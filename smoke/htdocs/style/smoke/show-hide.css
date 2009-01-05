@@ -1,0 +1,17 @@
+.show-hide-switcher {
+  padding-left: 16px;
+  background: url(/images/smoke/down-arrow.png) left center no-repeat; 
+}
+
+.show-hide-switcher.shown {
+  padding-left: 16px;
+  background: url(/images/smoke/up-arrow.png) left center no-repeat; 
+}
+
+.show-hide-contents {
+  display: none;
+}
+
+.show-hide-contents.shown {
+  display: block;
+}

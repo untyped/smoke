@@ -1,0 +1,340 @@
+/* html-element ------------------------------- */
+
+.smoke-hidden-component {
+  display: none;
+}
+
+/* tab-pane ----------------------------------- */
+
+.smoke-tab-pane ul.labels,
+.smoke-tab-pane ul.labels li, 
+.smoke-tab-pane ul.labels a, 
+.smoke-tab-pane ul.labels span {
+    border: none;
+    margin: 0em;
+    padding: 0em;
+    /*
+    height: 1.75em;
+    line-height: 1.9em;
+    */
+}
+
+.smoke-tab-pane ul.labels {
+    position: relative;
+    top: 1px;
+
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.smoke-tab-pane ul.labels li {
+    display: block;
+    float: left;
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+.smoke-tab-pane ul.labels .left {
+    display: block;
+    background: url(/images/smoke/tab-background-inactive.png) left top;
+    padding: 0px 0px 0px 0px;
+}
+
+.smoke-tab-pane ul.labels .right {
+    display: block;
+    position: relative;
+    left: 12px;
+    padding: 3px 12px 0px 0px;
+    background: url(/images/smoke/tab-background-inactive.png) right top;
+}
+
+.smoke-tab-pane ul.labels a {
+    cursor: pointer;
+    text-decoration: none;
+    color: #000;
+}
+
+.smoke-tab-pane ul.labels li.current .left {
+    background: url(/images/smoke/tab-background.png) left top;
+}
+
+.smoke-tab-pane ul.labels li.current .right {
+    padding-bottom: 1px;
+    background: url(/images/smoke/tab-background.png) right top;
+}
+
+.smoke-tab-pane ul.labels li:hover .left {
+    background: url(/images/smoke/tab-background-hover.png) left top;
+}
+
+.smoke-tab-pane ul.labels li:hover .right {
+    background: url(/images/smoke/tab-background-hover.png) right top;
+}
+
+.smoke-tab-pane .current-tab {
+    clear: both;
+    border: 1px solid #aaa;
+    margin: 0px;
+}
+
+.smoke-tab {
+    margin: 1em;
+}
+
+/* Multi-line tabbing adjustments */
+.smoke-tab-pane ul.labels li {
+  margin-bottom: 1px;
+}
+
+.smoke-tab-pane ul.labels li.current {
+  margin-bottom: 0px;
+}
+
+/* text-field --------------------------------- */
+
+input.placeholder,
+textarea.placeholder {
+    color: #aaa;
+}
+
+/* autocomplete-field ------------------------- */
+
+.smoke-autocomplete-field {
+  background: url(/images/smoke/down-arrow.png) right center no-repeat;
+}
+
+.smoke-autocomplete-options {
+  display: none;
+  position: absolute;
+}
+
+.smoke-autocomplete-options table {
+  background: #fff;
+  border: 1px solid #aaa;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  border-collapse: collapse;
+  box-shadow: .5em .5em .5em #ccc;
+  -webkit-box-shadow: .5em .5em .5em #ccc;
+  -moz-box-shadow: .5em .5em .5em #ccc;
+}
+
+.smoke-autocomplete-options tr {
+  margin: 0px;
+}
+
+.smoke-autocomplete-options tr:hover {
+  background: #ccf;
+}
+
+.smoke-autocomplete-options tr.current,
+.smoke-autocomplete-options tr.current:hover {
+  background: #aaf;
+}
+
+.smoke-autocomplete-options td {
+  padding: .2em .5em;
+  border-left: 1px solid #aaa;
+  white-space: nowrap;
+}
+
+.smoke-autocomplete-options td:first-child {
+  background none;
+  border-left: none;
+}
+
+/* html-dialog -------------------------------- */
+
+.smoke-dialog-background {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    
+    background: url(/images/smoke/dialog-background.png);
+    z-index: 1000;
+}
+
+.smoke-dialog {
+    display: none;
+    position: absolute;
+    
+    width: 200px;
+    height: 200px;
+
+    border: 1px solid #aaa;
+    background: #fff;
+    padding: .5em;
+    z-index: 1001;
+}
+
+/* notification ------------------------------- */
+
+.smoke-notifications .notification {
+    position: relative;
+    background: #fff url(/images/smoke/flash-background.png) repeat-x;
+    padding: .5em 1.5em .5em .5em;
+    border: 1px solid #aaa;
+}
+
+.smoke-notifications .dismiss {
+    position: absolute;
+    top: .5em;
+    right: .5em;
+}
+
+.smoke-notifications .dismiss + * {
+    margin-top: 0px;
+}
+
+.smoke-notifications .notification :last-child {
+    margin-bottom: 0px;
+}
+
+
+/* wizards ------------------------------------ */
+
+.smoke-wizard table.labels {
+  border: 1px solid #aaa;
+  margin: 0px;
+  font-size: 77%;
+  width: 100%;
+}
+.smoke-wizard table.labels td {
+  vertical-align: middle;
+}
+
+.smoke-wizard table.labels td.start {
+  background: url(/images/smoke/wizard-step-background-start.png) no-repeat center right;
+  font-weight: bold;
+}
+
+.smoke-wizard table.labels td.start-current {
+  background: url(/images/smoke/wizard-step-background-start-current.png) no-repeat center right;
+  font-weight: bold;
+}
+
+.smoke-wizard table.labels td.past-current {
+  background: url(/images/smoke/wizard-step-background-past-current.png) no-repeat center right;
+  color: #777;
+}
+
+.smoke-wizard table.labels td.past {
+  background: url(/images/smoke/wizard-step-background-past.png) no-repeat center right;
+  color: #777;
+}
+
+.smoke-wizard table.labels td.current {
+  background: url(/images/smoke/wizard-step-background-current.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.current-final {
+  background: url(/images/smoke/wizard-step-background-current-final.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.future {
+  background: url(/images/smoke/wizard-step-background-future.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.future-final {
+  background: url(/images/smoke/wizard-step-background-future-final.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.final {
+  background: url(/images/smoke/wizard-step-background-final.png) no-repeat center right;
+  font-weight: bold;
+}
+
+span.hidden {
+  display: none;
+}
+
+td.current a, td.future a {
+  color: black;
+}
+
+td.current a:hover, td.future a:hover {
+  text-decoration: none;
+}
+
+div.current-wizard-step {
+  border: 1px solid #aaa;
+  border-bottom: none;
+  margin: 0px auto;
+  padding: 5px;
+}
+
+div.wizard-navigation {
+  border: 1px solid #aaa;
+  border-top: none;
+  text-align: right;
+  padding: 5px;
+}
+
+span.wizard-step-number {
+  vertical-align: middle;
+  padding-right: 0.7ex;
+  font-weight: bold;
+}
+
+span.wizard-step-title {
+  vertical-align: middle;  
+}
+
+/* set-selectors */
+div.smoke-set-selector {
+}
+
+div.smoke-set-selector ul.active {
+  padding: 2px;
+  border: 1px solid white;
+}
+
+/*div.smoke-set-selector.edit-mode ul.active {
+  background-color: #eee;
+  color: #777;
+  border: 1px solid #777;
+}*/
+
+.rollover-img {
+  position: absolute;
+  top: 20%;
+  right: 1px;
+}
+
+.rollover-img.inner {
+  right: 20px;
+}
+
+div.smoke-set-selector ul.active li {
+  position: relative;
+  padding: 4px 22px 4px 2px; /* larger right padding for image*/
+  margin: 0px;
+}
+
+div.smoke-set-selector div.item-entry {
+  position: relative;
+  margin: 5px;
+  margin-right: 3px;
+  padding: 2px 48px 2px 8px;
+  border-left: 3px solid #aaa;
+}
+
+div.smoke-set-selector div.item-entry a {
+  
+}
+
+div.smoke-set-selector div.item-entry select,
+div.smoke-set-selector div.item-entry input {
+  width: 100%;
+}
+
+div.smoke-set-selector.disabled {
+  background-color: threedface !important;
+  border: 1px solid #BBBBBB;
+  color: graytext !important;
+  cursor: inherit;
+}

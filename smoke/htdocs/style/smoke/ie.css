@@ -1,0 +1,67 @@
+fieldset {
+    position: relative;
+    margin-top: 1em;
+}
+
+legend {
+    position: absolute;
+    top: .5em;
+    left: .5em;
+}
+
+/* tab-pane% ---------------------------------- */
+
+.smoke-tab-pane ul.labels li {
+    white-space: nowrap;
+    display: inline;
+    position: relative;
+    float: left;
+    margin-left: 12px;
+    margin-right: 0px;
+    padding: 0px;
+    border-top: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+    background: #eee;
+}
+
+.smoke-tab-pane ul.labels li.current {
+    padding-bottom: 1px;
+}
+
+.smoke-tab-pane ul.labels .left,
+.smoke-tab-pane ul.labels .right,
+.smoke-tab-pane ul.labels li.current .left,
+.smoke-tab-pane ul.labels li.current .right,
+.smoke-tab-pane ul.labels li:hover .left,
+.smoke-tab-pane ul.labels li:hover .right {
+    display: inline;
+    position: static;
+    padding: 0px;
+    margin: 0px;
+    background: none;
+    border: none;
+}
+
+.smoke-tab-pane ul.labels li.current {
+    background: #fff;
+}
+
+.smoke-tab-pane ul.labels li:hover {
+    background: #ffe;
+}
+
+.smoke-tab-pane ul.labels span.right,
+.smoke-tab-pane ul.labels li.current span.right,
+.smoke-tab-pane ul.labels li:hover span.right {
+    padding: 4px 12px 4px 12px;
+    margin-bottom: 0px;
+}
+
+.smoke-tab-pane .current-tab {
+    margin-top: 0px;
+}
+
+.left-controls, .right-controls {
+  position: relative;
+}

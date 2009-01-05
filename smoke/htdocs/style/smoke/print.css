@@ -1,0 +1,31 @@
+input,
+select {
+    font-size: 100%;
+}
+
+.smoke-notifications {
+    display: none;
+}
+
+.smoke-tab-pane ul.labels {
+    padding-left: 0em;
+}
+
+.smoke-tab-pane ul.labels li {
+    display: none;
+}
+
+.smoke-tab-pane ul.labels li.current {
+    display: block;
+    list-style: none;
+    font-size: 150%;
+    font-weight: bold;
+}
+
+.smoke-snooze-report .pager {
+    display: none;
+}
+
+.smoke-snooze-report .links {
+    display: none;
+}

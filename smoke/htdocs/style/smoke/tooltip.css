@@ -1,0 +1,25 @@
+/* jquery.tooltip.css
+ *
+ * A jQuery plugin written for Smoke.
+ *
+ * Dave Gurnell, adapted from a tutorial by Remy Sharp (http://jqueryfordesigners.com/coda-popup-bubbles/)
+ * and inspired by the web page for Coda by Panic (http://www.panic.com/coda).
+ */
+.tooltip-anchor {
+  position: relative;
+}
+
+.tooltip-anchor .tooltip {
+  display: none;
+  position: absolute;
+
+  min-width: 200px;
+  max-width: 500px;
+
+  border: 1px solid #aaa;
+  background: #fff;
+  padding: 3px;
+  -webkit-border-radius: 4px;
+
+  z-index: 1;
+}
