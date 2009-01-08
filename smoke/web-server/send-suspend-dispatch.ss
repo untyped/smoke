@@ -27,10 +27,6 @@
     (define url
       (embed-url
        (lambda (request)
-         (printf "Continuing: ~s~n" request)
-         (current-request-set! request)
-         (printf "Request set: ~s~n" (current-request))
-         
          (current-frame frame)
          
          (log-debug* "Continuation" (url->string (request-uri (current-request))))

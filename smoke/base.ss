@@ -8,7 +8,7 @@
          scheme/runtime-path
          srfi/26
          (planet untyped/mirrors:1/mirrors)
-         (planet untyped/unlib:3/debug)
+         (except-in (planet untyped/unlib:3/debug) debug-out)
          (planet untyped/unlib:3/exn)
          (planet untyped/unlib:3/log)
          "web-server/servlet.ss")
