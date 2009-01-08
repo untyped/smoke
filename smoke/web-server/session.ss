@@ -24,7 +24,7 @@
   (define session-id
     (request-session-id request))
   (and session-id
-       (let-debug ([session (hash-ref sessions session-id #f)])
+       (let ([session (hash-ref sessions session-id #f)])
          (when session
            (set-session-accessed! session (current-time time-utc)))
          session)))

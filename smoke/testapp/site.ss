@@ -1,7 +1,7 @@
 #lang scheme/base
 
 (require web-server/dispatchers/dispatch
-         (planet untyped/dispatch:1/dispatch)
+         (planet untyped/dispatch:1)
          "base.ss")
 
 ; Site -------------------------------------------
@@ -10,6 +10,7 @@
   ([(url "")                              home]
    [(url "/autocomplete")                 autocomplete]
    [(url "/counter")                      counter]
+   [(url "/current-request")              test-current-request]
    [(url "/dialog")                       dialog]
    [(url "/editor")                       editor]
    [(url "/form")                         form]

@@ -3,6 +3,7 @@
 (require "../../test-base.ss"
          "autocomplete-test.ss"
          "counter-test.ss"
+         "current-request-test.ss"
          "editor-test.ss"
          "form-hidden-test.ss"
          "form-test.ss"
@@ -17,6 +18,7 @@
 (define all-testapp-tests
   (test-suite "testapp"
     counter-tests
+    current-request-tests
     requirements-tests
     redirect-tests
     editor-tests

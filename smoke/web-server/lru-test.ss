@@ -139,7 +139,7 @@
         (collect-points 0)
         (check-exn exn:fail:servlet-manager:no-continuation?
           (lambda ()
-            (debug "points" ((LRU-manager-continuation-life-points manager) instance-id k-id salt))))))
+            ((LRU-manager-continuation-life-points manager) instance-id k-id salt)))))
     
     (test-case "continuations are collected when points less than zero"
       (match-let ([(list k-id salt) ((manager-continuation-store! manager) instance-id k #f)])
@@ -148,7 +148,7 @@
         (collect-points 0)
         (check-exn exn:fail:servlet-manager:no-continuation?
           (lambda ()
-            (debug "points" ((LRU-manager-continuation-life-points manager) instance-id k-id salt))))))))
+            ((LRU-manager-continuation-life-points manager) instance-id k-id salt)))))))
 
 ; Provide statements -----------------------------
 

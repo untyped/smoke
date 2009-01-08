@@ -5,7 +5,7 @@
          web-server/http/request-structs
          web-server/http/response-structs
          web-server/servlet-env
-         (planet untyped/delirium:2)
+         (planet untyped/delirium:3)
          (planet untyped/mirrors:1)
          "../base.ss"
          "resume.ss"

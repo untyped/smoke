@@ -2,8 +2,10 @@
 
 (require (planet untyped/unlib:3/require))
 
-(require web-server/servlet-env
-         (planet untyped/delirium:2)
+(require net/url
+         (except-in web-server/http redirect-to)
+         web-server/servlet-env
+         (planet untyped/delirium:3)
          "all-smoke-tests.ss"
          "smoke.ss"
          "testapp/content-base.ss"
@@ -12,10 +14,13 @@
 ; Main program body ----------------------------
 
 (print-struct #t)
+
 (current-deployment-mode 'test)
-(run-smoke/delirium #:start       (lambda ()
-                                    (parameterize ([dispatch-url-cleaner smoke-url-cleaner])
-                                      (dispatch (current-request) test-site)))
-                    #:tests           all-smoke-tests
-                    #:htdocs-path     (list testapp-htdocs-path)
-                    #:launch-browser? #t)
+
+(serve/smoke/delirium
+ (lambda ()
+   (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
+   (parameterize ([dispatch-url-cleaner smoke-url-cleaner])
+     (dispatch (current-request) test-site)))
+ all-smoke-tests
+ #:htdocs-paths (list testapp-htdocs-path))

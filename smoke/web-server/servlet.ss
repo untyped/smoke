@@ -3,8 +3,8 @@
 (require net/url
          scheme/contract
          srfi/26
-         web-server/http/request-structs
-         web-server/http/response-structs
+         (except-in web-server/http
+                    redirect-to)
          (except-in web-server/servlet
                     clear-continuation-table!
                     ; Web cell stuff:
@@ -39,8 +39,7 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out web-server/http/request-structs
-                       web-server/http/response-structs
+(provide (all-from-out web-server/http
                        web-server/servlet
                        "request.ss"
                        "request-util.ss"
