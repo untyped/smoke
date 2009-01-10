@@ -34,10 +34,10 @@
   (make-init-smoke-stage
    (lambda (continue . args)
      ; -> any
-     ; Make sure we're passing the current request on (if any).
+     ; Eliminate the request argument.
      (define (*continue*)
        (if (and (pair? args) (request? (car args)))
-           (apply continue (current-request) (cdr args))
+           (apply continue (cdr args))
            (apply continue args)))
      (if (resume-available?)
          (*continue*)
@@ -50,7 +50,8 @@
 
 ; pipeline
 (define init-smoke-pipeline
-  (list establish-session-stage establish-prompt-stage))
+  (list establish-session-stage
+        establish-prompt-stage))
 
 ; Provide statements -----------------------------
 
