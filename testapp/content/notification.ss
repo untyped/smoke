@@ -5,10 +5,10 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller notification
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send notification-page respond)))
 
 ; Components -------------------------------------

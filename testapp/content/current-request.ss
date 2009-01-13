@@ -7,7 +7,7 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller test-current-request
   `(,@init-smoke-pipeline
     ,(lambda (continue . args)
@@ -15,7 +15,7 @@
        (if (request? (current-request))
            (apply continue args)
            (error "invalid current-request" (current-request)))))
-  (lambda (request)
+  (lambda ()
     (send test-page respond)))
 
 ; Components -------------------------------------

@@ -6,7 +6,7 @@
 
 (define-controller requirements
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send requirements-page respond)))
 
 ; Components -------------------------------------

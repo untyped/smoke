@@ -6,16 +6,16 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller form
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send form-page respond)))
 
-; request -> response
+; -> response
 (define-controller form/hidden
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (for ([control (send form-page get-controls)])
       (send control set-visible?! #f))
     (send form-page respond)))

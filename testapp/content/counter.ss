@@ -6,7 +6,7 @@
 
 (define-controller counter
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send counter-page respond)))
 
 ; Components -------------------------------------

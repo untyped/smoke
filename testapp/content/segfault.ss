@@ -44,10 +44,10 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller segfault
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send test-page respond)))
 
 ; Components -------------------------------------

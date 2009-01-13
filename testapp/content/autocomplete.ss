@@ -8,7 +8,7 @@
 ; controller
 (define-controller autocomplete
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send autocomplete-page respond)))
 
 ; Pages ------------------------------------------

@@ -7,10 +7,10 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller editor
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send editor-page respond)))
 
 ; Helpers ----------------------------------------

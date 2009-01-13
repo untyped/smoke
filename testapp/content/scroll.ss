@@ -5,10 +5,10 @@
 
 ; Controllers ------------------------------------
 
-; request -> response
+; -> response
 (define-controller scroll
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send scroll-page respond)))
 
 ; Components -------------------------------------

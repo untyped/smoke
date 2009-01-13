@@ -9,7 +9,7 @@
 ; request -> response
 (define-controller tooltip
   init-smoke-pipeline
-  (lambda (request)
+  (lambda ()
     (send tooltip-page respond)))
 
 ; Components -------------------------------------
