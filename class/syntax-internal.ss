@@ -80,7 +80,12 @@
   (syntax-case clause-stx ()
     [(_ [id value] kw ...)
      (identifier? #'id)
-     (expand-keywords #'id #'(kw ...) #f (add-body seed #'(field [id value])))]))
+     (expand-keywords #'id #'(kw ...) #f (add-body seed #'(field [id value])))]
+    [(_ id value kw ...) 
+     (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
+     (expand-field-clause #'(_ [id value] kw ...) seed)]
+    [(_ id other kw ...)
+     (raise-syntax-error #f "expected field value, received" #'other clause-stx)]))
 
 ; syntax seed -> seed
 (define (expand-cell-clause clause-stx seed)
@@ -91,7 +96,12 @@
        (expand-keywords #'id #'(kw ...) #t 
                         (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
                                                                      (make-web-cell value))]))
-                                  #'(send this register-web-cell-field! cell-id))))]))
+                                  #'(send this register-web-cell-field! cell-id))))]
+    [(_ id value kw ...) 
+     (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
+     (expand-cell-clause #'(_ [id value] kw ...) seed)]
+    [(_ id other kw ...)
+     (raise-syntax-error #f "expected cell value, received" #'other clause-stx)]))
 
 ; syntax seed -> seed
 (define (expand-init-field-clause clause-stx seed)
@@ -99,6 +109,9 @@
     [(_ [id value] kw ...)
      (identifier? #'id)
      (expand-keywords #'id #'(kw ...) #f (add-body seed #'(init-field [id value])))]
+    [(_ id value kw ...)
+     (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
+     (expand-init-field-clause #'(_ [id value] kw ...) seed)]
     [(_ id kw ...)         
      (identifier? #'id)
      (expand-keywords #'id #'(kw ...) #f (add-body seed #'(init-field id)))]))
@@ -107,6 +120,7 @@
 (define (expand-init-cell-clause clause-stx seed)
   (syntax-case clause-stx ()
     [(_ [id value] kw ...) 
+     (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
                         (add-foot (add-body (add-body (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
@@ -114,6 +128,9 @@
                                                       #'(init [id value]))
                                             #'(web-cell-set! cell-id id))
                                   #'(send this register-web-cell-field! cell-id))))]
+    [(_ id value kw ...) 
+     (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
+     (expand-init-cell-clause #'(_ [id value] kw ...) seed)]
     [(_ id kw ...)
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
