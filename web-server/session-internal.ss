@@ -12,9 +12,7 @@
 ; Structure types --------------------------------
 
 ; (struct string time-utc time-utc (hasheqof symbol any))
-(define-struct session
-  (cookie-id issued [accessed #:mutable] hash)
-  #:transparent)
+(define-struct session (cookie-id issued [accessed #:mutable] hash) #:transparent)
 
 ; Accessors and mutators -------------------------
 
