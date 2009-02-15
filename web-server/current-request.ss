@@ -12,12 +12,10 @@
 
 ; request -> void
 (define (current-request-set! request)
-  (printf "SET current-request ~a~n" (and request (url->string (request-uri request))))
   (thread-cell-set! current-request-cell request))
 
 ; -> (U request #f)
 (define (current-request)
-  ;(printf "REF current-request ~a~n" (thread-cell-ref current-request-cell))
   (thread-cell-ref current-request-cell))
 
 ; Provide statements -----------------------------
