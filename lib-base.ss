@@ -1,11 +1,11 @@
 #lang scheme/base
 
 (require "base.ss"
-         "class/class.ss"
-         "seed.ss")
+         "seed.ss"
+         "class/class.ss")
 
 ; Provide statements -----------------------------
 
 (provide (all-from-out "base.ss"
-                       "class/class.ss"
-                       "seed.ss"))
+                       "seed.ss"
+                       "class/class.ss"))

@@ -7,6 +7,7 @@
          "editor-test.ss"
          "form-hidden-test.ss"
          "form-test.ss"
+         "notification-test.ss"
          "redirect-test.ss"
          "requirements-test.ss"
          "segfault-test.ss"
@@ -17,17 +18,19 @@
 
 (define all-testapp-tests
   (test-suite "testapp"
-    counter-tests
-    current-request-tests
-    requirements-tests
-    redirect-tests
-    editor-tests
-    form-tests
-    form-tests/hidden
-    tab-tests
-    segfault-tests
-    autocomplete-tests
-    tooltip-tests))
+    ;counter-tests
+    ;current-request-tests
+    ;requirements-tests
+    ;redirect-tests
+    notification-tests
+    ;editor-tests
+    ;form-tests
+    ;form-tests/hidden
+    ;tab-tests
+    ;segfault-tests
+    ;autocomplete-tests
+    ;tooltip-tests
+    ))
 
 ; Provide statements -----------------------------
 

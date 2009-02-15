@@ -30,6 +30,7 @@
          "web-server/pipeline.ss"
          "web-server/run-smoke.ss"
          "web-server/session.ss"
+         "web-server/session-cell.ss"
          "web-server/smoke-lru.ss")
 
 ; Provide statements -----------------------------
@@ -64,4 +65,5 @@
                        "web-server/pipeline.ss"
                        "web-server/run-smoke.ss"
                        "web-server/session.ss"
+                       "web-server/session-cell.ss"
                        "web-server/smoke-lru.ss"))

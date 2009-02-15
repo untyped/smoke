@@ -3,21 +3,17 @@
 (require (planet untyped/unlib:3/string)
          "../content-base.ss")
 
-; Controllers ------------------------------------
-
-; -> response
-(define-controller notification
-  init-smoke-pipeline
-  (lambda ()
-    (send notification-page respond)))
-
 ; Components -------------------------------------
 
-(define notification-page
-  (singleton/cells (notification-mixin html-page%) ()
+(define notification-page%
+  (class/cells (notification-mixin html-page%) ()
     
     (inherit add-notification!
              render-notifications)
+    
+    ; Fields -------------------------------------
+    
+    (init-field page-number)
     
     ; Constructor --------------------------------
     
@@ -26,13 +22,42 @@
     ; Methods ------------------------------------
     
     ; -> void
-    (define/public #:callback (on-notify num)
+    (define/public #:callback (on-notify num sticky?)
       (for ([i (in-range 1 (add1 num))])
-        (add-notification! (xml "Notification " ,i))))
+        (add-notification! (xml ,(if sticky? 
+                                     "Sticky notification "
+                                     "Notification ") ,i)
+                           sticky?)))
     
     ; seed -> xml
     (define/augment (render seed)
-      (xml ,(render-notifications seed)
-           (ul ,@(for/list ([i (in-range 1 21)])
-                   (xml (li (a (@ [href ,(embed seed (callback on-notify i))])
-                               "Create " ,i ,(if (= i 1) " notification" " notifications"))))))))))
+      (xml (h1 "Notification page " ,page-number)
+           (p (a (@ [href ,(controller-url notification1)]) "Visit page 1") " "
+              (a (@ [href ,(controller-url notification2)]) "Visit page 2"))
+           ,(render-notifications seed)
+           (ul ,@(for/list ([i (in-range 1 4)])
+                   (xml (li (a (@ [id ,(format "normal-~a" i)] [href ,(embed seed (callback on-notify i #f))])
+                               "Create " ,i ,(if (= i 1) " notification" " notifications")))))
+               ,@(for/list ([i (in-range 1 4)])
+                   (xml (li (a (@ [id ,(format "sticky-~a" i)] [href ,(embed seed (callback on-notify i #t))])
+                               "Create " ,i ,(if (= i 1) " sticky notification" " sticky notifications"))))))))))
+
+(define notification-page1
+  (new notification-page% [page-number 1]))
+
+(define notification-page2
+  (new notification-page% [page-number 2]))
+
+; Controllers ------------------------------------
+
+; -> response
+(define-controller notification1
+  init-smoke-pipeline
+  (lambda ()
+    (send notification-page1 respond)))
+
+; -> response
+(define-controller notification2
+  init-smoke-pipeline
+  (lambda ()
+    (send notification-page2 respond)))
