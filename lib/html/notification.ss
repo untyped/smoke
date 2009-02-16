@@ -141,5 +141,5 @@
  [notifications-set!        (-> (listof notification?) void?)]
  [notifications-reset!      (->* () (boolean?) void?)]
  [notifications-add!        (->* (xml?) (boolean?) notification?)]
- [notifications-add-sticky! (->* (xml?) (boolean?) notification?)]
+ [notifications-add-sticky! (-> xml? notification?)]
  [notifications-remove!     (-> (or/c notification? symbol?) void?)])
