@@ -69,7 +69,7 @@
     
     ; (cell (listof (U js (seed -> js))))
     (cell [current-js-requirements null] #:accessor #:mutator)
-        
+    
     ; string
     (init [content-type "text/html; charset=utf-8"])
     
@@ -86,7 +86,7 @@
                                     [id      (symbol-append (get-id) '-dialog-placeholder)]
                                     [classes '(smoke-html-page-dialog-placeholder)])]
       #:child #:accessor #:mutator)
-
+    
     ; Accessors ----------------------------------
     
     ; -> symbol
@@ -115,23 +115,22 @@
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])
-      (with-handlers ([exn? (lambda (exn)
-                              (log-debug* "Frame unserializable" 
-                                          (frame-id (current-frame))
-                                          "unserializable"
-                                          (exn-message exn)))])
-        (log-debug* "Frame serializable"
-                    (frame-id (current-frame))
-                    (format "~a bytes"
-                            (let ([out (open-output-bytes)])
-                              (write (frame-serialize (current-frame)) out)
-                              (bytes-length (get-output-bytes out))))))
+      #;(with-handlers ([exn? (lambda (exn)
+                                (log-debug* "Frame unserializable" 
+                                            (frame-id (current-frame))
+                                            "unserializable"
+                                            (exn-message exn)))])
+          (log-debug* "Frame serializable"
+                      (frame-id (current-frame))
+                      (format "~a bytes"
+                              (let ([out (open-output-bytes)])
+                                (write (frame-serialize (current-frame)) out)
+                                (bytes-length (get-output-bytes out))))))
       (unless (current-request)
         (error "No current HTTP request to respond to."))
       ; boolean
-      (let ([push-frame?
-             (and (not (ajax-request? (current-request)))
-                  (not (eq? (request-method (current-request)) 'post)))])
+      (let ([push-frame? (and (not (ajax-request? (current-request)))
+                              (not (eq? (request-method (current-request)) 'post)))])
         (when forward?
           (clear-continuation-table!))
         (parameterize ([current-page this])

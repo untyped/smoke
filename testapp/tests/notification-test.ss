@@ -17,15 +17,15 @@
     (test-case "normal notifications disappear on reload"
       (open/wait "/notification1")
       (check-equal? (notification-count) 0)
-      (click/wait (node/id 'normal-2))
+      (click/wait (node/id 'normal-2-full))
       (check-equal? (notification-count) 2)
       (reload/wait)
       (check-equal? (notification-count) 0))
     
-    (test-case "sticky notifications disappear on reload"
+    (test-case "sticky notifications don't disappear on reload"
       (open/wait "/notification1")
       (check-equal? (notification-count) 0)
-      (click/wait (node/id 'sticky-2))
+      (click/wait (node/id 'sticky-2-full))
       (check-equal? (notification-count) 2))
     
     (test-case "sticky notifications reappear on other pages"
@@ -38,6 +38,14 @@
       (reload/wait)
       (check-equal? (notification-count) 1)
       (click/wait (node/first (node/jquery ".notification .dismiss")))
+      (reload/wait)
+      (check-equal? (notification-count) 0))
+    
+    (test-case "notifications appear on AJAX refresh"
+      (open/wait "/notification1")
+      (check-equal? (notification-count) 0)
+      (click/wait (node/id 'normal-2-ajax))
+      (check-equal? (notification-count) 2)
       (reload/wait)
       (check-equal? (notification-count) 0))))
 

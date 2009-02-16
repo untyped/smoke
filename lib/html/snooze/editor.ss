@@ -23,10 +23,9 @@
 ; Mixins -----------------------------------------
 
 (define snooze-editor-mixin
-  (mixin/cells (notification-element<%>) (snooze-editor<%>)
+  (mixin/cells (html-element<%>) (snooze-editor<%>)
     
-    (inherit get-child-components
-             add-notification!)
+    (inherit get-child-components)
     
     ; Methods ------------------------------------
     
@@ -82,7 +81,7 @@
                                             (send (current-page) respond)]
             [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (add-notification! (get-failure-notification))
+            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
             [else                           (process-validate-results (validate))]))
     
@@ -91,18 +90,18 @@
       (update-check-labels! results)
       (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (add-notification! (get-failure-notification))
+            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
             [(ormap check-warning? results) (if (value-changed?)
                                                 (begin
-                                                  (add-notification! (get-warning-notification))
+                                                  (notifications-add! (get-warning-notification))
                                                   (send (current-page) respond))
                                                 (begin0
                                                   (commit-changes)
-                                                  (add-notification! (get-commit-notification))))]
+                                                  (notifications-add! (get-commit-notification))))]
             [else                           (begin0
                                               (commit-changes)
-                                              (add-notification! (get-commit-notification)))]))
+                                              (notifications-add! (get-commit-notification)))]))
     
     ; (listof check-result) -> void
     (define/public (update-check-labels! results)
@@ -122,7 +121,7 @@
 ; Classes ----------------------------------------
 
 (define snooze-editor%
-  (class/cells (snooze-editor-mixin (notification-mixin html-element%)) ()))
+  (class/cells (snooze-editor-mixin html-element%) ()))
 
 ; Helpers ----------------------------------------
 

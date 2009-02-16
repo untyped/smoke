@@ -33,6 +33,10 @@
     (notifications-set! (append (notifications-ref) (list notification)))
     notification))
 
+; xml -> notification
+(define (notifications-add-sticky! xml)
+  (notifications-add! xml #t))
+
 ; (U notification symbol) -> void
 (define (notifications-remove! notification+id)
   (notifications-set! (filter (if (notification? notification+id)
@@ -42,84 +46,70 @@
                                     (not (eq? (notification-id notification) notification+id))))
                               (notifications-ref))))
 
-; Interfaces -------------------------------------
+; Classes ----------------------------------------
 
-(define notification-element<%>
-  (interface (html-element<%>)
-    get-notifications      ; -> (listof notification)
-    add-notification!      ; xml [boolean] -> notification
-    remove-notification!   ; (U notification symbol) -> void
-    reset-notifications!   ; [boolean] -> void
-    render-notifications)) ; seed -> xml
-
-; Mixins -----------------------------------------
-
-(define notification-mixin
-  (mixin/cells (html-element<%>) (notification-element<%>)
+(define notification-pane%
+  (class/cells html-element% ()
     
-    (inherit get-id)
+    (inherit get-id
+             core-html-attributes)
+    
+    ; (cell (listof symbol))
+    (cell visible-notifications null #:accessor #:mutator)
+    
+    ; Constructor --------------------------------
+    
+    (init [classes '(smoke-notifications)])
+    
+    (super-new [classes classes])
     
     ; Methods ------------------------------------
-    
-    ; -> (listof notifications)
-    (define/public (get-notifications)
-      (notifications-ref))
-    
-    ; (listof notifications) -> void
-    (define/public (set-notifications! notifications)
-      (when notifications
-        (notifications-set! notifications)))
-    
-    ; [boolean] -> void
-    (define/public (reset-notifications! [sticky? #f])
-      (notifications-reset! sticky?))
-    
-    ; xml [boolean] -> notification
-    (define/public (add-notification! xml [sticky? #f])
-      (notifications-add! xml sticky?))
-    
-    ; (U notification symbol) -> void
-    (define/public (remove-notification! notification+id)
-      (notifications-remove! notification+id))
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
       (list* rollover-script (inner null get-html-requirements)))
     
     ; seed -> xml
-    (define/public (render-notifications seed)
+    (define/override (render seed)
       (define id (get-id)) ; (U symbol #f)
-      (define notifications (get-notifications)) ; (listof xml)
-      (opt-xml (not (null? notifications))
-        (ul (@ [class 'smoke-notifications])
-            ,@(for/list ([notification notifications])
-                (let* ([id              (notification-id notification)]
-                       [notification-id (format "notification-~a" id)]
-                       [dismiss-id      (string-append notification-id "-dismiss")])
-                  (xml (div (@ [id    ,notification-id]
-                               [class ,(if (notification-sticky? notification)
-                                           "notification sticky"
-                                           "notification")])
-                            ,(opt-xml (notification-sticky? notification)
-                               (img (@ [class "sticky"]
-                                       [src   "/images/smoke/sticky.png"]
-                                       [title "Sticky notification"]
-                                       [alt   "Sticky notification"])))
-                            (img (@ [id    ,dismiss-id]
-                                    [class "dismiss rollover"]
-                                    [src   "/images/smoke/dismiss.png"]
-                                    [title "Dismiss this notification"]
-                                    [alt   "Dismiss this notification"]))
-                            ,(notification-xml notification))))))))
+      (define notifications (notifications-ref)) ; (listof xml)
+      (set-visible-notifications! (map notification-id notifications))
+      (xml (div (@ ,@(core-html-attributes seed))
+                ,(opt-xml (not (null? notifications))
+                   ,@(for/list ([notification (in-list notifications)])
+                       (let* ([id              (notification-id notification)]
+                              [notification-id (format "notification-~a" id)]
+                              [dismiss-id      (string-append notification-id "-dismiss")])
+                         (xml (div (@ [id    ,notification-id]
+                                      [class ,(if (notification-sticky? notification)
+                                                  "notification sticky"
+                                                  "notification")])
+                                   ,(opt-xml (notification-sticky? notification)
+                                      (img (@ [class "sticky"]
+                                              [src   "/images/smoke/sticky.png"]
+                                              [title "Sticky notification"]
+                                              [alt   "Sticky notification"])))
+                                   (img (@ [id    ,dismiss-id]
+                                           [class "dismiss rollover"]
+                                           [src   "/images/smoke/dismiss.png"]
+                                           [title "Dismiss this notification"]
+                                           [alt   "Dismiss this notification"]))
+                                   ,(notification-xml notification)))))))))
+    
+    ; -> boolean
+    (define/override (dirty?)
+      (or (super dirty?)
+          (not (equal? (get-visible-notifications)
+                       (map notification-id (notifications-ref))))))
     
     ; seed -> js
     (define/augride (get-on-attach seed)
       ; (U symbol #f)
       (define id (get-id))
       ; (listof xml)
-      (define notifications (get-notifications))
-      (reset-notifications!)
-      (js ,@(for/list ([notification notifications])
+      (define notifications (notifications-ref))
+      (notifications-reset!)
+      (js ,@(for/list ([notification (in-list notifications)])
               (let* ([id                    (notification-id notification)]
                      [notification-selector (format "#notification-~a" id)]
                      [dismiss-selector      (string-append notification-selector "-dismiss")])
@@ -137,20 +127,19 @@
     
     ; symbol -> void
     (define/public #:callback (on-dismiss id)
-      (printf "on-dismiss ~a~n" id)
-      (remove-notification! id))))
+      (notifications-remove! id))))
 
 ; Provide statements -----------------------------
 
 (provide (except-out (all-from-out "notification-internal.ss") make-notification)
          (rename-out [create-notification make-notification])
-         notification-element<%>
-         notification-mixin)
+         notification-pane%)
 
 (provide/contract
- [notifications-cell    session-cell?]
- [notifications-ref     (-> (listof notification?))]
- [notifications-set!    (-> (listof notification?) void?)]
- [notifications-reset!  (->* () (boolean?) void?)]
- [notifications-add!    (->* (xml?) (boolean?) notification?)]
- [notifications-remove! (-> (or/c notification? symbol?) void?)])
+ [notifications-cell        session-cell?]
+ [notifications-ref         (-> (listof notification?))]
+ [notifications-set!        (-> (listof notification?) void?)]
+ [notifications-reset!      (->* () (boolean?) void?)]
+ [notifications-add!        (->* (xml?) (boolean?) notification?)]
+ [notifications-add-sticky! (->* (xml?) (boolean?) notification?)]
+ [notifications-remove!     (-> (or/c notification? symbol?) void?)])

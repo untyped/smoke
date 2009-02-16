@@ -38,27 +38,24 @@
 ; Components -------------------------------------
 
 (define editor-page
-  (singleton/cells (snooze-editor-mixin (notification-mixin html-page%)) ()
-    
-    (inherit render-notifications)
+  (singleton/cells (snooze-editor-mixin html-page%) ()
     
     ; Fields -------------------------------------
     
-    (field [larger-field (new snooze-integer-field%
-                              [id 'larger-field]
-                              [value 1]
-                              [predicate (by-key 'integer-fields)])]
+    (field notification-pane
+      (new notification-pane% [id 'notifications])
       #:child #:accessor #:mutator)
     
-    (field [smaller-field (new snooze-integer-field%
-                               [id 'smaller-field]
-                               [value 2]
-                               [predicate (by-key 'integer-fields)])]
+    (field larger-field
+      (new snooze-integer-field% [id 'larger-field] [value 1] [predicate (by-key 'integer-fields)])
       #:child #:accessor #:mutator)
     
-    (field [submit-button (new submit-button%
-                               [id 'submit-button]
-                               [action (callback on-update)])]
+    (field smaller-field
+      (new snooze-integer-field% [id 'smaller-field] [value 2] [predicate (by-key 'integer-fields)])
+      #:child #:accessor #:mutator)
+    
+    (field submit-button
+      (new submit-button% [id 'submit-button] [action (callback on-update)])
       #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
@@ -69,7 +66,7 @@
     
     ; seed -> xml
     (define/augment (render seed)
-      (xml ,(render-notifications seed)
+      (xml ,(send notification-pane render seed)
            (table (tr (th "ID")
                       (th "Widget")
                       (th "Value"))
