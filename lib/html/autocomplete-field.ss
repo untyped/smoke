@@ -30,7 +30,7 @@
     ;
     ; where option: 
     ;   string          if multi-column? is #f
-    ;   (listof string) if multi-column? is #f
+    ;   (listof string) if multi-column? is #t
     (init-cell [options null]
       #:mutator)
     

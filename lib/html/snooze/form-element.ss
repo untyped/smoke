@@ -47,9 +47,9 @@
     ; seed -> xml
     (define/override (render seed)
       (define id (get-wrapper-id))
-      (xml (div (@ [id ,id])
-                ,(super render seed) " "
-                ,(render-check-label seed))))
+      (xml (span (@ [id ,id])
+                 ,(super render seed) " "
+                 ,(render-check-label seed))))
     
     ; seed -> js
     (define/override (get-on-render seed)
