@@ -122,8 +122,10 @@
                                          (unbind))
                                    (!dot ($ ,notification-selector)
                                          (unbind)
-                                         (fadeOut "fast")
-                                         (remove))))))))))
+                                         (fadeOut "fast"
+                                                  (function ()
+                                                    (!dot ($ ,notification-selector)
+                                                          (remove)))))))))))))
     
     ; symbol -> void
     (define/public #:callback (on-dismiss id)
