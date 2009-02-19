@@ -19,10 +19,18 @@
          "check-label.ss"
          "util.ss")
 
+; Interfaces -------------------------------------
+
+(define snooze-form-element<%>
+  (interface (form-element<%> check-label<%>)
+    get-predicate
+    set-predicate!
+    get-wrapper-id))
+
 ; Mixins -----------------------------------------
 
 (define snooze-form-element-mixin
-  (mixin/cells (form-element<%> check-label<%>) ()
+  (mixin/cells (form-element<%> check-label<%>) (snooze-form-element<%>)
     
     (inherit get-id
              render-check-label)
@@ -59,22 +67,22 @@
 
 ; Classes ----------------------------------------
 
-(define snooze-autocomplete-field% (snooze-form-element-mixin (check-label-mixin autocomplete-field%)))
-(define snooze-check-box%          (snooze-form-element-mixin (check-label-mixin check-box%)))
-(define snooze-combo-box%          (snooze-form-element-mixin (check-label-mixin combo-box%)))
-(define snooze-file-field%         (snooze-form-element-mixin (check-label-mixin file-field%)))
-(define snooze-integer-field%      (snooze-form-element-mixin (check-label-mixin integer-field%)))
-(define snooze-password-field%     (snooze-form-element-mixin (check-label-mixin password-field%)))
-(define snooze-regexp-field%       (snooze-form-element-mixin (check-label-mixin regexp-field%)))
-(define snooze-set-selector%       (snooze-form-element-mixin (check-label-mixin set-selector%)))
-(define snooze-set-selector-autocomplete%
-  (snooze-form-element-mixin (check-label-mixin set-selector-autocomplete%)))
-(define snooze-text-area%          (snooze-form-element-mixin (check-label-mixin text-area%)))
-(define snooze-text-field%         (snooze-form-element-mixin (check-label-mixin text-field%)))
+(define snooze-autocomplete-field%        (snooze-form-element-mixin (check-label-mixin autocomplete-field%)))
+(define snooze-check-box%                 (snooze-form-element-mixin (check-label-mixin check-box%)))
+(define snooze-combo-box%                 (snooze-form-element-mixin (check-label-mixin combo-box%)))
+(define snooze-file-field%                (snooze-form-element-mixin (check-label-mixin file-field%)))
+(define snooze-integer-field%             (snooze-form-element-mixin (check-label-mixin integer-field%)))
+(define snooze-password-field%            (snooze-form-element-mixin (check-label-mixin password-field%)))
+(define snooze-regexp-field%              (snooze-form-element-mixin (check-label-mixin regexp-field%)))
+(define snooze-set-selector%              (snooze-form-element-mixin (check-label-mixin set-selector%)))
+(define snooze-set-selector-autocomplete% (snooze-form-element-mixin (check-label-mixin set-selector-autocomplete%)))
+(define snooze-text-area%                 (snooze-form-element-mixin (check-label-mixin text-area%)))
+(define snooze-text-field%                (snooze-form-element-mixin (check-label-mixin text-field%)))
 
 ; Provide statements -----------------------------
 
-(provide snooze-form-element-mixin
+(provide snooze-form-element<%>
+         snooze-form-element-mixin
          snooze-autocomplete-field%
          snooze-check-box%
          snooze-combo-box%
