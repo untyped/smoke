@@ -1,14 +1,13 @@
 #lang scheme/base
 
 (require "../../lib-base.ss"
+         "disableable-element.ss"
          "html-element.ss")
 
 ; Interfaces -------------------------------------
 
 (define form-element<%>
-  (interface (html-element<%>)
-    get-enabled?     ; -> boolean
-    set-enabled?!    ; boolean -> void
+  (interface (disableable-element<%>)
     get-value        ; -> any
     set-value!       ; any -> void
     value-valid?     ; -> boolean
@@ -17,15 +16,10 @@
 
 ; Mixins -----------------------------------------
 
-(define form-element-mixin
-  (mixin/cells (html-element<%>) (form-element<%>)
+(define form-element-mixin    
+  (mixin/cells (disableable-element<%>) (form-element<%>)
     
-    (inherit get-id get-classes get-style get-tooltip)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell boolean)
-    (init-cell [enabled? #t] #:accessor #:mutator)
+    (inherit get-id get-classes get-enabled? get-style get-tooltip)    
     
     ; Public methods -----------------------------
     
@@ -62,19 +56,17 @@
                       #:style   [style   (get-style)]
                       #:tooltip [title   (get-tooltip)])
       (define id       (get-id))
-      (define enabled? (get-enabled?))
       (unless id (error (format "ID not set in form-element: ~a" this)))
       (append (super core-html-attributes seed
                      #:id      id
                      #:classes classes
                      #:style   style
-                     #:tooltip title)
-              (if enabled? 
-                  (xml-attrs [name ,id])
-                  (xml-attrs [name ,id] [disabled "disabled"]))))))
+                     #:tooltip title)              
+              (xml-attrs [name ,id])))))
+
 
 (define form-element%
-  (class/cells (form-element-mixin html-element%) ()))
+  (class/cells (form-element-mixin disableable-element%) ()))
 
 ; Provide statements -----------------------------
 

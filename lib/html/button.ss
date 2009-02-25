@@ -2,16 +2,15 @@
 
 (require (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
-         "html-component.ss"
-         "html-element.ss")
+         "disableable-element.ss"
+         "html-component.ss")
 
 ; Classes ----------------------------------------
 
 (define button%
-  (class/cells html-element% ()
+  (class/cells disableable-element% ()
     
-    (inherit core-html-attributes
-             get-id)
+    (inherit core-html-attributes)
     
     ; Fields -------------------------------------
     
