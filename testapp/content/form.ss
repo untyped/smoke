@@ -63,6 +63,8 @@
     ; (listof form-element%)
     (field [controls `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
                        ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
+                       ,(new text-field% [id 'uppercase-text-field] [value "Initial"] [size 20] [max-length 10] [case-conversion 'uppercase])
+                       ,(new text-field% [id 'lowercase-text-field] [value "Initial"] [size 20] [max-length 10] [case-conversion 'lowercase])
                        ,(new test-autocomplete-field%
                              [id         'autocomplete-field]
                              [value      "Initial"]
@@ -74,6 +76,8 @@
                              [size       20]
                              [max-length 10])
                        ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
+                       ,(new text-area% [id 'uppercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'uppercase])
+                       ,(new text-area% [id 'lowercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'lowercase])
                        ,(new check-box% [id 'check-box] [value #t] [label "Label"])
                        ,(new combo-box% [id 'combo-box] [options '((1  . "Option 1") 
                                                                    (2  . "Option 2")

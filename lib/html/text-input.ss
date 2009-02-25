@@ -14,23 +14,46 @@
     ; Fields -------------------------------------
     
     ; (cell string)
-    (cell [raw ""] #:accessor #:mutator)
+    (cell [raw ""] #:accessor)
     
     ; (cell boolean)
     (init-cell [allow-blank? #t] #:accessor #:mutator)
     
+    ; (cell (U 'uppercase 'lowercase #f))
+    (cell [case-conversion #f] #:accessor)
+    
     ; Constructor --------------------------------
+    
+    ; (U 'uppercase 'lowercase #f)
+    (init [case-conversion #f])
+    (set-case-conversion! case-conversion)
     
     ; (U string #f)
     (init [value #f])
+    (set-value! value)
     
     ; (listof symbol)
     (init [classes null])
-    
-    (set-value! value)
     (super-new [classes (cons 'smoke-text-input classes)])
     
     ; Public methods -----------------------------
+    
+    ; (U 'uppercase 'lowercase #f) -> void
+    (define/public (set-case-conversion! val)
+      (if (memq val '(uppercase lowercase #f))
+          (web-cell-set! case-conversion-cell val)
+          (error "expected (U 'uppercase 'lowercase #f)" val)))
+    
+    ; string -> void
+    (define/public (set-raw! val)
+      (debug "unconverted" val)
+      (web-cell-set!
+       raw-cell
+       (debug* "converted"
+               case (get-case-conversion)
+               [(uppercase) (string-upcase val)]
+               [(lowercase) (string-downcase val)]
+               [else    val])))
     
     ; -> (U string #f)
     (define/override (get-value)
@@ -43,7 +66,7 @@
     
     ; (U string #f) -> void
     (define/override (set-value! val)
-      (set-raw! (cond [(not val) ""]
+      (set-raw! (cond [(not val)     ""]
                       [(string? val) val]
                       [else (raise-type-error 'set-value! "(U string #f)" val)])))
         

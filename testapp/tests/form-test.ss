@@ -119,7 +119,19 @@
         (enter-text (node/id 'text-field) "   abc   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'text-field "abc")
-        (enter-text (node/id 'text-field) "Done")))
+        (enter-text (node/id 'text-field) "Done"))
+      
+      (test-case "uppercase case conversion"
+        (enter-text (node/id 'uppercase-text-field) "   abc   ")
+        (click/wait (node/id 'submit-button))
+        (check-printed-value 'uppercase-text-field "ABC")
+        (enter-text (node/id 'uppercase-text-field) "Done"))
+      
+      (test-case "lowercase case conversion"
+        (enter-text (node/id 'lowercase-text-field) "   ABC   ")
+        (click/wait (node/id 'submit-button))
+        (check-printed-value 'lowercase-text-field "abc")
+        (enter-text (node/id 'lowercase-text-field) "Done")))
     
     (test-suite "text-area"
     
@@ -155,7 +167,19 @@
         (enter-text (node/id 'text-area) "   abc   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'text-area "abc")
-        (enter-text (node/id 'text-area) "Done")))
+        (enter-text (node/id 'text-area) "Done"))
+      
+      (test-case "uppercase case conversion"
+        (enter-text (node/id 'uppercase-text-area) "   abc   ")
+        (click/wait (node/id 'submit-button))
+        (check-printed-value 'uppercase-text-area "ABC")
+        (enter-text (node/id 'uppercase-text-area) "Done"))
+      
+      (test-case "lowercase case conversion"
+        (enter-text (node/id 'lowercase-text-area) "   ABC   ")
+        (click/wait (node/id 'submit-button))
+        (check-printed-value 'lowercase-text-area "abc")
+        (enter-text (node/id 'lowercase-text-area) "Done")))
     
     (test-suite "check-box"
     
