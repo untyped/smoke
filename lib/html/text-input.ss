@@ -46,14 +46,12 @@
     
     ; string -> void
     (define/public (set-raw! val)
-      (debug "unconverted" val)
       (web-cell-set!
        raw-cell
-       (debug* "converted"
-               case (get-case-conversion)
-               [(uppercase) (string-upcase val)]
-               [(lowercase) (string-downcase val)]
-               [else    val])))
+       (case (get-case-conversion)
+         [(uppercase) (string-upcase val)]
+         [(lowercase) (string-downcase val)]
+         [else    val])))
     
     ; -> (U string #f)
     (define/override (get-value)
