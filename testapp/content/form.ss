@@ -78,6 +78,8 @@
                        ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
                        ,(new text-area% [id 'uppercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'uppercase])
                        ,(new text-area% [id 'lowercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'lowercase])
+                       ,(new tiny-mce% [id 'tiny-mce1] [value "Initial"] [rows 10] [cols 20])
+                       ;,(new tiny-mce% [id 'tiny-mce2] [value "Initial"] [rows 10] [cols 20])
                        ,(new check-box% [id 'check-box] [value #t] [label "Label"])
                        ,(new combo-box% [id 'combo-box] [options '((1  . "Option 1") 
                                                                    (2  . "Option 2")

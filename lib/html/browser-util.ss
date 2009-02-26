@@ -50,14 +50,27 @@
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/firebug/firebug-lite.js"]))))
 
+(define tiny-mce-script
+  (xml (script (@ [type "text/javascript"]
+                  [src  "/scripts/tiny_mce/tiny_mce.js"]))))
+
 ; Javascript requirements ------------------------
+
+(define default-tiny-mce-options-script
+  (xml (script (@ [type "text/javascript"])
+               (!raw "\n// <![CDATA[\n")
+               (!raw ,(js (!dot tinyMCE (init (!object [mode  "none"]
+                                                       [style "simple"])))))
+               (!raw "\n// ]]>\n"))))
 
 ; Provide statements -----------------------------
 
 (provide/contract
- [smoke-styles     xml?]
- [tooltip-script   xml?]
- [rollover-script  xml?]
- [show-hide-script xml?]
- [excanvas-script  xml?]
- [firebug-script   xml?])
+ [smoke-styles                    xml?]
+ [tooltip-script                  xml?]
+ [rollover-script                 xml?]
+ [show-hide-script                xml?]
+ [excanvas-script                 xml?]
+ [firebug-script                  xml?]
+ [tiny-mce-script                 xml?]
+ [default-tiny-mce-options-script xml?])

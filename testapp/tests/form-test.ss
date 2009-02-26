@@ -181,6 +181,23 @@
         (check-printed-value 'lowercase-text-area "abc")
         (enter-text (node/id 'lowercase-text-area) "Done")))
     
+    (test-suite "tiny-mce"
+    
+      (test-case "initial value"
+        (check-field-attr 'text-area 'cols 20)
+        (check-field-attr 'text-area 'rows 10)
+        (check-field-value 'text-area "<p>Initial</p>")
+        (check-printed-value 'text-area "<p>Initial</p>"))
+      
+      (test-case "full refresh"
+        (printf "These tests have not been automated yet (might need an exec-javascript Delirium command).")
+        (printf "Change the value of the tinyMCE field, do a full refresh, and check the repoted value changes:")
+        (read-line))
+      
+      (test-case "full refresh"
+        (printf "Change the value of the tinyMCE field, do an AJAX refresh, and check the repoted value changes:")
+        (read-line)))
+    
     (test-suite "check-box"
     
       (test-case "initial value"

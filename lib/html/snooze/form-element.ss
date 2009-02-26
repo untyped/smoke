@@ -16,6 +16,7 @@
          "../set-selector.ss"
          "../text-area.ss"
          "../text-field.ss"
+         "../tiny-mce.ss"
          "check-label.ss"
          "util.ss")
 
@@ -78,6 +79,7 @@
 (define snooze-set-selector-autocomplete% (snooze-form-element-mixin (check-label-mixin set-selector-autocomplete%)))
 (define snooze-text-area%                 (snooze-form-element-mixin (check-label-mixin text-area%)))
 (define snooze-text-field%                (snooze-form-element-mixin (check-label-mixin text-field%)))
+(define snooze-tiny-mce%                  (snooze-form-element-mixin (check-label-mixin tiny-mce%)))
 
 ; Provide statements -----------------------------
 
@@ -93,4 +95,5 @@
          snooze-set-selector%
          snooze-set-selector-autocomplete%
          snooze-text-area%
-         snooze-text-field%)
+         snooze-text-field%
+         snooze-tiny-mce%)
