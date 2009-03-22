@@ -31,12 +31,13 @@
     ; rather than a method, because we want it to remain constant across calls
     ; to get-html-requirements.
     (define (make-tiny-mce-options-script seed)
-      (xml (!raw "\n// <![CDATA[\n")
-           (!raw ,(js ((function ()
-                         (var [tinyMCEOptions ,(send this get-tiny-mce-options seed)])
-                         (= (!dot tinyMCEOptions mode) "none")
-                         (!dot tinyMCE (init tinyMCEOptions))))))
-           (!raw "\n// ]]>\n")))
+      (xml (script (@ [type "text/javascript"])
+                   (!raw "\n// <![CDATA[\n")
+                   (!raw ,(js ((function ()
+                                 (var [tinyMCEOptions ,(send this get-tiny-mce-options seed)])
+                                 (= (!dot tinyMCEOptions mode) "none")
+                                 (!dot tinyMCE (init tinyMCEOptions))))))
+                   (!raw "\n// ]]>\n"))))
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
