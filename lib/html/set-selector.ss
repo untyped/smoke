@@ -163,7 +163,7 @@
                                        [onclick 
                                         ,(embed/ajax seed 
                                                      (callback dismiss-item (car item)))])))))))]))
-          ,(opt-xml (and (get-enabled?) (not visible?) (items-selectable?)) 
+          ,(opt-xml (and (debug* "enabled?" get-enabled?) (debug* "¬visible?" not visible?) (debug* "items-selectable?" items-selectable?)) 
              (div (@ [class 'item-entry])
                   (a (@ [id ,(string->symbol (format "~a-activate" (get-id)))] 
                         [onclick ,(embed/ajax seed (callback activate-item-entry))])
