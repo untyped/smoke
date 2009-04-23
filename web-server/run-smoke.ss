@@ -37,19 +37,21 @@
 ;  void
 (define (serve/smoke
          servlet-start
-         #:manager         [manager          (make-default-smoke-manager)]
-         #:port            [port             8765]
-         #:listen-ip       [listen-ip        #f]
-         #:htdocs-paths    [app-htdocs-paths null]
-         #:mime-types-path [mime-types-path  smoke-mime-types-path]
-         #:launch-browser? [launch-browser?  #f]
-         #:404-handler     [404-handler      smoke-404-handler])
+         #:manager           [manager          (make-default-smoke-manager)]
+         #:port              [port             8765]
+         #:listen-ip         [listen-ip        #f]
+         #:htdocs-paths      [app-htdocs-paths null]
+         #:mime-types-path   [mime-types-path  smoke-mime-types-path]
+         #:launch-browser?   [launch-browser?  #f]
+         #:404-handler       [404-handler      smoke-404-handler]
+         #:servlet-namespace [servlet-namespace-specs   null])
   (serve/dispatcher
    (make-smoke-dispatcher (make-smoke-controller servlet-start)
-                          #:manager         manager
-                          #:htdocs-paths    `(,@app-htdocs-paths ,smoke-htdocs-path)
-                          #:mime-types-path mime-types-path
-                          #:404-handler     404-handler)
+                          #:manager           manager
+                          #:htdocs-paths      `(,@app-htdocs-paths ,smoke-htdocs-path)
+                          #:mime-types-path   mime-types-path
+                          #:404-handler       404-handler
+                          #:servlet-namespace servlet-namespace-specs)
    #:port               port
    #:listen-ip          listen-ip
    #:launch-browser-url (and launch-browser? "/")))
@@ -211,12 +213,13 @@
 (provide/contract
  [serve/smoke           (->* ((-> response?))
                              (#:manager any/c
-                                        #:port            natural-number/c
-                                        #:listen-ip       (or/c string? false/c)
-                                        #:htdocs-paths    (listof path?)
-                                        #:mime-types-path path?
-                                        #:launch-browser? boolean?
-                                        #:404-handler     (-> request? response?))
+                                        #:port              natural-number/c
+                                        #:listen-ip         (or/c string? false/c)
+                                        #:htdocs-paths      (listof path?)
+                                        #:mime-types-path   path?
+                                        #:launch-browser?   boolean?
+                                        #:404-handler       (-> request? response?)
+                                        #:servlet-namespace list?)
                              void?)]
  [serve/smoke/delirium  (->* ((-> response?) any/c)
                              (#:manager any/c

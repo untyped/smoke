@@ -5,7 +5,6 @@
          scheme/contract
          (only-in srfi/1 drop-right)
          srfi/13
-         (planet untyped/mirrors:1/javascript/util)
          (planet untyped/unlib:3/debug)
          "base.ss"
          "json.ss"
