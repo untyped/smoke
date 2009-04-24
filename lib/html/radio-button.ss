@@ -7,7 +7,7 @@
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "form-element.ss"
-         "html-element.ss")
+         "disableable-element.ss")
 
 ; Both radio-group% and all radio-button%s must be added as children of
 ; the component in which they are rendered.
@@ -54,8 +54,8 @@
       (if (or (not button) (is-a? button radio-button%))
           (web-cell-set! selected-cell button)
           (raise-exn exn:fail:contract
-            (format "Expected (U radio-button% #f), received ~s" button))))
-  
+                     (format "Expected (U radio-button% #f), received ~s" button))))
+    
     ; symbol -> void
     (define/public (set-selected/id! id)
       (set-selected! (ormap (lambda (button)
@@ -77,7 +77,7 @@
           (when binding (set-selected/id! (string->symbol binding))))))))
 
 (define radio-button%
-  (class/cells html-element% ()
+  (class/cells disableable-element% ()
     
     (inherit get-id
              core-html-attributes)
@@ -88,7 +88,11 @@
     (cell [group #f] #:accessor)
     
     ; (cell any)
-    (init-cell [value #f] #:accessor #:mutator)
+    ; Given a gensym by default, to make explicit the link between 
+    ; radio-group:selected and radio-group:value. This link is created
+    ; by equality-testing the value of the selected item, hence we need
+    ; distinct values by default.
+    (init-cell [value (gensym/interned 'radio-button)] #:accessor #:mutator)
     
     ; (cell xml)
     (init-cell [label #f] #:accessor #:mutator)
@@ -113,6 +117,12 @@
       (web-cell-set! group-cell new-group)
       (when new-group (send new-group set-buttons! (cons this (send new-group get-buttons)))))
     
+    ; -> boolean
+    (define/override (get-enabled?)
+      (and (super get-enabled?) 
+           (or (and (get-group) (send (get-group) get-enabled?))
+               (and (not (get-group)) #t))))
+    
     ; seed -> xml
     (define/override (render seed)
       (define id       (get-id))
@@ -121,11 +131,13 @@
       (define value    (get-id))
       (define label    (get-label))
       (define checked? (equal? (get-value) (send group get-value)))
+      (define-debug enabled? (get-enabled?))
       (xml (input (@ ,@(core-html-attributes seed)
                      [type  "radio"]
                      [name  ,name]
                      [value ,value]
-                     ,@(if checked? (xml-attrs [checked "checked"]) null)))
+                     ,@(if checked? (xml-attrs [checked "checked"]) null)
+                     ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
            ,(opt-xml label
               " " (label (@ [for ,id]) ,label))))
     
