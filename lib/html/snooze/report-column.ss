@@ -112,7 +112,8 @@
                                            [(desc) "sort desc"]
                                            [(#f)   "sort"])])
                               ,(get-xml-name)))
-                      (get-xml-name))))))
+                      (xml (span (@ [class "not-sortable"])
+                                 ,(get-xml-name))))))))
     
     (define/public (render-head/csv)
       (csv:cell (get-string-name)))))
@@ -165,7 +166,7 @@
  [make-column           (->* (symbol? string?) 
                              ((or/c (listof sql:order?) false/c)
                               #:xml-name xml?
-                                         #:classes         (listof (or/c symbol? string?))
-                                         #:display-in-html? boolean?
-                                         #:display-in-csv? boolean?) 
+                              #:classes         (listof (or/c symbol? string?))
+                              #:display-in-html? boolean?
+                              #:display-in-csv? boolean?) 
                              (is-a?/c snooze-report-column%))])

@@ -69,12 +69,18 @@ img.check-error.icon {
   padding: 0px;
 }
 
-.smoke-snooze-report th a {
+.smoke-snooze-report th a,
+.smoke-snooze-report th span.not-sortable {
   padding: 4px 5px;
 }
 
 .smoke-snooze-report th.sort:hover {
     background: #ffa;
+}
+
+.smoke-snooze-report th span.not-sortable {
+    display: block;
+    background: transparent;
 }
 
 .smoke-snooze-report th a.sort {
