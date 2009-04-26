@@ -131,7 +131,7 @@
       (define value    (get-id))
       (define label    (get-label))
       (define checked? (equal? (get-value) (send group get-value)))
-      (define-debug enabled? (get-enabled?))
+      (define enabled? (get-enabled?))
       (xml (input (@ ,@(core-html-attributes seed)
                      [type  "radio"]
                      [name  ,name]
