@@ -101,7 +101,11 @@ textarea.placeholder {
 /* autocomplete-field ------------------------- */
 
 .smoke-autocomplete-field {
-  background: url(/images/smoke/down-arrow.png) right center no-repeat;
+/*
+  background-image: url(/images/smoke/down-arrow.png);
+  background-position: right center;
+  background-repeat: no-repeat;
+*/
 }
 
 .smoke-autocomplete-options {
@@ -141,8 +145,13 @@ textarea.placeholder {
 }
 
 .smoke-autocomplete-options td:first-child {
-  background none;
+  background: none;
   border-left: none;
+}
+
+.smoke-disabled {
+  background: #f7f7f7;
+  color: #222;
 }
 
 /* html-dialog -------------------------------- */

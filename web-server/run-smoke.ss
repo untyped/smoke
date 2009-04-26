@@ -37,21 +37,21 @@
 ;  void
 (define (serve/smoke
          servlet-start
-         #:manager           [manager          (make-default-smoke-manager)]
-         #:port              [port             8765]
-         #:listen-ip         [listen-ip        #f]
-         #:htdocs-paths      [app-htdocs-paths null]
-         #:mime-types-path   [mime-types-path  smoke-mime-types-path]
-         #:launch-browser?   [launch-browser?  #f]
-         #:404-handler       [404-handler      smoke-404-handler]
-         #:servlet-namespace [servlet-namespace-specs   null])
+         #:manager           [manager           (make-default-smoke-manager)]
+         #:port              [port              8765]
+         #:listen-ip         [listen-ip         #f]
+         #:htdocs-paths      [app-htdocs-paths  null]
+         #:mime-types-path   [mime-types-path   smoke-mime-types-path]
+         #:launch-browser?   [launch-browser?   #f]
+         #:404-handler       [404-handler       smoke-404-handler]
+         #:servlet-namespace [servlet-namespace null])
   (serve/dispatcher
    (make-smoke-dispatcher (make-smoke-controller servlet-start)
                           #:manager           manager
                           #:htdocs-paths      `(,@app-htdocs-paths ,smoke-htdocs-path)
                           #:mime-types-path   mime-types-path
                           #:404-handler       404-handler
-                          #:servlet-namespace servlet-namespace-specs)
+                          #:servlet-namespace servlet-namespace)
    #:port               port
    #:listen-ip          listen-ip
    #:launch-browser-url (and launch-browser? "/")))
