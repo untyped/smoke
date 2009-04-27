@@ -261,7 +261,7 @@
     ; seed integer integer integer -> xml
     (define/public (render-controls seed start count total)
       (xml (div (@ [id    ,(format "~a-controls" (get-id))]
-                   [class "controls show-hide-preserve"])
+                   [class "controls"])
                 ; Filter is always visible:
                 ,(if (> (length (get-filters)) 1)
                      (xml (div (@ [class "filter"])
@@ -272,14 +272,10 @@
                                ,(send pattern-field render seed)))
                      (xml "Filter for " ,(send pattern-field render seed)))
                 ; Remaining controls are not always visible:
-                (div (@ [class "show-hide-switcher"])
-                     "Report options")
-                (div (@ [class "show-hide-content"])
-                     ; View control:
-                     ,(opt-xml (> (length (get-views)) 1)
-                        (div (@ [class "view"])
-                             "View: "
-                             ,(send view-field render seed))))
+                ,(opt-xml (> (length (get-views)) 1)
+                   ; View control:
+                   (div (@ [class "view"])
+                        "View: " ,(send view-field render seed)))
                 ; extra link controls:
                 ,(render-control-links seed start count total))))
     
