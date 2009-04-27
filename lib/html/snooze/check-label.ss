@@ -91,8 +91,8 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (xml (div (@ ,(core-html-attributes seed))
-                ,(render-check-label seed (get-tooltip?)))))))
+      (xml (span (@ ,(core-html-attributes seed))
+                 ,(render-check-label seed (get-tooltip?)))))))
 
 ; Provide statements -----------------------------
 
