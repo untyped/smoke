@@ -38,6 +38,12 @@
   (interface (snooze-scaffolded-element<%> snooze-editor<%>)
     get-fields))   ; -> (listof snooze-form-element%)
 
+; The basis for list scaffolding - requires a list of structs
+(define snooze-scaffolded-list-element<%>
+  (interface ()
+    set-structs!  ; (listof persistent-struct) -> void 
+    get-structs)) ; -> (listof persistent-struct)
+
 
 ; Mixins -----------------------------------------
 (define vanilla-element-mixin
@@ -106,6 +112,33 @@
 
 ; List pages -------------------------------------
 
+; A mixin for a particular entity review page.
+;
+;  entity
+;  [(attr -> (value -> xml))]
+;  [#:attributes  (listof attribute)]
+;  [#:struct-ref* (persistent-struct -> (listof any))]
+; -> 
+;  (mixin html-element<%>)
+(define (entity->list-mixin entity 
+                              [attr->review-renderer default-attr->list-renderer]
+                              #:entity->attrs [entity->attrs default-attributes])
+  (mixin/cells (html-element<%>) (snooze-scaffolded-list-element<%>)
+    
+    ; Fields -----------------------------------
+    ; (cell (listof snooze-struct))
+    (init-cell structs null #:accessor #:mutator)
+    
+    ; (struct -> xml)
+    (field renderer 
+           (entity->list-renderer entity attr->review-renderer #:entity->attrs entity->attrs)
+           #:accessor)
+    
+    ; Methods ------------------------------------ 
+    ; seed -> xml
+    (define/augment (render seed)
+      (renderer (get-structs)))))
+
 ;  entity
 ;  [(attr -> (value -> xml))]
 ;  [#:entity->attrs (entity -> (listof attribute))]
@@ -114,7 +147,7 @@
 (define (entity->list-renderer entity 
                                [attr->list-renderer default-attr->list-renderer]
                                #:entity->attrs [entity->attrs default-attributes])
-  (let* ([attributes (entity-attributes entity)])
+  (let* ([attributes (entity->attrs entity)])
     (lambda (structs)
       (xml (table (@ [class 'snooze-list])
                   (thead (tr ,@(for/list ([attr (in-list attributes)])
