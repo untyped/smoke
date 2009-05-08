@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require srfi/19
+         (planet untyped/unlib:3/time)
          "../../lib-base.ss"
          "text-field.ss")
 
@@ -23,7 +24,12 @@
     
     ; date -> void
     (define/override (set-value! val)
-      (super set-value! (and val (date->string val (get-date-string)))))    
+      (let ([parsed-val (cond [(date? val)     val]
+                              [(time-tai? val) (time-tai->date val)]
+                              [(time-utc? val) (time-utc->date val)]
+                              [(not val)       val]
+                              [else            (error (format "Expecting a time-tai, time-utc or date; found ~a" val))])])
+        (super set-value! (and parsed-val (date->string parsed-val (get-date-string))))))    
     
     ; -> (U date #f)
     (define/override (get-value)

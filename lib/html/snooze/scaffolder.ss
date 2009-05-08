@@ -1,11 +1,13 @@
 #lang scheme
 
-(require srfi/19
+(require srfi/13
+         srfi/19
          (planet untyped/snooze:2)
          "../../../lib-base.ss"
          "../submit-button.ss"
          "../html-element.ss"
          "editor.ss"
+         "report.ss"
          "form-element.ss")
 
 ; Procedures -------------------------------------
@@ -44,7 +46,6 @@
     set-structs!  ; (listof persistent-struct) -> void 
     get-structs)) ; -> (listof persistent-struct)
 
-
 ; Mixins -----------------------------------------
 (define vanilla-element-mixin
   (mixin/cells (html-element<%>) (vanilla-element<%> html-element<%>)             
@@ -53,7 +54,6 @@
     ; seed -> xml
     (define/augment (render seed)
       (get-inner-xml))))
-
 
 ; Review pages -----------------------------------
 
@@ -68,21 +68,17 @@
 (define (entity->review-mixin entity 
                               [attr->review-renderer default-attr->review-renderer]
                               #:attributes [attributes (default-attributes entity)])
-  (mixin/cells (html-element<%>) (snooze-scaffolded-element<%>)
-    
-    ; Fields -----------------------------------
-    ; (cell (U snooze-struct #f))
-    (init-cell struct #f #:accessor #:mutator)
-    
-    ; (struct -> xml)
-    (field renderer 
-           (entity->review-renderer entity attr->review-renderer #:attributes attributes)
-           #:accessor)
-    
-    ; Methods ------------------------------------ 
-    ; seed -> xml
-    (define/augment (render seed)
-      (renderer (get-struct)))))
+  (let ([renderer (entity->review-renderer entity attr->review-renderer #:attributes attributes)])
+    (mixin/cells (html-element<%>) (snooze-scaffolded-element<%>)
+      
+      ; Fields -----------------------------------
+      ; (cell (U snooze-struct #f))
+      (init-cell struct #f #:accessor #:mutator)
+      
+      ; Methods ------------------------------------ 
+      ; seed -> xml
+      (define/augment (render seed)
+        (renderer (get-struct))))))
 
 ; Generates a procedure that takes persistent-structs for a particular entity
 ; and returns an appropriate XML representation.
@@ -109,63 +105,6 @@
   (lambda (value)
     (xml (dt (@ [class 'snooze-review-attr])  ,(attribute-name attr))
          (dd (@ [class 'snooze-review-value]) ,value))))
-
-; List pages -------------------------------------
-
-; A mixin for a particular entity review page.
-;
-;  entity
-;  [(attr -> (value -> xml))]
-;  [#:attributes  (listof attribute)]
-;  [#:struct-ref* (persistent-struct -> (listof any))]
-; -> 
-;  (mixin html-element<%>)
-(define (entity->list-mixin entity 
-                              [attr->review-renderer default-attr->list-renderer]
-                              #:entity->attrs [entity->attrs default-attributes])
-  (mixin/cells (html-element<%>) (snooze-scaffolded-list-element<%>)
-    
-    ; Fields -----------------------------------
-    ; (cell (listof snooze-struct))
-    (init-cell structs null #:accessor #:mutator)
-    
-    ; (struct -> xml)
-    (field renderer 
-           (entity->list-renderer entity attr->review-renderer #:entity->attrs entity->attrs)
-           #:accessor)
-    
-    ; Methods ------------------------------------ 
-    ; seed -> xml
-    (define/augment (render seed)
-      (renderer (get-structs)))))
-
-;  entity
-;  [(attr -> (value -> xml))]
-;  [#:entity->attrs (entity -> (listof attribute))]
-; ->
-;  ((listof struct) -> xml)
-(define (entity->list-renderer entity 
-                               [attr->list-renderer default-attr->list-renderer]
-                               #:entity->attrs [entity->attrs default-attributes])
-  (let* ([attributes (entity->attrs entity)])
-    (lambda (structs)
-      (xml (table (@ [class 'snooze-list])
-                  (thead (tr ,@(for/list ([attr (in-list attributes)])
-                                 (xml (th ,(attribute-name attr))))))
-                  (tbody ,@(for/list ([struct (in-list structs)])
-                             (struct->list-xml struct attr->list-renderer entity->attrs))))))))
-
-; snooze-struct (attr -> (value -> xml)) -> xml
-(define (struct->list-xml struct attr->renderer entity->attrs)
-  (let* ([entity     (struct-entity struct)]
-         [attributes (entity->attrs entity)])
-    (xml (tr ,@(for/list ([attr (in-list attributes)])
-                 ((attr->renderer attr) (struct-attribute struct attr)))))))
-
-; attr -> (value -> xml)
-(define (default-attr->list-renderer attr)
-  (lambda (value)
-    (xml (td ,value))))
 
 
 ; Editors ----------------------------------------
@@ -206,19 +145,10 @@
       (init-cell struct #f #:accessor)
       
       ; (listof form-element%)
-      (field fields
-             (for/list ([attr (in-list attributes)])
-               (attr->editor attr))
-             #:accessor
-             #:children)
+      (field fields (for/list ([attr (in-list attributes)]) (attr->editor attr)) #:accessor #:children)
       
       ; submit-button%
-      (field submit-button
-             (new submit-button%
-                  [action (callback on-update)]
-                  [label  "Okay"])
-             #:accessor
-             #:child)
+      (field submit-button (new submit-button% [action (callback on-update)] [label  "Okay"]) #:accessor #:child)
       
       ; Methods ----------------------------------
       
@@ -231,7 +161,7 @@
                 ; default types; otherwise convert to a string and show in a textfield
                 (cond [(boolean? val)  val]
                       [(integer? val)  val]
-                      [(time-tai? val) (time-tai->date val)]
+                      [(time-tai? val) (time-tai->date val)] ; TODO time/date fields
                       [(time-utc? val) (time-utc->date val)]
                       [else            (format "~a" val)]))))
       
@@ -262,8 +192,8 @@
           (call-with-transaction
            (lambda () (save! struct))
            (if (struct-saved? struct)
-               (format "Edit ~a details: ~a" (entity-name entity) struct)
-               (format "Create ~a: ~a" (entity-name entity) struct)))))))
+               (format "Edit ~a details: ~a" (entity-name entity) (struct-id struct))
+               (format "Create ~a: ~a" (entity-name entity) (struct-id struct))))))))
   ; Create a compound mixin of the above and snooze-editor-mixin
   (lambda (html-element) 
     (scaffolded-mixin (snooze-editor-mixin html-element))))
@@ -281,6 +211,176 @@
         [else 
          (new snooze-text-field% [predicate (by-attributes attr)])]))
 
+
+; List pages -------------------------------------
+
+; A mixin for a particular entity review page.
+;
+;  entity
+;  [(attr -> (value -> xml))]
+;  [#:attributes  (listof attribute)]
+;  [#:struct-ref* (persistent-struct -> (listof any))]
+; -> 
+;  (mixin html-element<%>)
+(define (entity->list-mixin entity 
+                            [attr->review-renderer default-attr->list-renderer]
+                            #:attributes [attributes (default-attributes entity)])
+  (let ([renderer (entity->list-renderer entity attr->review-renderer #:attributes attributes)])
+    (mixin/cells (html-element<%>) (snooze-scaffolded-list-element<%>)
+      
+      ; Fields -----------------------------------
+      ; (cell (listof snooze-struct))
+      (init-cell structs null #:accessor #:mutator)
+      
+      ; Methods ------------------------------------ 
+      ; seed -> xml
+      (define/augment (render seed)
+        (renderer (get-structs))))))
+
+;  entity
+;  [(attr -> (value -> xml))]
+;  [#:entity->attrs (entity -> (listof attribute))]
+; ->
+;  ((listof struct) -> xml)
+(define (entity->list-renderer entity 
+                               [attr->list-renderer default-attr->list-renderer]
+                               ; TODO header cells...
+                               #:attributes [attributes (default-attributes entity)])
+  (lambda (structs)
+    (xml (table (@ [class 'snooze-list])
+                (thead (tr ,@(for/list ([attr (in-list attributes)])
+                               (xml (th ,(attribute-name attr))))))
+                (tbody ,@(for/list ([struct (in-list structs)])
+                           (struct->list-xml struct attr->list-renderer attributes)))))))
+
+; snooze-struct (attr -> (value -> xml)) -> xml
+(define (struct->list-xml struct attr->renderer attributes)
+  (xml (tr ,@(for/list ([attr (in-list attributes)])
+               ((attr->renderer attr) (struct-attribute struct attr))))))
+
+; attr -> (value -> xml)
+(define (default-attr->list-renderer attr)
+  (lambda (value)
+    (xml (td ,value))))
+
+
+; Snooze report ----------------------------------
+
+; A mixin for a particular entity review page.
+;
+;  entity
+;  [(attr -> (value -> xml))]
+;  [#:attributes  (listof attribute)]
+;  [#:struct-ref* (persistent-struct -> (listof any))]
+; -> 
+;  (mixin html-element<%>)
+(define (entity->report-mixin snooze entity 
+                              [attr->report-renderer default-attr->report-renderer]
+                              #:entity->attrs [entity->attrs default-attributes]
+                              #:query         [query         (lambda (where-clause [order-clause null] [offset #f] [limit #f])
+                                                               (define-snooze-interface snooze)
+                                                               (let-alias ([E entity])
+                                                                 (sql (select #:from   E 
+                                                                              #:where  ,where-clause
+                                                                              #:order  ,order-clause
+                                                                              #:offset ,offset
+                                                                              #:limit  ,limit))))])
+  (mixin/cells (html-element<%>) (html-element<%>)
+    
+    ; Fields -----------------------------------
+    
+    ; (struct -> xml)
+    (field report (entity->report snooze entity attr->report-renderer #:entity->attrs entity->attrs #:query query) #:child)
+    
+    ; Methods ------------------------------------ 
+    ; seed -> xml
+    (define/augment (render seed) (send report render seed))))
+
+;  entity
+;  [(attr -> (value -> xml))]
+;  [#:entity->attrs (entity -> (listof attribute))]
+; ->
+;  ((listof struct) -> xml)
+(define (entity->report snooze entity 
+                        [attr->list-renderer default-attr->report-renderer]
+                        #:entity->attrs [entity->attrs default-attributes]
+                        #:query         [query         
+                                         (lambda (where-clause [order-clause null] [offset #f] [limit #f])
+                                           (define-snooze-interface snooze)
+                                           (let-alias ([E entity])
+                                             (sql (select #:from   E 
+                                                          #:where  ,where-clause
+                                                          #:order  ,order-clause
+                                                          #:offset ,offset
+                                                          #:limit  ,limit))))])
+  (define-snooze-interface snooze)
+  (define-alias E entity)
+  (define E-id (sql:alias E (entity-attribute entity 'id)))
+  (let* ([attributes     (entity->attrs entity)]
+         [report-columns (for/list ([attr (in-list attributes)])
+                           (let ([ATTR (sql:alias E attr)])
+                             (make-column (attribute-name attr)
+                                          (format "~a" (attribute-name attr))
+                                          (list (sql:asc ATTR)))))]
+         [report-filters (for/list ([attr (in-list attributes)])
+                           (make-filter (attribute-name attr)
+                                        (format "~a" (attribute-name attr))))])
+    (singleton/cells snooze-report% ()
+      
+      (inherit get-sort-order)
+      
+      (super-new [sort-col (car report-columns)])
+      
+      (define/override (query-num-items filter pattern)
+        (find-one (sql:select #:what (sql:count E-id) #:from (query (make-where filter pattern)))))
+      
+      
+      (define/override (query-items filter pattern col dir start count)
+        (g:find (query (make-where filter pattern) (get-sort-order col dir) start count)))
+      
+      ; filter pattern
+      (define/private (make-where filter pattern)
+        (if pattern 
+            (let ([sql-return 
+                   (for/or ([attr (in-list attributes)])
+                     (let ([ATTR (sql:alias E attr)])
+                       (if (equal? (filter-id filter) (attribute-name attr))
+                           (cond [(integer-type? attr)  (sql:= ATTR pattern)]
+                                 [(boolean-type? attr)  (sql:= ATTR pattern)]
+                                 [else (sql:regexp-match-ci ATTR (pattern->regexp pattern))])
+                           #f)))])
+              (or sql-return (sql #t)))
+            (sql #t)))
+      
+      (define/override (get-views)
+        (list (make-view 'default-view "Default" report-columns)))
+      
+      (define/override (get-filters)
+        report-filters)
+      
+      ; seed (listof column) persistent-struct -> xml
+      (define/override (render-item seed cols a-struct)
+        (xml (tr ,@(for/list ([col (in-list cols)])
+                     (let ([attribute (entity-attribute entity (send col get-id))])
+                       (xml (td ,((default-attr->report-renderer attribute) a-struct)))))))))))
+
+
+; attr -> (value -> xml)
+(define (default-attr->report-renderer attr)
+  (lambda (struct)
+    (xml ,(struct-attribute struct attr))))
+
+
+
+; string [boolean] -> string
+(define (pattern->regexp pattern [anywhere? #f])
+  (apply string-append (cons (if anywhere? "^.*" "^")
+                             (string-fold-right (lambda (chr accum)
+                                                  (cond [(eq? chr #\*) (cons ".*" accum)]
+                                                        [(eq? chr #\?) (cons "." accum)]
+                                                        [else          (cons (regexp-quote (string chr)) accum)]))
+                                                null
+                                                pattern))))
 ; Provides ---------------------------------------
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out) pattern->regexp))
