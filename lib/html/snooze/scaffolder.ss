@@ -202,14 +202,17 @@
 ;
 ; attr -> snooze-form-element<%>
 (define (default-attr->editor attr)
-  (cond [(boolean-type? (attribute-type attr))
-         (new snooze-check-box% [predicate (by-attributes attr)])]
-        [(integer-type? (attribute-type attr))
-         (new snooze-integer-field% [predicate (by-attributes attr)])]
-        [(or (time-tai-type? (attribute-type attr)) (time-utc-type? (attribute-type attr)))
-         (new snooze-date-field% [predicate (by-attributes attr)])]
-        [else 
-         (new snooze-text-field% [predicate (by-attributes attr)])]))
+  (let ([attr-type (attribute-type attr)])
+    (cond [(boolean-type? attr-type)
+           (new snooze-check-box% [predicate (by-attributes attr)])]
+          [(integer-type? attr-type)
+           (new snooze-integer-field% [predicate (by-attributes attr)])]
+          [(or (time-tai-type? attr-type) (time-utc-type? attr-type))
+           (new snooze-date-field% [predicate (by-attributes attr)])]
+          [(and (string-type? attr-type) (> (string-type-max-length attr-type) 128))
+           (new snooze-text-area% [predicate (by-attributes attr)])]
+          [else 
+           (new snooze-text-field% [predicate (by-attributes attr)])])))
 
 
 ; List pages -------------------------------------
