@@ -7,8 +7,7 @@
                   make-header
                   request?
                   request-uri
-                  request-headers
-                  response?)
+                  request-headers)
          (planet untyped/mirrors:1/mirrors)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
@@ -60,6 +59,6 @@
  [expiry-cookie-ref         (-> request? (or/c string? false/c))]
  [make-expiry-cookie        (-> request? cookie?)]
  [make-expiry-header        (-> request? header?)]
- [make-expiry-response      (-> request? url? response?)]
+ [make-expiry-response      (-> request? url? (or/c response/full? response/incremental?))]
  [make-cancel-expiry-cookie (-> request? cookie?)]
  [make-cancel-expiry-header (-> request? header?)])

@@ -7,6 +7,7 @@
          web-server/http/response-structs
          (planet untyped/unlib:3/debug)
          (planet untyped/unlib:3/log)
+         (planet untyped/mirrors:1/plain/util)
          "current-request.ss"
          "request-util.ss"
          "resume.ss"
@@ -85,4 +86,4 @@
   (-> any))
 
 (provide/contract
- [send/suspend/dispatch (->* ((-> (-> any/c string?) response?)) (#:push-frame? boolean?) any)])
+ [send/suspend/dispatch (->* ((-> (-> any/c string?) (or/c response/full? response/incremental?))) (#:push-frame? boolean?) any)])

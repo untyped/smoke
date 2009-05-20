@@ -7,8 +7,8 @@
          scheme/pretty
          scheme/runtime-path
          srfi/26
-         (planet untyped/mirrors:1/mirrors)
          (except-in (planet untyped/unlib:3/debug) debug-out)
+         (planet untyped/mirrors:1)
          (planet untyped/unlib:3/exn)
          (planet untyped/unlib:3/log)
          "web-server/servlet.ss")
@@ -61,7 +61,7 @@
                        scheme/match
                        scheme/pretty
                        srfi/26
-                       (planet untyped/mirrors:1/mirrors)
+                       (planet untyped/mirrors:1)
                        (planet untyped/unlib:3/debug)
                        (planet untyped/unlib:3/exn)
                        (planet untyped/unlib:3/log)

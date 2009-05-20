@@ -211,17 +211,17 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [serve/smoke           (->* ((-> response?))
+ [serve/smoke           (->* ((-> (or/c response/full? response/incremental?)))
                              (#:manager any/c
                                         #:port              natural-number/c
                                         #:listen-ip         (or/c string? false/c)
                                         #:htdocs-paths      (listof path?)
                                         #:mime-types-path   path?
                                         #:launch-browser?   boolean?
-                                        #:404-handler       (-> request? response?)
+                                        #:404-handler       (-> request? (or/c response/full? response/incremental?))
                                         #:servlet-namespace list?)
                              void?)]
- [serve/smoke/delirium  (->* ((-> response?) any/c)
+ [serve/smoke/delirium  (->* ((-> (or/c response/full? response/incremental?)) any/c)
                              (#:manager any/c
                                         #:run-tests?      boolean?
                                         #:run-tests       (-> any/c any)
@@ -230,5 +230,5 @@
                                         #:htdocs-paths    (listof path?)
                                         #:mime-types-path path?
                                         #:launch-browser? boolean?
-                                        #:404-handler     (-> request? response?))
+                                        #:404-handler     (-> request? (or/c response/full? response/incremental?)))
                              void?)])

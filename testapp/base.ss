@@ -6,8 +6,8 @@
          scheme/pretty
          scheme/runtime-path
          srfi/26
-         (planet untyped/dispatch:1/dispatch)
-         (planet untyped/mirrors:1/mirrors)
+         (planet untyped/dispatch:1)
+         (planet untyped/mirrors:1)
          "../dispatch.ss"
          "../smoke.ss"
          "../lib/html/snooze/snooze.ss")
@@ -21,8 +21,8 @@
                        scheme/match
                        scheme/pretty
                        srfi/26
-                       (planet untyped/dispatch:1/dispatch)
-                       (planet untyped/mirrors:1/mirrors)
+                       (planet untyped/dispatch:1)
+                       (planet untyped/mirrors:1)
                        "../dispatch.ss"
                        "../smoke.ss"
                        "../lib/html/snooze/snooze.ss"))

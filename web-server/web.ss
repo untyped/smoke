@@ -74,7 +74,7 @@
 #;(provide/contract
  [current-servlet-continuation-expiration-handler parameter?]
  [clear-continuation-table! (-> void?)]
- [send/suspend/dispatch     (-> (-> web-server-embed/url? response?) any/c)])
+ [send/suspend/dispatch     (-> (-> web-server-embed/url? (or/c response/full? response/incremental?)) any/c)])
 
 (provide (rename-out [ws:current-servlet-continuation-expiration-handler current-servlet-continuation-expiration-handler]
                      [ws:clear-continuation-table!                       clear-continuation-table!]

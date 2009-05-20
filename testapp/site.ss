@@ -2,7 +2,11 @@
 
 (require web-server/dispatchers/dispatch
          (planet untyped/dispatch:1)
-         "base.ss")
+         (except-in "base.ss"
+                    string-arg
+                    symbol-arg
+                    integer-arg
+                    real-arg))
 
 ; Site -------------------------------------------
 

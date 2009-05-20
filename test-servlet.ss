@@ -37,6 +37,6 @@
 
 (provide/contract
  [interface-version           symbol?]
- [start                       (-> request? response?)]
- [instance-expiration-handler (-> request? response?)]
+ [start                       (-> request? (or/c response/full? response/incremental?))]
+ [instance-expiration-handler (-> request? (or/c response/full? response/incremental?))]
  [manager                     manager?])

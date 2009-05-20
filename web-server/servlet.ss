@@ -21,8 +21,13 @@
                     ; Request bindings:
                     exists-binding?
                     extract-binding/single
-                    extract-bindings)
-         (planet untyped/mirrors:1/mirrors)
+                    extract-bindings
+                    ; web-server/dispatch:
+                    symbol-arg
+                    string-arg
+                    integer-arg
+                    real-arg)
+         (planet untyped/mirrors:1)
          "current-request.ss"
          "request.ss"
          "request-util.ss"
