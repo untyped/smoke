@@ -7,7 +7,9 @@
                   make-header
                   request?
                   request-uri
-                  request-headers)
+                  request-headers
+                  response/full?
+                  response/incremental?)
          (planet untyped/mirrors:1/mirrors)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
