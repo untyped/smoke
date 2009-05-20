@@ -23,7 +23,7 @@
 
 ; persistent-struct -> (listof any)
 (define (default-struct-ref* struct)
-  (cddr (snooze-struct-ref* struct)))
+  (cddr (debug* "ssr*" snooze-struct-ref* struct)))
 
 ; Interfaces -------------------------------------
 
@@ -139,11 +139,11 @@
 ; ->
 ;  snooze-editor-mixin
 (define (entity->editor-mixin snooze entity
-                              #:attributes      [attributes      (default-attributes entity)]
+                              #:attributes       [attributes      (default-attributes entity)]
                               #:attr-pretty-name [attr-pretty-name default-attr-pretty-name]
-                              #:struct-ref*     [struct-ref*     default-struct-ref*]
-                              #:attr->editor    [attr->editor    default-attr->editor] 
-                              #:check-proc      [check-proc      (lambda (struct) null)])
+                              #:struct-ref*      [struct-ref*     default-struct-ref*]
+                              #:attr->editor     [attr->editor    default-attr->editor] 
+                              #:check-proc       [check-proc      (lambda (struct) null)])
   ;(define-snooze-interface snooze) ; required for aliases for save!, call-with-transaction, etc.
   ; (snooze-editor% -> snooze-scaffolded-editor<%>)
   (define scaffolded-mixin
@@ -164,8 +164,9 @@
       ; snooze-struct -> void
       (define/public (set-struct! struct)
         (web-cell-set! struct-cell struct)
-        (for ([val   (in-list (snooze-struct-ref* struct))]
+        (for ([val   (in-list (struct-ref* struct))]
               [field (in-list fields)])
+          (debug "val" val)
           (send field set-value! 
                 ; default types; otherwise convert to a string and show in a textfield
                 (cond [(boolean? val)  val]
