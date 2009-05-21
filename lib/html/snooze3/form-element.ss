@@ -72,6 +72,7 @@
 (define snooze-autocomplete-field%        (snooze-form-element-mixin (check-label-mixin autocomplete-field%)))
 (define snooze-check-box%                 (snooze-form-element-mixin (check-label-mixin check-box%)))
 (define snooze-combo-box%                 (snooze-form-element-mixin (check-label-mixin combo-box%)))
+(define snooze-vanilla-combo-box%         (snooze-form-element-mixin (check-label-mixin vanilla-combo-box%)))
 (define snooze-date-field%                (snooze-form-element-mixin (check-label-mixin date-field%)))
 (define snooze-file-field%                (snooze-form-element-mixin (check-label-mixin file-field%)))
 (define snooze-integer-field%             (snooze-form-element-mixin (check-label-mixin integer-field%)))
@@ -90,6 +91,7 @@
          snooze-autocomplete-field%
          snooze-check-box%
          snooze-combo-box%
+         snooze-vanilla-combo-box%
          snooze-date-field%
          snooze-file-field%
          snooze-integer-field%

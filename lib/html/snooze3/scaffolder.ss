@@ -26,6 +26,14 @@
 (define (default-struct-ref* struct)
   (cddr (snooze-struct-ref* struct))) ; trim the GUID and revision
 
+; attribute any -> string
+(define (default-attr->string attr value)
+  (let/debug ([attr-type (attribute-type attr)])
+    (if (guid-type? attr-type)
+        (and value (format-snooze-struct value))
+        (format "~s" value))))
+
+
 ; Interfaces -------------------------------------
 
 ; A really simple html-element creation mixin:
@@ -109,11 +117,14 @@
 
 ; The default attribute-value renderer.
 ;
-; attr (attribute -> string) -> (value -> xml)
-(define (default-attr->review-renderer attr [attr-pretty-name default-attr-pretty-name])
-  (lambda (value)
-    (xml (tr (th (@ [class 'snooze-review-attr])  ,(attr-pretty-name attr))
-             (td (@ [class 'snooze-review-value]) ,value)))))
+; attr [(attribute -> string)] [(attribute any -> string)] -> (value -> xml)
+(define (default-attr->review-renderer attr 
+          [attr-pretty-name default-attr-pretty-name]
+          [attr->string     default-attr->string])
+  (let ([attr-type (attribute-type attr)])
+    (lambda (value)
+      (xml (tr (th (@ [class 'snooze-review-attr])  ,(attr-pretty-name attr))
+               (td (@ [class 'snooze-review-value]) ,(attr->string attr value)))))))
 
 
 ; Editors ----------------------------------------
@@ -169,7 +180,8 @@
               [field (in-list fields)])
           (send field set-value! 
                 ; default types; otherwise convert to a string and show in a textfield
-                (cond [(boolean? val)  val]
+                (cond [(guid? val)     ]
+                      [(boolean? val)  val]
                       [(integer? val)  val]
                       [(time-tai? val) (time-tai->date val)] ; TODO time/date fields
                       [(time-utc? val) (time-utc->date val)]
@@ -213,7 +225,11 @@
 ; attr -> snooze-form-element<%>
 (define (default-attr->editor attr)
   (let ([attr-type (attribute-type attr)])
-    (cond [(boolean-type? attr-type)
+    (cond [(guid-type? attr-type)
+           (new snooze-foreign-key-combo-box%
+                [predicate (by-attributes attr)]
+                [entity    (guid-type-entity attr-type)])]
+          [(boolean-type? attr-type)
            (new snooze-check-box% [predicate (by-attributes attr)])]
           [(integer-type? attr-type)
            (new snooze-integer-field% [predicate (by-attributes attr)])]
@@ -225,6 +241,35 @@
           [else 
            (new snooze-text-field% [predicate (by-attributes attr)])])))
 
+; snooze-vanilla-combo-box%
+(define snooze-foreign-key-combo-box%
+  (class/cells snooze-vanilla-combo-box% ()
+    
+    (init-field entity #f #:accessor)
+    
+    ; guid -> void
+    (define/override (set-value! val)
+      (super set-value! (and val (snooze-struct-id val))))
+    
+    ; -> (listof (cons integer string))
+    (define/override (get-options)
+      (let-alias ([E entity])
+        (list* #f (select-all #:from E #:order ((asc E.guid))))))
+    
+    (define/override (option->raw option)
+      (and option (snooze-struct-id option)))
+    
+    (define/override (raw->option raw)
+      (debug "raw->" raw)
+      (debug* "->raw" and raw 
+              (let ([id (string->number raw)])
+                (and id 
+                     (find-by-id entity id)))))
+    
+    (define/override (option->string option)
+      (if option
+          (format-snooze-struct option)
+          "-- Make a selection --"))))
 
 ; List pages -------------------------------------
 
@@ -399,14 +444,17 @@
                                        [(eq? col-id 'edit-col)
                                         (xml (a (@ [href ,(struct->edit-url a-struct)]) "Edit"))]
                                        [else
-                                        (let ([attribute (entity-attribute entity col-id)])
+                                        (let/debug ([attribute (entity-attribute entity col-id)])
+                                          (debug "struct" a-struct)
                                           ((default-attr->report-renderer attribute) a-struct))])))))))))))
 
 
 ; attr -> (value -> xml)
 (define (default-attr->report-renderer attr)
   (lambda (struct)
-    (xml ,(snooze-struct-ref struct attr))))
+    (debug-location)
+    (let/debug ([value (snooze-struct-ref struct attr)])
+      (xml ,(default-attr->string attr value)))))
 
 
 
