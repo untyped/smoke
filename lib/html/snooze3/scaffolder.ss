@@ -2,6 +2,7 @@
 
 (require srfi/13
          srfi/19
+         (only-in (planet untyped/unlib:3/list) assemble-list)
          (planet untyped/unlib:3/time)
          (planet untyped/snooze:3)
          "../../../lib-base.ss"
@@ -15,15 +16,15 @@
 
 ; entity -> (listof attribute)
 (define (default-attributes entity)
-  (cddr (entity-attributes entity)))
+  (cddr (entity-attributes entity))) ; trim the GUID and revision
 
 ; attribute -> string
-(define (default-attr-pretty-name attribute)
-  (attribute-pretty-name attribute))
+(define default-attr-pretty-name 
+  attribute-pretty-name)
 
 ; persistent-struct -> (listof any)
 (define (default-struct-ref* struct)
-  (cddr (debug* "ssr*" snooze-struct-ref* struct)))
+  (cddr (snooze-struct-ref* struct))) ; trim the GUID and revision
 
 ; Interfaces -------------------------------------
 
@@ -166,7 +167,6 @@
         (web-cell-set! struct-cell struct)
         (for ([val   (in-list (struct-ref* struct))]
               [field (in-list fields)])
-          (debug "val" val)
           (send field set-value! 
                 ; default types; otherwise convert to a string and show in a textfield
                 (cond [(boolean? val)  val]
@@ -187,7 +187,7 @@
       (define/override (validate)
         (web-cell-set! 
          struct-cell 
-         (apply copy-snooze-struct 
+         (apply snooze-struct-set 
                 (list* (get-struct)
                        (for/fold ([args null])
                          ([attr  (in-list attributes)]
@@ -200,10 +200,10 @@
         (let* ([struct (get-struct)]
                [entity (snooze-struct-entity struct)])
           (call-with-transaction
-           (lambda () (save! struct))
-           (if (snooze-struct-saved? struct)
-               (format "Edit ~a details: ~a" struct)
-               (format "Create ~a: ~a" struct)))))))
+           ;(if (snooze-struct-saved? struct)
+           ;    (format "Edit ~a details: ~a" (entity-name entity) struct)
+           ;    (format "Create ~a instance: ~a" (entity-name entity) struct))
+           (lambda () (save! struct)))))))
   ; Create a compound mixin of the above and snooze-editor-mixin
   (lambda (html-element) 
     (scaffolded-mixin (snooze-editor-mixin html-element))))
@@ -286,26 +286,38 @@
 ;  [(attr -> (value -> xml))]
 ;  [#:attributes  (listof attribute)]
 ;  [#:struct-ref* (persistent-struct -> (listof any))]
+;  [#:struct->view-url (U (struct -> url) #f)]
+;  [#:struct->edit-url (U (struct -> url) #f)]
 ; -> 
 ;  (mixin html-element<%>)
 (define (entity->report-mixin snooze entity 
                               [attr->report-renderer default-attr->report-renderer]
                               #:attr-pretty-name [attr-pretty-name default-attr-pretty-name]
                               #:entity->attrs    [entity->attrs default-attributes]
-                              #:query         [query         (lambda (where-clause [order-clause null] [offset #f] [limit #f])
-                                                               ;(define-snooze-interface snooze)
-                                                               (let-alias ([E entity])
-                                                                 (sql (select #:from   E 
-                                                                              #:where  ,where-clause
-                                                                              #:order  ,order-clause
-                                                                              #:offset ,offset
-                                                                              #:limit  ,limit))))])
+                              #:query            [query (lambda (where-clause [order-clause null] 
+                                                                              [offset #f]
+                                                                              [limit #f])
+                                                          ;(define-snooze-interface snooze)
+                                                          (let-alias ([E entity])
+                                                            (sql (select #:from   E 
+                                                                         #:where  ,where-clause
+                                                                         #:order  ,order-clause
+                                                                         #:offset ,offset
+                                                                         #:limit  ,limit))))]
+                              #:struct->view-url [struct->view-url #f]
+                              #:struct->edit-url [struct->edit-url #f])
   (mixin/cells (html-element<%>) (html-element<%>)
     
     ; Fields -----------------------------------
     
     ; (struct -> xml)
-    (field report (entity->report snooze entity attr->report-renderer #:entity->attrs entity->attrs #:query query) #:child)
+    (field report
+           (entity->report snooze entity attr->report-renderer 
+                           #:entity->attrs entity->attrs
+                           #:query query
+                           #:struct->view-url struct->view-url
+                           #:struct->edit-url struct->edit-url) 
+           #:child)
     
     ; Methods ------------------------------------ 
     ; seed -> xml
@@ -314,30 +326,34 @@
 ;  entity
 ;  [(attr -> (value -> xml))]
 ;  [#:entity->attrs (entity -> (listof attribute))]
+;  [#:struct->view-url (U (struct -> url) #f)]
+;  [#:struct->edit-url (U (struct -> url) #f)]
 ; ->
 ;  ((listof struct) -> xml)
 (define (entity->report snooze entity 
                         [attr->list-renderer default-attr->report-renderer]
                         #:attr-pretty-name [attr-pretty-name default-attr-pretty-name]
-                        #:entity->attrs [entity->attrs default-attributes]
-                        #:query         [query         
-                                         (lambda (where-clause [order-clause null] [offset #f] [limit #f])
-                                           ;(define-snooze-interface snooze)
-                                           (let-alias ([E entity])
-                                             (sql (select #:from   E 
-                                                          #:where  ,where-clause
-                                                          #:order  ,order-clause
-                                                          #:offset ,offset
-                                                          #:limit  ,limit))))])
-  ;(define-snooze-interface snooze)
+                        #:entity->attrs    [entity->attrs default-attributes]
+                        #:query            [query         
+                                            (lambda (where-clause [order-clause null] [offset #f] [limit #f])
+                                              (let-alias ([E entity])
+                                                (sql (select #:from   E 
+                                                             #:where  ,where-clause
+                                                             #:order  ,order-clause
+                                                             #:offset ,offset
+                                                             #:limit  ,limit))))]
+                        #:struct->view-url [struct->view-url #f]
+                        #:struct->edit-url [struct->edit-url #f])
   (define-alias E entity)
-  ;(define E.guid (sql:alias E (entity-attribute entity 'guid)))
   (let* ([attributes     (entity->attrs entity)]
-         [report-columns (for/list ([attr (in-list attributes)])
-                           (let ([ATTR (sql:alias E attr)])
-                             (make-column (attribute-name attr)
-                                          (format "~a" (attr-pretty-name attr))
-                                          (list (sql:asc ATTR)))))]
+         [report-columns (assemble-list
+                          [struct->view-url (make-column 'view-col "")]
+                          [struct->edit-url (make-column 'edit-col "")]
+                          [#t               ,@(for/list ([attr (in-list attributes)])
+                                                (let ([ATTR (sql:alias E attr)])
+                                                  (make-column (attribute-name attr)
+                                                               (format "~a" (attr-pretty-name attr))
+                                                               (list (sql:asc ATTR)))))])]
          [report-filters (for/list ([attr (in-list attributes)])
                            (make-filter (attribute-name attr)
                                         (format "~a" (attr-pretty-name attr))))])
@@ -377,8 +393,14 @@
       ; seed (listof column) persistent-struct -> xml
       (define/override (render-item seed cols a-struct)
         (xml (tr ,@(for/list ([col (in-list cols)])
-                     (let ([attribute (entity-attribute entity (send col get-id))])
-                       (xml (td ,((default-attr->report-renderer attribute) a-struct)))))))))))
+                     (xml (td ,(let ([col-id (send col get-id)])
+                                 (cond [(eq? col-id 'view-col)
+                                        (xml (a (@ [href ,(struct->view-url a-struct)]) "View"))]
+                                       [(eq? col-id 'edit-col)
+                                        (xml (a (@ [href ,(struct->edit-url a-struct)]) "Edit"))]
+                                       [else
+                                        (let ([attribute (entity-attribute entity col-id)])
+                                          ((default-attr->report-renderer attribute) a-struct))])))))))))))
 
 
 ; attr -> (value -> xml)
