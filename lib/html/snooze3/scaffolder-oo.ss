@@ -56,7 +56,7 @@
 
 ; review and delete pages are essentially the same. They render a single struct with attribute labels and values.
 (define crudl-review+delete<%>
-  (interface (rdl-element<%> crud-element<%>)
+  (interface (crudl-review+delete+list<%> crud-element<%>)
     render-attr-name+value)) ; seed 
 
 ; create and update pages need to convert attributes into editor components
@@ -66,7 +66,7 @@
 
 ; list elements deal with a list of structs
 (define crudl-list<%>
-  (interface (rdl-element<%>)
+  (interface (crudl-review+delete+list<%>)
     set-structs!  ; (listof snooze-struct) -> void
     get-structs)) ; -> (listof snooze-structs)
 
@@ -112,7 +112,7 @@
 
 ; Defaults for review-delete-list pages (the display-only pages).
 (define (scaffold-RDL-mixin)
-  (mixin/cells (crudl-element<%>) (rdl-element<%>)
+  (mixin/cells (crudl-element<%>) (crudl-review+delete+list<%>)
     
     ; crudl-operation/c snooze struct -> (U string #f)
     (define/public (struct->crud-url crudl-operation struct)
@@ -148,7 +148,7 @@
 
 ; Sensible defaults for review-delete elements, which are essentially the same
 (define (scaffold-RD-mixin)
-  (mixin/cells (crudl-element<%> rdl-element<%>) (crudl-review+delete<%>)
+  (mixin/cells (crudl-element<%> crudl-review+delete+list<%>) (crudl-review+delete<%>)
     
     (inherit get-entity-attrs
              render-attr-name
@@ -167,7 +167,7 @@
 
 
 (define (scaffold-CU-mixin)
-  (mixin/cells (crudl-element<%> rdl-element<%>) (crudl-create+update<%>)
+  (mixin/cells (crudl-element<%> crudl-review+delete+list<%>) (crudl-create+update<%>)
     
     (inherit get-entity-attrs
              render-attr-name
@@ -187,7 +187,7 @@
 
 ; Defaults for review elements
 (define (scaffold-review-mixin)
-  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> rdl-element<%>) 
+  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> crudl-review+delete+list<%>) 
     (crudl-review+delete<%>)
     
     (inherit get-struct render-struct)
@@ -197,13 +197,13 @@
       (render-struct seed (get-struct)))))
 
 (define (scaffold-editor-mixin)
-  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> rdl-element<%>) 
+  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> crudl-review+delete+list<%>) 
     (crudl-review+delete<%>)
     
     (inherit get-struct render-struct)
     
     ; Fields -------------------------------------
-    (
+    
     
     ; Methods ------------------------------------
     ; seed -> xml
@@ -225,7 +225,7 @@
                                  #:rd-mixin     [rd-mixin     (scaffold-RD-mixin)]
                                  #:review-mixin [review-mixin (scaffold-review-mixin)])
   (lambda (element)
-    (r-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element)))))))
+    (review-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element)))))))
 
 ; Provides ---------------------------------------
 (provide (except-out (all-defined-out)
