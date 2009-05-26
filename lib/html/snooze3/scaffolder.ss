@@ -449,6 +449,7 @@
          [report-columns (assemble-list
                           [(entity->url crudl:review entity) (make-column 'view-col "")]
                           [(entity->url crudl:update entity) (make-column 'edit-col "")]
+                          [(entity->url crudl:delete entity) (make-column 'delete-col "")]
                           [#t                   ,@(for/list ([attr (in-list attributes)])
                                                     (let ([ATTR (sql:alias E attr)])
                                                       (make-column (attribute-name attr)
@@ -498,6 +499,8 @@
                                         (xml (a (@ [href ,(struct->url crudl:review a-struct)]) "View"))]
                                        [(eq? col-id 'edit-col)
                                         (xml (a (@ [href ,(struct->url crudl:update a-struct)]) "Edit"))]
+                                       [(eq? col-id 'delete-col)
+                                        (xml (a (@ [href ,(struct->url crudl:delete a-struct)]) "Delete"))]
                                        [else
                                         (let ([attribute (entity-attribute entity col-id)])
                                           ((attr->report-renderer attribute 

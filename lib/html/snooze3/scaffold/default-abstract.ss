@@ -1,9 +1,9 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
-         "../../../lib-base.ss"
-         "../html-element.ss"
-         "editor.ss"
+         "../../../../lib-base.ss"
+         "../../html-element.ss"
+         "../editor.ss"
          "scaffold-internal.ss")
 
 ; Mixins -----------------------------------------
@@ -18,7 +18,7 @@
     
     ; Skip the GUID and revision attributes, but retain all others
     ; -> (listof attribute)
-    (define/public (get-entity-attrs)
+    (define/public (get-attributes)
       (cddr (entity-attributes entity)))
     
     ; Again, skip the GUID and revision values
@@ -26,10 +26,15 @@
     (define/public (get-struct-values struct)
       (cddr (snooze-struct-ref* struct)))
     
-    ; Take the default prettified attribute name, defined with the entity
+    ; Defaults to the pretty attribute name, but may be overridden
+    ; attribute -> string
+    (define/public (get-attribute-pretty-name attribute)
+      (attribute-pretty-name attribute))
+    
+    ; Take the prettified attribute name, defined with the entity
     ; seed attribute -> xml
-    (define/public (render-attr-name seed attr)
-      (xml ,(attribute-pretty-name attr)))
+    (define/public (render-attribute-label seed attr)
+      (xml ,(get-attribute-pretty-name attr)))
     
     ; Contingent on the subclass, so do not define here.
     ; seed struct -> xml
@@ -43,7 +48,19 @@
   (mixin/cells (html-element<%>) (crud-element<%>)
     ; Fields -----------------------------------
     ; (cell (U snooze-struct #f))
-    (init-cell struct #f #:accessor #:mutator)))
+    (init-cell struct #f #:accessor #:mutator)
+    
+    ; Methods ----------------------------------
+    
+    ; seed attribute -> xml
+    (define/public (render-attribute seed attr)
+      (error "render-attribute must be overridden"))
+    
+    ; seed (listof attribute) -> xml
+    ; seed (listof attribute) -> xml
+    (define/public-final (render-attributes seed attrs)
+      (xml ,@(for/list ([attr  (in-list attrs)])
+               (render-attribute seed attr))))))
 
 
 
@@ -68,20 +85,20 @@
     
     ; Governs the decision to render as plain or foreign-key values (FINAL)
     ; seed attribute any -> xml
-    (define/public-final (render-attr seed attr value)
+    (define/public-final (render-value seed attr value)
       (let ([attr-type (attribute-type attr)])
         (if (and (guid-type? attr-type) value)
-            (render-foreign-key-attr seed attr value)
-            (render-plain-attr seed attr value))))
+            (render-value/foreign-key seed attr value)
+            (render-value/plain       seed attr value))))
     
     ; Plain attributes are simply turned into strings and rendered.
     ; seed attribute any -> xml
-    (define/public (render-plain-attr seed attr plain)
+    (define/public (render-value/plain seed attr plain)
       (xml ,(format "~s" plain)))
     
     ; Foreign-keys are resolved to a URL if possible, and linked; otherwise they are just displayed.
     ; seed attribute snooze-struct -> xml
-    (define/public-final (render-foreign-key-attr seed attr struct)
+    (define/public-final (render-value/foreign-key seed attr struct)
       (let ([url           (struct->crud-url crudl:review struct)]
             [struct-pretty (render-struct-pretty seed struct)])
         (if url 
@@ -97,22 +114,53 @@
 
 ; Sensible defaults for review-delete elements, which are essentially the same
 (define (default-review+delete-mixin)
-  (mixin/cells (crudl-element<%> crudl-review+delete+list<%>) (crudl-review+delete<%>)
+  (mixin/cells (crudl-review+delete+list<%> crud-element<%>)
+    (crudl-review+delete<%>)
     
-    (inherit get-entity-attrs
-             render-attr-name
-             render-attr)
+    (inherit get-struct
+             get-attributes
+             render-attributes
+             render-attribute-label
+             render-value)
     
     ; seed attribute any -> xml
-    (define/public (render-attr-name+value seed attr value)
-      (xml (tr (th ,(render-attr-name seed attr))
-               (td ,(render-attr seed attr value)))))
+    (define/override (render-attribute seed attr)
+      (let ([value (snooze-struct-ref (get-struct) attr)])
+        (xml (tr (th ,(render-attribute-label seed attr))
+                 (td ,(render-value seed attr value))))))
     
     ; seed snooze-struct -> xml
     (define/override (render-struct seed struct)
       (xml (table (@ [class 'crud-review-delete])
-                  (tbody ,@(for/list ([attr (in-list (get-entity-attrs))])
-                             (render-attr-name+value seed attr (snooze-struct-ref struct attr)))))))))
+                  (tbody ,(render-attributes seed (get-attributes))))))))
+
+
+(define (default-crudl-report-mixin)
+  (mixin/cells (crudl-review+delete+list<%>) (crudl-report<%>)
+    
+    (inherit get-entity)
+    
+    ; Methods ------------------------------------
+    ; -> (sql-where 
+    ;     [#:order  (listof sql-order)]
+    ;     [#:offset (U integer #f)]
+    ;     [#:limit  (U integer #f)]
+    ;   ->
+    ;    sql
+    (define/public (make-query)
+      (lambda (where-clause #:order  [order-clause null]
+                            #:offset [offset       #f]
+                            #:limit  [limit        #f])
+        (let-alias ([E (get-entity)])
+          (sql (select #:from   E
+                       #:where  ,where-clause
+                       #:order  ,order-clause
+                       #:offset ,offset
+                       #:limit  ,limit)))))
+    
+    ; crudl-operation entity -> boolean
+    (define/public (entity->crudl-url? type entity)
+      (error "entity->crudl-url? must be overridden"))))
 
 
 ; Provides ---------------------------------------
