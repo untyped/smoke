@@ -44,7 +44,8 @@
     ; -> struct
     (define/override (commit-changes)
       (call-with-transaction
-       (lambda () (delete! (get-struct)))))))
+       (lambda () (delete! (get-struct))))
+      (clear-continuation-table!))))
 
 
 ; Provides ---------------------------------------

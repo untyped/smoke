@@ -1,21 +1,12 @@
 #lang scheme/base
 
-(require "../../../../lib-base.ss"
+(require srfi/19
+         (planet untyped/snooze:3)
+         (planet untyped/unlib:3/time)
+         "../../../../lib-base.ss"
          "../../html-element.ss"
-         "../editor.ss")
-
-; Constants --------------------------------------
-
-; symbol ...
-(define crudl:create 'create)
-(define crudl:review 'review)
-(define crudl:update 'update)
-(define crudl:delete 'delete)
-(define crudl:list   'list)
-
-; any -> boolean
-(define crudl-operation/c
-  (or/c crudl:create crudl:review crudl:update crudl:delete crudl:list))
+         "../editor.ss"
+         "scaffold-common.ss")
 
 ; Interfaces -------------------------------------
 
@@ -61,8 +52,8 @@
 ; create and update pages need to convert attributes into editor components
 (define crudl-create+update<%>
   (interface (crudl-element<%> crud-element<%> snooze-editor<%>)
-    make-editor  ; attribute -> form-element
-    get-editor)) ; attribute -> form-element
+    make-binder  ; attribute -> binder
+    get-binder)) ; attribute -> binder
 
 ; list elements deal with a list of structs
 (define crudl-list<%>
@@ -90,5 +81,7 @@
   #f)
 
 ; Provides ---------------------------------------
+
+(provide (all-from-out "scaffold-common.ss"))
 
 (provide (all-defined-out))
