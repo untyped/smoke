@@ -13,7 +13,7 @@
 
 ; Mixins -----------------------------------------
 
-(define (default-report-mixin entity)
+(define (default-report-mixin entity [report-class snooze-report%])
   (mixin/cells (crudl-report<%>) (crudl-report<%>)
     
     (inherit get-attributes
@@ -27,13 +27,13 @@
     
     ; snooze-report%
     (field report
-           (new (default-crudl-report entity
-                                      (lambda () (get-attributes))
-                                      (lambda (attr) (get-attribute-pretty-name attr))
-                                      (lambda (seed attr value) (render-value seed attr value))
-                                      (lambda (type entity) (entity->crudl-url? type entity))
-                                      (lambda (type struct) (struct->crud-url type struct))
-                                      (lambda () (make-query)))) 
+           (new (default-crudl-report entity report-class
+                                      #:attributes      (lambda () (get-attributes))
+                                      #:attribute-names (lambda (attr) (get-attribute-pretty-name attr))
+                                      #:render-value    (lambda (seed attr value) (render-value seed attr value))
+                                      #:entity->url?    (lambda (type entity) (entity->crudl-url? type entity))
+                                      #:struct->url     (lambda (type struct) (struct->crud-url type struct))
+                                      #:query           (lambda () (make-query)))) 
            #:child)
     
     ; Methods ------------------------------------
@@ -42,13 +42,13 @@
     (define/augment (render seed)
       (send report render seed))))
 
-(define (default-crudl-report entity
-                              get-attributes
-                              get-attribute-pretty-name
-                              render-value
-                              entity->crudl-url?
-                              struct->url
-                              make-query)
+(define (default-crudl-report entity [report-class snooze-report%]
+                              #:attributes      get-attributes
+                              #:attribute-names get-attribute-pretty-name
+                              #:render-value    render-value
+                              #:entity->url?    entity->crudl-url?
+                              #:struct->url     struct->url
+                              #:query           make-query)
   (define-alias E entity)
   (let* ([attributes     (get-attributes)]
          [report-columns (assemble-list
@@ -64,7 +64,7 @@
                            (make-filter (attribute-name attr) ; filter IDs are eq? to attribute-names
                                         (format "~a" (get-attribute-pretty-name attr))))]
          [query          (make-query)])
-    (class/cells snooze-report% ()
+    (class/cells report-class ()
       
       (inherit get-sort-order)
       

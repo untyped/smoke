@@ -1,7 +1,8 @@
 #lang scheme
 
 (require "scaffold/scaffold-internal.ss"
-         "scaffold/scaffold-defaults.ss")
+         "scaffold/scaffold-defaults.ss"
+         "report.ss")
 
 ; Procedures -------------------------------------
 
@@ -46,11 +47,11 @@
     (list-mixin (rdl-mixin (crudl-mixin element)))))
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-report-element entity
+(define (scaffold-report-element entity [report-class snooze-report%]
                                  #:crudl-mixin        [crudl-mixin        (default-crudl-mixin entity)]
                                  #:rdl-mixin          [rdl-mixin          (default-review+delete+list-mixin)]
                                  #:crudl-report-mixin [crudl-report-mixin (default-crudl-report-mixin)]
-                                 #:report-mixin       [report-mixin       (default-report-mixin entity)])
+                                 #:report-mixin       [report-mixin       (default-report-mixin entity report-class)])
   (lambda (element)
     (report-mixin (crudl-report-mixin (rdl-mixin (crudl-mixin element))))))
 
