@@ -135,33 +135,6 @@
                   (tbody ,(render-attributes seed (get-attributes))))))))
 
 
-(define (default-crudl-report-mixin)
-  (mixin/cells (crudl-review+delete+list<%>) (crudl-report<%>)
-    
-    (inherit get-entity)
-    
-    ; Methods ------------------------------------
-    ; -> (sql-where 
-    ;     [#:order  (listof sql-order)]
-    ;     [#:offset (U integer #f)]
-    ;     [#:limit  (U integer #f)]
-    ;   ->
-    ;    sql
-    (define/public (make-query)
-      (lambda (where-clause #:order  [order-clause null]
-                            #:offset [offset       #f]
-                            #:limit  [limit        #f])
-        (let-alias ([E (get-entity)])
-          (sql (select #:from   E
-                       #:where  ,where-clause
-                       #:order  ,order-clause
-                       #:offset ,offset
-                       #:limit  ,limit)))))
-    
-    ; crudl-operation entity -> boolean
-    (define/public (entity->crudl-url? type entity)
-      (error "entity->crudl-url? must be overridden"))))
-
 
 ; Provides ---------------------------------------
 (provide (all-defined-out))

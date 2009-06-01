@@ -28,6 +28,50 @@
 
 ; Mixins -----------------------------------------
 
+(define (default-crudl-report-mixin)
+  (mixin/cells (crudl-review+delete+list<%>) (crudl-report<%>)
+    
+    (inherit get-entity get-attributes)
+    
+    ; Methods ------------------------------------
+    ; -> (sql-where 
+    ;     [#:order  (listof sql-order)]
+    ;     [#:offset (U integer #f)]
+    ;     [#:limit  (U integer #f)]
+    ;   ->
+    ;    sql
+    (define/public (make-query)
+      (lambda (where-clause #:order  [order-clause null]
+                            #:offset [offset       #f]
+                            #:limit  [limit        #f])
+        (let-alias ([E (get-entity)])
+          (sql (select #:from   E
+                       #:where  ,where-clause
+                       #:order  ,order-clause
+                       #:offset ,offset
+                       #:limit  ,limit)))))
+    
+    ; -> (listof column)
+    (define/public (make-columns)
+      (make-columns/defaults (get-entity) (get-attributes) 
+                             #:entity->url? (lambda (type entity) (entity->crudl-url? type entity))))
+    
+    ; -> (listof filter)
+    (define/public (make-filters)
+      (make-filters/attributes (get-attributes)))
+    
+    ; -> (listof view)
+    (define/public (make-views)
+      (default-views (make-columns)))
+    
+    ; crudl-operation entity -> boolean
+    (define/public (entity->crudl-url? type entity)
+      (error "entity->crudl-url? must be overridden"))
+    
+    ; seed solumn any -> xml
+    (define/public (render-column seed column data)
+      (error (format "Unrecognised column: ~a" column)))))
+
 (define default-snooze-report-crudl-mixin
   (mixin/cells () (snooze-report-crudl<%>)
     
@@ -57,7 +101,11 @@
              render-value
              entity->crudl-url?
              struct->crud-url
-             make-query)
+             make-columns
+             make-views
+             make-filters
+             make-query
+             render-column)
     
     ; Fields ----------------------------
     
@@ -65,10 +113,14 @@
     (field report
            (new (default-crudl-report (get-entity) report-class%
                                       #:attributes      (get-attributes)
-                                      #:render-value    (lambda (seed attr value) (render-value seed attr value))
                                       #:entity->url?    (lambda (type entity) (entity->crudl-url? type entity))
                                       #:struct->url     (lambda (type struct) (struct->crud-url type struct))
-                                      #:query           (make-query))) 
+                                      #:report-columns  (make-columns)
+                                      #:report-views    (make-views)
+                                      #:report-filters  (make-filters)
+                                      #:render-value    (lambda (seed attr value) (render-value seed attr value))
+                                      #:query           (make-query)
+                                      #:column-renderer (lambda (seed col data) (render-column seed col data)))) 
            #:child)
     
     ; Methods ------------------------------------
@@ -80,17 +132,18 @@
 
 (define (default-crudl-report entity 
                               [report-class% (default-snooze-report-crudl-mixin snooze-report%)]
-                              #:attributes     [attributes     (default-attributes entity)]
-                              #:entity->url?   [entity->url?   (lambda (crudl:op entity) #f)]
-                              #:struct->url    [struct->url    (lambda (crudl:op struct) #f)]
-                              #:report-column  [report-columns (make-columns/defaults entity
+                              #:attributes      [attributes     (default-attributes entity)]
+                              #:entity->url?    [entity->url?   (lambda (crudl:op entity) #f)]
+                              #:struct->url     [struct->url    (lambda (crudl:op struct) #f)]
+                              #:report-columns  [report-columns (make-columns/defaults entity
                                                                                       attributes 
                                                                                       #:entity->url? entity->url?)]
-                              #:report-views   [report-views   (list (make-view 'default-view "Default" report-columns))]
-                              #:report-filters [report-filters (make-filters/attributes attributes)]
-                              #:render-value   [render-value   (lambda (seed attr val)
+                              #:report-views    [report-views   (default-views report-columns)]
+                              #:report-filters  [report-filters (make-filters/attributes attributes)]
+                              #:render-value    [render-value   (lambda (seed attr val)
                                                                  (xml ,(format "~a" val)))]
-                              #:query          [query          (default-query entity)])
+                              #:query           [query          (default-query entity)]
+                              #:column-renderer [column-render default-column-renderer])
   (define-alias E entity)
   (class/cells report-class% (snooze-report-crudl<%>)
     
@@ -135,6 +188,7 @@
     (define/override (get-filters)
       report-filters)
     
+    ; seed symbol snooze-struct -> xml
     (define/public (render-item/crud seed col-id struct)
       (cond [(eq? col-id column-id:review)
              (render-review-td seed (struct->url crudl:review struct))]
@@ -144,8 +198,13 @@
              (render-delete-td seed (struct->url crudl:delete struct))]
             [else (error "Unrecognised column")]))
     
+    ; seed snooze-struct attribute -> xml
     (define/public (render-item/struct seed struct attribute)
       (xml (td ,(render-value seed attribute (snooze-struct-ref struct attribute)))))
+    
+    ; seed column any -> xml
+    (define/public (render-item/custom seed col data)
+      (column-render seed col data))
     
     ; seed (listof column) persistent-struct -> xml
     (define/override (render-item seed cols a-struct)
@@ -155,7 +214,8 @@
                                   (render-item/crud seed col-id a-struct)]
                                  [(entity-has-attribute? entity col-id)
                                   (render-item/struct seed a-struct (entity-attribute entity col-id))]
-                                 [else (error "Unrecognised column")])))))))))
+                                 [else 
+                                  (render-item/custom seed col a-struct)])))))))))
 
 
 ; entity -> (listof attribute)
@@ -215,6 +275,14 @@
 (define (make-filters/attributes attributes)
   (for/list ([attr (in-list attributes)])
     (make-filter/attribute attr)))
+
+; (listof column) -> (listof view)
+(define (default-views columns)
+  (list (make-view 'default-view "Default" columns)))
+  
+; seed column any -> xml
+(define (default-column-renderer seed column data)
+      (error (format "Unrecognised column: ~a" column)))
 
 (define (default-query entity)
   (lambda (where-clause #:order  [order-clause null]

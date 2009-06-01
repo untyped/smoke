@@ -70,7 +70,11 @@
 ; list elements deal with a list of structs
 (define crudl-report<%>
   (interface (crudl-list<%>)
-    make-query)) ;
+    make-query      ;
+    make-columns    ;
+    make-filters    ;
+    make-views      ;
+    render-column)) ;
 
 
 ; Provides ---------------------------------------
