@@ -121,7 +121,7 @@
                                       #:render-value    (lambda (seed attr value) (render-value seed attr value))
                                       #:query           (make-query)
                                       #:column-renderer (lambda (seed col data) (render-column seed col data)))) 
-           #:child)
+           #:child #:accessor)
     
     ; Methods ------------------------------------
     
