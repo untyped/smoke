@@ -1,7 +1,11 @@
 #lang scheme
 
-(require "scaffold/scaffold-internal.ss"
-         "scaffold/scaffold-defaults.ss"
+(require (planet untyped/snooze:3)
+         (planet untyped/unlib:3/debug)
+         "../html-element.ss"
+         "../html-page.ss"
+         "scaffold/interfaces.ss"
+         "scaffold/default-mixins.ss"
          "report.ss")
 
 ; Procedures -------------------------------------
@@ -21,11 +25,9 @@
                                  #:crudl-mixin  [crudl-mixin  (default-crudl-mixin entity)]
                                  #:crud-mixin   [crud-mixin   (default-crud-mixin)]
                                  #:editor-mixin [editor-mixin (default-crudl-editor-mixin)]
-                                 #:rdl-mixin    [rdl-mixin    (default-review+delete+list-mixin)]
-                                 #:rd-mixin     [rd-mixin     (default-review+delete-mixin)]
                                  #:update-mixin [update-mixin (default-create+update-mixin)])
   (lambda (element)
-    (update-mixin (editor-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element))))))))
+    (update-mixin (editor-mixin (crud-mixin (crudl-mixin element))))))
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
 (define (scaffold-delete-element entity
@@ -46,17 +48,29 @@
   (lambda (element)
     (list-mixin (rdl-mixin (crudl-mixin element)))))
 
-; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-report-element entity [report-class snooze-report%]
+(define (scaffold-report-element entity
+                                 [report-class% (default-snooze-report-crudl-mixin snooze-report%)]
                                  #:crudl-mixin        [crudl-mixin        (default-crudl-mixin entity)]
                                  #:rdl-mixin          [rdl-mixin          (default-review+delete+list-mixin)]
+                                 #:list-mixin         [list-mixin         (default-list-mixin)]
                                  #:crudl-report-mixin [crudl-report-mixin (default-crudl-report-mixin)]
-                                 #:report-mixin       [report-mixin       (default-report-mixin entity report-class)])
+                                 #:report-mixin       [report-mixin       (default-report-mixin report-class%)])
   (lambda (element)
-    (report-mixin (crudl-report-mixin (rdl-mixin (crudl-mixin element))))))
+    (report-mixin (crudl-report-mixin (list-mixin (rdl-mixin (crudl-mixin element)))))))
+
 
 ; Provides ---------------------------------------
 
 (provide (all-defined-out)
-         (all-from-out "scaffold/scaffold-defaults.ss")
-         (all-from-out "scaffold/scaffold-internal.ss"))
+         (all-from-out "scaffold/default-mixins.ss")
+         (all-from-out "scaffold/interfaces.ss"))
+
+;(provide/contract
+; [scaffold-review-element (->* (entity?)
+;                               (#:crudl-mixin   crudl-mixin/c
+;                                                #:crud-mixin   crud-mixin/c
+;                                                #:rdl-mixin    review+delete+list-mixin/c
+;                                                #:rd-mixin     review+delete-mixin/c
+;                                                #:review-mixin review+delete-mixin/c)
+;                               (-> (implementation?/c html-element<%>)
+;                                   (implementation?/c crudl-review+delete<%>)))])

@@ -10,6 +10,7 @@
 
 ; Interfaces -------------------------------------
 
+
 ; All CRUDL elements need access to an entity, its attributes, and the attribute-values of a snooze-struct
 ; Attribute-names and 
 (define crudl-element<%>
@@ -43,7 +44,7 @@
     render-value             ; seed snooze-struct attr -> xml. FINAL!
     render-value/plain       ; seed attr any -> xml
     render-value/foreign-key ; seed attr snooze-struct -> xml
-    render-struct-pretty))       ; seed struct -> xml
+    render-struct-pretty))   ; seed struct -> xml
 
 ; review and delete pages are essentially the same. They render a single struct with attribute labels and values.
 (define crudl-review+delete<%>
@@ -66,19 +67,11 @@
     set-structs!  ; (listof snooze-struct) -> void
     get-structs)) ; -> (listof snooze-structs)
 
-; reports rely on query construction
+; list elements deal with a list of structs
 (define crudl-report<%>
   (interface (crudl-list<%>)
-    ; -> (sql-where 
-    ;     [#:order  (listof sql-order)]
-    ;     [#:offset (U integer #f)]
-    ;     [#:limit  (U integer #f)]
-    ;   ->
-    ;    sql
-    make-query))
+    make-query)) ;
 
-(define crudl-query/c
-  #f)
 
 ; Provides ---------------------------------------
 

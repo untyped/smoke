@@ -7,7 +7,7 @@
          "../editor.ss"
          "../form-element.ss"
          "default-abstract.ss"
-         "scaffold-internal.ss")
+         "interfaces.ss")
 
 ; Mixins -----------------------------------------
 

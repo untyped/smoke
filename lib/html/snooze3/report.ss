@@ -249,7 +249,7 @@
                 ,(render-position seed start count total)
                 ,(render-pager seed start count total)
                 ; Table:
-                (table (@ [id ,(get-table-id)] [class "snooze-report-table"])
+                (table (@ [id ,(get-table-id)] [class "snooze-report-table ui-widget"])
                        ,(render-head seed cols)
                        ,(if (zero? total)
                             (render-empty-body seed cols)
@@ -401,7 +401,8 @@
       ; (U 'asc 'desc)
       (define current-dir (get-sort-dir))
       ; xml
-      (xml (thead (tr ,@(for/list ([col (in-list (get-visible-columns))])
+      (xml (thead (tr (@ [class 'ui-widget-header])
+                      ,@(for/list ([col (in-list (get-visible-columns))])
                           (send col render-head seed (and (equal? col current-col) current-dir)))))))
     
     ; seed (listof column) -> xml

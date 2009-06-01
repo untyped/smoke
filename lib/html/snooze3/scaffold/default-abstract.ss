@@ -4,7 +4,7 @@
          "../../../../lib-base.ss"
          "../../html-element.ss"
          "../editor.ss"
-         "scaffold-internal.ss")
+         "interfaces.ss")
 
 ; Mixins -----------------------------------------
 
