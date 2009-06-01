@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require (planet untyped/snooze:3)
+(require srfi/19
+         (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
          "../editor.ss"
@@ -94,7 +95,14 @@
     ; Plain attributes are simply turned into strings and rendered.
     ; seed attribute any -> xml
     (define/public (render-value/plain seed attr plain)
-      (xml ,(format "~s" plain)))
+      (let ([attr-type (attribute-type attr)])
+        (xml ,(cond [(time-utc-type? attr-type)
+                     (date->string (time-utc->date plain))]
+                    [(time-tai-type? attr-type)
+                     (date->string (time-tai->date plain))]
+                    [(boolean-type? attr-type)
+                     (if plain "yes" "no")]
+                    [else (format "~a" plain)]))))
     
     ; Foreign-keys are resolved to a URL if possible, and linked; otherwise they are just displayed.
     ; seed attribute snooze-struct -> xml
