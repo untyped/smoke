@@ -20,12 +20,12 @@
     ; Skip the GUID and revision attributes, but retain all others
     ; -> (listof attribute)
     (define/public (get-attributes)
-      (cddr (entity-attributes entity)))
+      (cddr (entity-attributes entity))) ; TODO: an abstraction like (entity-attributes-external ...) in Snooze?
     
     ; Again, skip the GUID and revision values
     ; snooze-struct -> (listof any)
     (define/public (get-struct-values struct)
-      (cddr (snooze-struct-ref* struct)))
+      (cddr (snooze-struct-ref* struct)))  ; TODO: an abstraction like (snooze-struct-ref*-external ...) in Snooze?
     
     ; Defaults to the pretty attribute name, but may be overridden
     ; attribute -> string
@@ -96,7 +96,9 @@
     ; seed attribute any -> xml
     (define/public (render-value/plain seed attr plain)
       (let ([attr-type (attribute-type attr)])
-        (xml ,(cond [(time-utc-type? attr-type)
+        (xml ,(cond [(not plain) ; default for empty values is the empty string, regardless of type
+                     ""]
+                    [(time-utc-type? attr-type)
                      (date->string (time-utc->date plain))]
                     [(time-tai-type? attr-type)
                      (date->string (time-tai->date plain))]
@@ -107,11 +109,13 @@
     ; Foreign-keys are resolved to a URL if possible, and linked; otherwise they are just displayed.
     ; seed attribute snooze-struct -> xml
     (define/public-final (render-value/foreign-key seed attr struct)
-      (let ([url           (struct->crud-url crudl:review struct)]
-            [struct-pretty (render-struct-pretty seed struct)])
-        (if url 
-            (xml (a (@ [href ,url]) ,struct-pretty))
-            (xml ,struct-pretty))))
+      (if (not struct)
+          (xml "")
+          (let ([url           (struct->crud-url crudl:review struct)]
+                [struct-pretty (render-struct-pretty seed struct)])
+            (if url 
+                (xml (a (@ [href ,url]) ,struct-pretty))
+                (xml ,struct-pretty)))))
     
     ; Foreign keys are displayed as the pretty string, which takes the default pretty formatter here.
     ; seed snooze-struct -> xml
