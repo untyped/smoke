@@ -11,13 +11,13 @@
     ; Fields -------------------------------------    
     
     ; (cell (U string #f))
-    (init-cell [date-string #f]
+    (init-cell date-string #f
                #:accessor #:mutator)
     ; (cell (U string #f))
-    (init-cell [pretty-date-string #f]
+    (init-cell pretty-date-string #f
                #:accessor #:mutator)
     ; (cell boolean)
-    (init-cell [show-date-label? #f]
+    (init-cell show-date-label? #f
                #:accessor #:mutator)
     
     ; Public methods -----------------------------
@@ -29,7 +29,10 @@
                               [(time-utc? val) (time-utc->date val)]
                               [(not val)       val]
                               [else            (error (format "Expecting a time-tai, time-utc or date; found ~a" val))])])
-        (super set-value! (and parsed-val (date->string parsed-val (get-date-string))))))    
+        (super set-value! (and parsed-val 
+                               (if (get-date-string)
+                                   (date->string parsed-val (get-date-string))
+                                   (date->string parsed-val))))))    
     
     ; -> (U date #f)
     (define/override (get-value)
