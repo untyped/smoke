@@ -9,6 +9,9 @@
 
 ; Mixins -----------------------------------------
 
+; DJG : - where the procedures are argumentless, these mixins can just be defined as variables.
+;       - this could be defined with entity as a constructor argument...
+
 ; Sensible defaults for all CRUDL elements
 (define (default-crudl-mixin entity)
   (mixin/cells (html-element<%>) (crudl-element<%>)

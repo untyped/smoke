@@ -18,6 +18,8 @@
     (define/augment (render seed)
       (render-struct seed (get-struct)))))
 
+; DJG : There's also an is-a?/c
+
 (define review-mixin/c
   (-> (implementation?/c crudl-review+delete<%>)
       (implementation?/c crudl-review+delete<%>)))

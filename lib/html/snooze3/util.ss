@@ -2,7 +2,6 @@
 
 (require srfi/13
          (planet untyped/snooze:3/snooze)
-         (planet untyped/snooze:3/check/check)
          "../../../lib-base.ss")
 
 ; (listof symbol)

@@ -65,6 +65,8 @@
          (all-from-out "scaffold/default-mixins.ss")
          (all-from-out "scaffold/interfaces.ss"))
 
+; DJG : Object/class contracts are in the works. Leave this kind of thing for now.
+
 ;(provide/contract
 ; [scaffold-review-element (->* (entity?)
 ;                               (#:crudl-mixin   crudl-mixin/c

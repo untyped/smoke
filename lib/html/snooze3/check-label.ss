@@ -1,6 +1,6 @@
 #lang scheme/base
 
-(require (planet untyped/snooze:3/check/check)
+(require (planet untyped/snooze:3)
          (planet untyped/unlib:3/symbol)
          "../../../lib-base.ss"
          "../browser-util.ss"

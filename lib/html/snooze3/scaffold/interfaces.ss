@@ -10,6 +10,7 @@
 
 ; Interfaces -------------------------------------
 
+; DJG : The names of the interfaces are a bit unintuitive.
 
 ; All CRUDL elements need access to an entity, its attributes, and the attribute-values of a snooze-struct
 ; Attribute-names and 
@@ -22,13 +23,17 @@
     render-struct             ; seed -> xml
     render-attribute-label))  ; seed attr -> xml
 
+; DJG : Can render-attribute[s] be moved into crudl-element<%>? That way, we have all attribute rendering stuff in one interface.
+
 ; Non-list elements deal only with a single struct
 (define crud-element<%>
   (interface ()
-    render-attribute  ; seed attribute -> xml
-    render-attributes ; seed (listof attribute) -> xml
+    render-attribute  ; seed attribute -> xml          ; render the label (and the value)
+    render-attributes ; seed (listof attribute) -> xml ; render the labels (and the values)
     set-struct!       ; snooze-struct -> void
     get-struct))      ; -> snooze-struct
+
+; DJG : Roll this into snooze-editor<%>?
 
 ; Editor elements inherit from snooze editor, and have a submit button label method
 (define crudl-editor<%>
@@ -50,11 +55,15 @@
 (define crudl-review+delete<%>
   (interface (crudl-review+delete+list<%> crud-element<%>))) ; seed attribute value -> xml
 
+; DJG : Binders = macro form elements ??
+
 ; create and update pages need to convert attributes into editor components
 (define crudl-create+update<%>
   (interface (crudl-element<%> crud-element<%> snooze-editor<%>)
     make-binder  ; attribute -> binder
     get-binder)) ; attribute -> binder
+
+; DJG : I'd prefer get-create-controller, get-review-controller, get-update-controller, etc...
 
 ; list elements deal with a list of structs
 (define crudl-list<%>
@@ -66,6 +75,9 @@
   (interface (crudl-list<%>)
     set-structs!  ; (listof snooze-struct) -> void
     get-structs)) ; -> (listof snooze-structs)
+
+; DJG : make-query is already sort-of defined in snooze-report<%> (in that it's possible to override the parts of the queries).
+; DJG : a good method here would be get-entity-alias.
 
 ; list elements deal with a list of structs
 (define crudl-report<%>
