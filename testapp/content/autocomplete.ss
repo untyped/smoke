@@ -5,11 +5,9 @@
 
 ; Controllers ------------------------------------
 
-; controller
-(define-controller autocomplete
-  init-smoke-pipeline
-  (lambda ()
-    (send autocomplete-page respond)))
+; request -> response
+(define-controller (autocomplete request)
+  (send autocomplete-page respond))
 
 ; Pages ------------------------------------------
 

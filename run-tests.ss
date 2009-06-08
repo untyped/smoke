@@ -15,12 +15,9 @@
 
 (print-struct #t)
 
-(current-deployment-mode 'test)
-
 (serve/smoke/delirium
  (lambda ()
    (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
-   (parameterize ([dispatch-url-cleaner smoke-url-cleaner])
-     (dispatch (current-request) test-site)))
+   (testapp-dispatch (current-request)))
  all-smoke-tests
  #:htdocs-paths (list testapp-htdocs-path))

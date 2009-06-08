@@ -6,7 +6,7 @@
          web-server/http/response-structs
          web-server/servlet-env
          (planet untyped/delirium:3)
-         (planet untyped/mirrors:1)
+         (planet untyped/mirrors:2)
          "../base.ss"
          "resume.ss"
          "send-suspend-dispatch.ss"

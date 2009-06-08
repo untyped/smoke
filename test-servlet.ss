@@ -2,7 +2,7 @@
 
 (require (only-in web-server/managers/manager manager?)
          web-server/managers/lru
-         (planet untyped/mirrors:1/mirrors)
+         (planet untyped/mirrors:2)
          "all-smoke-tests.ss"
          "test-base.ss")
 

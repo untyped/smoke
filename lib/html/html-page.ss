@@ -190,7 +190,7 @@
            (xml ,(get-doctype)
                 (html (@ [xmlns "http://www.w3.org/1999/xhtml"] [lang ,(get-lang)])
                       (head (meta (@ [http-equiv "Content-Type"] [content ,(get-content-type)]))
-                            (script (@ [type "text/javascript"] [src "/scripts/jquery/jquery.js"]))
+                            (script (@ [type "text/javascript"] [src "/scripts/jquery/jquery-1.3.2.min.js"]))
                             (script (@ [type "text/javascript"] [src "/scripts/smoke/smoke.js"]))
                             ,(opt-xml (get-title)
                                (title ,(get-title)))

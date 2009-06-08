@@ -1,7 +1,8 @@
 #lang scheme/base
 
 (require web-server/dispatchers/dispatch
-         (planet untyped/dispatch:1)
+         (planet untyped/dispatch:3)
+         "../web-server/dispatch3-wrapper.ss"
          (except-in "base.ss"
                     string-arg
                     symbol-arg
@@ -10,50 +11,44 @@
 
 ; Site -------------------------------------------
 
-(define-site test-site
-  ([(url "")                              home]
-   [(url "/autocomplete")                 autocomplete]
-   [(url "/counter")                      counter]
-   [(url "/current-request")              test-current-request]
-   [(url "/dialog")                       dialog]
-   [(url "/editor")                       editor]
-   [(url "/form")                         form]
-   [(url "/form/checked")                 checked-form]
-   [(url "/form/hidden")                  form/hidden]
-   [(url "/notification1")                notification1]
-   [(url "/notification2")                notification2]
-   [(url "/redirect")                     redirect]
-   [(url "/requirements")                 requirements]
-   [(url "/scroll")                       scroll]
-   [(url "/segfault")                     segfault]
-   [(url "/session")                      test-session-show]
-   [(url "/session/set/"
-         (symbol-arg) "/" (string-arg))   test-session-set]
-   [(url "/session/remove/" (symbol-arg)) test-session-remove]
-   [(url "/session/start/" (boolean-arg)) test-session-start]
-   [(url "/session/end/" (boolean-arg))   test-session-end]
-   [(url "/tab")                          tab]
-   [(url "/tooltip")                      tooltip])
-  #:rule-not-found
-  (lambda (request)
-    (next-dispatcher)))
+(define-site testapp
+  [("")                                           home]
+  [("autocomplete")                               autocomplete]
+  [("counter")                                    counter]
+  [("refresh-counter")                            refresh-counter]
+  [("current-request")                            test-current-request]
+  [("dialog")                                     dialog]
+  [("editor")                                     editor]
+  [("form")                                       form]
+  [("form" "checked")                             checked-form]
+  [("form" "hidden")                              form/hidden]
+  [("notification1")                              notification1]
+  [("notification2")                              notification2]
+  [("redirect")                                   redirect]
+  [("requirements")                               requirements]
+  [("scroll")                                     scroll]
+  [("segfault")                                   segfault]
+  [("session")                                    test-session-show]
+  [("session" "set"    (symbol-arg) (string-arg)) test-session-set]
+  [("session" "remove" (symbol-arg))              test-session-remove]
+  [("session" "start"  (boolean-arg))             test-session-start]
+  [("session" "end"    (boolean-arg))             test-session-end]
+  [("tab")                                        tab]
+  [("tooltip")                                    tooltip])
 
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller home
-  null
-  (lambda (request)
-    (make-html-response
-     (xml (html (head (title "Smoke test application"))
-                (body (h1 "Smoke test application")
-                      (ul ,@(reverse (for/list ([controller (site-controllers test-site)])
-                                       (with-handlers ([exn? (lambda _ (xml))])
-                                         (if (eq? controller home)
-                                             (xml)
-                                             (xml (li (a (@ [href ,(controller-url controller)])
-                                                         ,(controller-id controller)))))))))))))))
-  
+(define-controller (home request)
+  (make-html-response
+   (xml (html (head (title "Smoke test application"))
+              (body (h1 "Smoke test application")
+                    (ul ,@(for/list ([controller (in-list (reverse (site-controllers testapp)))])
+                            (with-handlers ([exn? (lambda _ (xml))])
+                              (opt-xml (not (eq? controller home))
+                                (li (a (@ [href ,(testapp-url controller)])
+                                       ,(controller-id controller))))))))))))
+
 ; Provide statements -----------------------------
 
-(provide (site-out test-site))
+(provide (site-out testapp))

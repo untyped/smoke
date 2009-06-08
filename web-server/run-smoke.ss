@@ -19,7 +19,7 @@
          web-server/private/mime-types
          web-server/servlet/setup
          (planet untyped/delirium:3)
-         (planet untyped/mirrors:1)
+         (planet untyped/mirrors:2)
          "../base.ss"
          "current-request.ss"
          "send-suspend-dispatch.ss"

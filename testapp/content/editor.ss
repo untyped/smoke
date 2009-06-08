@@ -1,17 +1,17 @@
 #lang scheme/base
 
-(require (planet untyped/snooze:2/check/check)
+(require "../content-base.ss")
+
+(require (planet untyped/snooze:2)
+         (planet untyped/snooze:2/check/check)
          (planet untyped/unlib:3/list)
-         (planet untyped/unlib:3/symbol)
-         "../content-base.ss")
+         (planet untyped/unlib:3/symbol))
 
 ; Controllers ------------------------------------
 
-; -> response
-(define-controller editor
-  init-smoke-pipeline
-  (lambda ()
-    (send editor-page respond)))
+; request -> response
+(define-controller (editor request)
+  (send editor-page respond))
 
 ; Helpers ----------------------------------------
 

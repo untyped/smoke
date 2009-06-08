@@ -1,6 +1,6 @@
 #lang scheme/base
 
-(require (planet untyped/mirrors:1/mirrors)
+(require (planet untyped/mirrors:2)
          "../test-base.ss"
          "session.ss")
 

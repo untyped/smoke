@@ -1,5 +1,7 @@
 #lang scheme/base
 
+(require (planet untyped/unlib:3/debug))
+
 (require net/url
          scheme/contract
          srfi/26
@@ -23,11 +25,12 @@
                     extract-binding/single
                     extract-bindings
                     ; web-server/dispatch:
+                    serve/dispatch
                     symbol-arg
                     string-arg
                     integer-arg
                     real-arg)
-         (planet untyped/mirrors:1)
+         (planet untyped/mirrors:2)
          "current-request.ss"
          "request.ss"
          "request-util.ss"
@@ -44,14 +47,14 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out web-server/http
-                       web-server/servlet
-                       "request.ss"
-                       "request-util.ss"
-                       "resume.ss"
-                       "send-suspend-dispatch.ss"
-                       "web-cell.ss"
-                       "web.ss")
+(provide (all-from-out web-server/http)
+         (all-from-out web-server/servlet)
+         (all-from-out "request.ss")
+         (all-from-out "request-util.ss")
+         (all-from-out "resume.ss")
+         (all-from-out "send-suspend-dispatch.ss")
+         (all-from-out "web-cell.ss")
+         (all-from-out "web.ss")
          ; From current-request.ss:
          current-request)
 

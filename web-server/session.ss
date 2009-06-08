@@ -3,7 +3,7 @@
 (require mzlib/md5
          net/url
          srfi/19
-         (planet untyped/mirrors:1/mirrors)
+         (planet untyped/mirrors:2)
          (planet untyped/unlib:3/cache)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)

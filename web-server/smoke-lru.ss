@@ -3,7 +3,7 @@
 (require scheme/contract
          scheme/pretty
          web-server/managers/manager
-         (planet untyped/mirrors:1/mirrors)
+         (planet untyped/mirrors:2)
          "../base.ss"
          "continuation-url.ss"
          "lru.ss"

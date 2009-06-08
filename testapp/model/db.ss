@@ -1,6 +1,6 @@
 #lang scheme/base
 
-(require (planet untyped/snooze:2/snooze)
+(require (planet untyped/snooze:2)
          (planet untyped/snooze:2/postgresql8/postgresql8))
 
 ; snooze%
@@ -10,5 +10,5 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet untyped/snooze:2/snooze))
+(provide (all-from-out (planet untyped/snooze:2))
          (snooze-interface-out))

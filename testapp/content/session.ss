@@ -6,58 +6,48 @@
 
 ; Controllers ------------------------------------
 
-; -> response
-(define-controller test-session-show
-  init-smoke-pipeline
-  (lambda ()
-    (define session (request-session (current-request)))
-    (make-html-response
-     (xml (html (head (title "Current session"))
-                (body (p "Current session")
-                      ,(session-html session)))))))
+; request -> response
+(define-controller (test-session-show request)
+  (define session (request-session (current-request)))
+  (make-html-response
+   (xml (html (head (title "Current session"))
+              (body (p "Current session")
+                    ,(session-html session))))))
 
-; boolean -> response
-(define-controller test-session-start
-  init-smoke-pipeline
-  (lambda (forward?)
-    (define session (start-session forward?))
-    (make-html-response
-     (xml (html (head (title "Session started"))
-                (body (p "Session started")
-                      ,(session-html session)))))))
+; request boolean -> response
+(define-controller (test-session-start request forward?)
+  (define session (start-session forward?))
+  (make-html-response
+   (xml (html (head (title "Session started"))
+              (body (p "Session started")
+                    ,(session-html session))))))
 
-; boolean -> response
-(define-controller test-session-end
-  init-smoke-pipeline
-  (lambda (forward?)
-    (define session (request-session (current-request)))
-    (end-session session forward?)
-    (make-html-response
-     (xml (html (head (title "Session ended"))
-                (body (p "Session ended")
-                      ,(session-html session)))))))
+; request boolean -> response
+(define-controller (test-session-end request forward?)
+  (define session (request-session (current-request)))
+  (end-session session forward?)
+  (make-html-response
+   (xml (html (head (title "Session ended"))
+              (body (p "Session ended")
+                    ,(session-html session))))))
 
-; symbol string -> response
-(define-controller test-session-set
-  init-smoke-pipeline
-  (lambda (key val)
-    (define session (request-session (current-request)))
-    (session-set! session key val)
-    (make-html-response
-     (xml (html (head (title "Current session"))
-                (body (p "Current session")
-                      ,(session-html session)))))))
+; request symbol string -> response
+(define-controller (test-session-set request key val)
+  (define session (request-session (current-request)))
+  (session-set! session key val)
+  (make-html-response
+   (xml (html (head (title "Current session"))
+              (body (p "Current session")
+                    ,(session-html session))))))
 
-; symbol string -> response
-(define-controller test-session-remove
-  init-smoke-pipeline
-  (lambda (key)
-    (define session (request-session (current-request)))
-    (session-remove! session key)
-    (make-html-response
-     (xml (html (head (title "Current session"))
-                (body (p "Current session")
-                      ,(session-html session)))))))
+; request symbol -> response
+(define-controller (test-session-remove request key)
+  (define session (request-session (current-request)))
+  (session-remove! session key)
+  (make-html-response
+   (xml (html (head (title "Current session"))
+              (body (p "Current session")
+                    ,(session-html session))))))
 
 ; Helpers ----------------------------------------
 

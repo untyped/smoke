@@ -88,8 +88,8 @@
     
     ; seed -> js
     (define/augride (get-on-key-down seed)
-      (js (if (== (!dot evt keyCode) 13) ; remove "enter" behaviour
-              (!dot evt (preventDefault)))))
+      (js (if (== (!dot evt keyCode) 13)
+              (= (!dot evt cancelBubble) #t))))
     
     ; seed -> js
     (define/augride (get-on-page-submit seed)

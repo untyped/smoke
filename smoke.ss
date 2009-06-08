@@ -2,7 +2,8 @@
 
 (require (planet untyped/unlib:3/debug))
 
-(require (debug-in "lib" "lib-base.ss")
+(require "seed.ss"
+         "class/class.ss"
          "lib/page.ss"
          "lib/html/autocomplete-field.ss"
          "lib/html/button.ss"
@@ -32,15 +33,17 @@
          "lib/html/text-field.ss"
          "lib/html/text-input.ss"
          "lib/html/tiny-mce.ss"
-         (debug-in "pip" "web-server/pipeline.ss")
-         (debug-in "run" "web-server/run-smoke.ss")
-         (debug-in "ses" "web-server/session.ss")
-         (debug-in "cel" "web-server/session-cell.ss")
-         (debug-in "lru" "web-server/smoke-lru.ss"))
+         "web-server/pipeline.ss"
+         "web-server/run-smoke.ss"
+         "web-server/servlet.ss"
+         "web-server/session.ss"
+         "web-server/session-cell.ss"
+         "web-server/smoke-lru.ss")
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out "lib-base.ss"
+(provide (all-from-out "seed.ss"
+                       "class/class.ss"
                        "lib/page.ss"
                        "lib/html/autocomplete-field.ss"
                        "lib/html/button.ss"
@@ -72,6 +75,7 @@
                        "lib/html/tiny-mce.ss"
                        "web-server/pipeline.ss"
                        "web-server/run-smoke.ss"
+                       "web-server/servlet.ss"
                        "web-server/session.ss"
                        "web-server/session-cell.ss"
                        "web-server/smoke-lru.ss"))

@@ -4,10 +4,9 @@
 
 ; Controllers ------------------------------------
 
-(define-controller counter
-  init-smoke-pipeline
-  (lambda ()
-    (send counter-page respond)))
+; request -> response
+(define-controller (counter request)
+  (send counter-page respond))
 
 ; Components -------------------------------------
 

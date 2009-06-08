@@ -10,7 +10,7 @@
          web-server/private/util
          web-server/servlet/servlet-structs
          (prefix-in ws: web-server/servlet/web)
-         (planet untyped/mirrors:1)
+         (planet untyped/mirrors:2)
          "continuation-url.ss")
 
 ; (parameter (U (request -> response) #f))

@@ -3,16 +3,15 @@
 (require (planet untyped/unlib:3/require))
 
 (require scheme/cmdline
+         "../web-server/dispatch3-wrapper.ss"
          "content-base.ss"
          (directory-in "content"))
 
 ; -> void
 (define (run-application)
-  (current-deployment-mode 'development)
-  (run-smoke #:start       (lambda ()
-                             (parameterize ([dispatch-url-cleaner smoke-url-cleaner])
-                               (dispatch (current-request) test-site)))
-             #:htdocs-path (list testapp-htdocs-path)))
+  (serve/smoke (lambda ()
+                 (testapp-dispatch (current-request)))
+               #:htdocs-paths (list testapp-htdocs-path)))
 
 ; Main program body ------------------------------
 
@@ -21,7 +20,7 @@
 
 ; void
 (command-line #:once-any 
-              [("--test") "Run in test mode." (set! mode 'test)]
+              [("--test")   "Run in test mode."        (set! mode 'test)]
               [("--initdb") "Initialise the database." (set! mode 'initdb)])
 
 ; void

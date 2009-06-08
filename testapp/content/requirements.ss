@@ -4,10 +4,9 @@
 
 ; Controllers ------------------------------------
 
-(define-controller requirements
-  init-smoke-pipeline
-  (lambda ()
-    (send requirements-page respond)))
+; request -> response
+(define-controller (requirements request)
+  (send requirements-page respond))
 
 ; Components -------------------------------------
 

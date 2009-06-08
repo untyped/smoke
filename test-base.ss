@@ -4,7 +4,8 @@
          (planet schematics/schemeunit:2/text-ui)
          (planet schematics/schemeunit:2/util)
          (planet untyped/delirium:3)
-         (planet untyped/dispatch:1)
+         (planet untyped/dispatch:3)
+         "lib-base.ss"
          "smoke.ss"
          "testapp/site.ss")
 
@@ -14,6 +15,7 @@
                        (planet schematics/schemeunit:2/text-ui)
                        (planet schematics/schemeunit:2/util)
                        (planet untyped/delirium:3)
-                       (planet untyped/dispatch:1)
+                       (planet untyped/dispatch:3)
+                       "lib-base.ss"
                        "smoke.ss"
                        "testapp/site.ss"))

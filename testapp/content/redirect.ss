@@ -4,11 +4,9 @@
 
 ; Controllers ------------------------------------
 
-; -> response
-(define-controller redirect
-  init-smoke-pipeline
-  (lambda ()
-    (send redirect-page respond)))
+; request -> response
+(define-controller (redirect request)
+  (send redirect-page respond))
 
 ; Components -------------------------------------
 

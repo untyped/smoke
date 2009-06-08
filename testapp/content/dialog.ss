@@ -5,11 +5,9 @@
 
 ; Controllers ------------------------------------
 
-; -> response
-(define-controller dialog
-  init-smoke-pipeline
-  (lambda ()
-    (send main-page respond)))
+; request -> response
+(define-controller (dialog request)
+  (send main-page respond))
 
 ; Components -------------------------------------
 
