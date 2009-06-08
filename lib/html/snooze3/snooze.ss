@@ -2,6 +2,7 @@
 
 (require "check-label.ss"
          "editor.ss"
+         "foreign-key-combo-box.ss"
          "form-element.ss"
          "report.ss"
          "scroll-report.ss")
@@ -10,6 +11,7 @@
 
 (provide (all-from-out "check-label.ss"
                        "editor.ss"
+                       "foreign-key-combo-box.ss"
                        "form-element.ss"
                        "report.ss"
                        "scroll-report.ss"))
