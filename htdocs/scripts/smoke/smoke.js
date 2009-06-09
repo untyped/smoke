@@ -109,7 +109,10 @@ if (!window.console.log) {
   
   // AJAX ==========================================
   
-  // string [object] -> void
+  // U(string, arrayOf(string)) [object] -> void
+  //
+  // url can be a string or an array, with the base callback url at index 0
+  // and the arguments at indices 1 and up
   Smoke.doAjax = function (url) {
     var request = null;
     
@@ -117,6 +120,11 @@ if (!window.console.log) {
       if (!Smoke.triggerSubmitEvent(false)) {
         return false;
       };
+      
+      // Convert array-form URL into a string URL:
+      var url = (typeof url == "string")
+        ? url
+        : url[0] + "/" + $.map(url.slice(1), encodeURIComponent).join("/");
   
       var data = arguments.length > 1
         ? $.extend(Smoke.submitData, arguments[1])
@@ -124,7 +132,7 @@ if (!window.console.log) {
         
       Smoke.submitData = {};
       
-      // The result JS is automatically evaluated by Prototype:
+      // The result JS is automatically evaluated by jQuery:
       request = $.ajax({
         url        : url,
         type       : "post",
