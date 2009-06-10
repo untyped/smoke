@@ -45,8 +45,16 @@
            (parameterize ([current-frame (push-frame)])
              (send/suspend/dispatch
               (lambda (embed-url)
-                (make-redirect-response
-                 (embed-url *continue*))))))))))
+                (let* ([url0 (request-uri (current-request))]
+                       [url1 (string->url (embed-url *continue*))])
+                  (make-redirect-response (make-url (url-scheme url1)
+                                                    (url-user url1)
+                                                    (url-host url1)
+                                                    (url-port url1)
+                                                    (url-path-absolute? url1)
+                                                    (url-path url1)
+                                                    (url-query url0)
+                                                    (url-fragment url0))))))))))))
 
 ; pipeline
 (define init-smoke-pipeline
