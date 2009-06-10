@@ -261,7 +261,7 @@
     ; seed integer integer integer -> xml
     (define/public (render-controls seed start count total)
       (xml (div (@ [id    ,(format "~a-controls" (get-id))]
-                   [class "controls"])
+                   [class "controls ui-helper-clearfix"])
                 ; Filter is always visible:
                 ,(if (> (length (get-filters)) 1)
                      (xml (div (@ [class "filter"])

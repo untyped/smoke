@@ -54,7 +54,17 @@
                                       (format "~a" val)])])
                    (send editor set-value! value)))
                (lambda ()       ; The default binder-values procedure, returning edits by attribute.
-                 (list (cons attribute (send editor get-value))))))
+                 (let* ([val   (send editor get-value)]
+                        [type  (attribute-type attribute)]
+                        [value (cond [(and val (symbol-type? type))
+                                      (string->symbol val)]
+                                     [(and val (time-utc-type? type))
+                                      (date->time-utc val)]
+                                     [(and val (time-tai-type? type))
+                                      (date->time-tai val)]
+                                     [else val])])
+                   
+                   (list (cons attribute value))))))
 
 ; Provides ---------------------------------------
 
