@@ -60,8 +60,8 @@
 ; create and update pages need to convert attributes into editor components
 (define crudl-create+update<%>
   (interface (crudl-element<%> crud-element<%> snooze-editor<%>)
-    make-binder  ; attribute -> binder
-    get-binder)) ; attribute -> binder
+    make-binder/attrs  ; attribute -> binder
+    get-binder))       ; attribute -> binder
 
 ; DJG : I'd prefer get-create-controller, get-review-controller, get-update-controller, etc...
 

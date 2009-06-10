@@ -44,7 +44,7 @@
     ; (listof form-element<%>)
     (define/private (init-fields)
       (flatten (for/list ([attr (in-list (get-attributes))])
-                 (let ([binder (make-binder attr)])
+                 (let ([binder (make-binder/attrs attr)])
                    (hash-set! attr=>binder attr binder)
                    (binder-editors binder)))))
     
@@ -59,10 +59,10 @@
           ((binder-initialise! binder) struct))))   
     
     ; (U attribute (listof attribute)) -> binder
-    (define/pubment (make-binder attr)
-      (let ([custom-binder (inner #f make-binder attr)]) ; allow custom overrides
+    (define/pubment (make-binder/attrs attrs)
+      (let ([custom-binder (inner #f make-binder/attrs attrs)]) ; allow custom overrides
         (or custom-binder
-            (make-binder/type attr))))  ; or default to the by-type binder
+            (make-binder/type attrs))))  ; or default to the by-type binder
     
     ; (U attribute (listof attribute)) -> binder
     (define/private (make-binder/type attr)
@@ -106,8 +106,8 @@
     
     (define/public-final (get-attribute-values attributes)
       (flatten (for/fold ([attrs+vals null])
-                 ([attr  (in-list attributes)])
-                 (append attrs+vals ((binder-values (get-binder attr)))))))
+                         ([attr  (in-list attributes)])
+                         (append attrs+vals ((binder-values (get-binder attr)))))))
     
     ; struct -> struct
     (define/public (update-struct struct)
