@@ -12,6 +12,7 @@
          "../html-element.ss"
          "../integer-field.ss"
          "../labelled-component.ss"
+         "../number-field.ss"
          "../password-field.ss"
          "../radio-button.ss"
          "../regexp-field.ss"
@@ -26,13 +27,13 @@
 
 (define editor<%>
   (interface (form-element<%>)
-    get-child-editors ; -> (listof editor<%>)
-    parse             ; -> (listof check-result)
-    validate))        ; -> (listof check-result)
+    get-editors ; -> (listof editor<%>)
+    parse       ; -> (listof check-result)
+    validate))  ; -> (listof check-result)
 
 (define entity-editor<%>
   (interface (editor<%>)
-    ))
+    get-entity))
 
 (define attribute-editor<%>
   (interface (labelled<%> editor<%> check-label<%>)
@@ -57,6 +58,9 @@
     ; (listof attribute)
     (init-cell attributes null #:accessor)
     
+    ; boolean
+    (init-field required? #f #:accessor)
+    
     ; Constructor --------------------------------
     
     (super-new)
@@ -68,7 +72,7 @@
     ; Methods ------------------------------------
     
     ; -> (listof editor<%>)
-    (define/public (get-child-editors)
+    (define/public (get-editors)
       null)
     
     ; check-result -> boolean
@@ -86,6 +90,7 @@
       (define id (get-wrapper-id))
       (xml (span (@ [id ,id])
                  ,(super render seed) " "
+                 ,(opt-xml required? "(required) ")
                  ,(render-check-label seed))))
     
     ; snooze-struct -> snooze-struct
@@ -126,34 +131,43 @@
 (define entity-editor-mixin
   (mixin/cells (html-element<%>) (entity-editor<%>)
     
+    (inherit core-html-attributes)
+    
+    ; Fields -------------------------------------
+    
+    ; entity
+    (init-field entity #:accessor)
+    
     ; (listof editor<%>)
-    (field child-editors null #:accessor #:children)
+    (init-field editors (default-entity-editors entity) #:accessor #:children)
     
     ; (U snooze-struct #f)
     (cell initial-value #f #:accessor)
     
-    ; Constructor --------------------------------
-    
-    ; (listof editor<%>)
-    (init [(init-child-editors editors)])
-    
-    (set! child-editors init-child-editors)
-    
     ; Methods ------------------------------------
+    
+    ; seed -> xml
+    (define/override (render seed)
+      (xml (table (@ ,(core-html-attributes seed))
+                  ,@(for/list ([editor (in-list (get-editors))])
+                      (xml (tr (th ,(send editor render-label seed))
+                               (td ,(send editor render seed))))))))
     
     ; -> snooze-struct
     (define/public (get-value)
       (let ([init (get-initial-value)])
         (if (snooze-struct? init)
             (for/fold ([struct (get-initial-value)])
-                      ([editor (in-list child-editors)])
+                      ([editor (in-list editors)])
                       (send editor restructure struct))
             (raise-type-error 'entity-editor.get-value "snooze-struct" #f))))
     
     ; snooze-struct -> void
     (define/public (set-value! struct)
+      (unless (snooze-struct? struct)
+        (raise-type-error 'entity-editor.set-value! "snooze-struct" struct))
       (web-cell-set! initial-value-cell struct)
-      (for ([editor (in-list child-editors)])
+      (for ([editor (in-list editors)])
         (send editor destructure! struct)))
     
     ; -> boolean
@@ -162,13 +176,13 @@
     
     ; -> boolean
     (define/public (value-changed?)
-      (for/or ([editor (in-list (get-child-editors))])
+      (for/or ([editor (in-list (get-editors))])
         (send editor value-changed?)))
     
     ; -> (listof check-result)
     (define/public (parse)
       (apply check-problems
-             (for/list ([editor (in-list (get-child-editors))])
+             (for/list ([editor (in-list (get-editors))])
                (check/annotate ([ann:form-elements (list editor)])
                  (let ([message (with-handlers ([exn:smoke:form? exn-message])
                                   (send editor get-value)
@@ -180,6 +194,47 @@
     ; -> (listof check-result)
     (define/public (validate)
       (check-snooze-struct (get-value)))))
+
+; Helpers ----------------------------------------
+
+(define (default-entity-editors entity)
+  (for/list ([attr (in-list (cddr (entity-attributes entity)))])
+    (let* ([id        (symbol-append (entity-name entity) '- (attribute-name attr) '-field)]
+           [label     (string-titlecase (attribute-pretty-name attr))]
+           [type      (attribute-type attr)]
+           [required? (not (type-allows-null? type))])
+      (match type
+        [(? boolean-type?)                   (new check-box-editor% [id id] [label label] [attributes (list attr)] [required? required?])]
+        [(? integer-type?)                   (new integer-editor%   [id id] [label label] [attributes (list attr)] [required? required?])]
+        [(? real-type?)                      (new number-editor%    [id id] [label label] [attributes (list attr)] [required? required?])]
+        [(struct string-type (_ max-length)) (if max-length
+                                                 (new text-field-editor% [id id] [label label] [attributes (list attr)] [required? required?] [max-length max-length])
+                                                 (new text-area-editor%  [id id] [label label] [attributes (list attr)] [required? required?]))]
+        [(struct symbol-type (_ max-length)) (if max-length
+                                                 (new (symbol-editor-mixin text-field-editor%)
+                                                      [id         id]
+                                                      [label      label]
+                                                      [attributes (list attr)]
+                                                      [required?  required?]
+                                                      [max-length max-length])
+                                                 (new (symbol-editor-mixin text-area-editor%)
+                                                      [id         id]
+                                                      [label      label]
+                                                      [attributes (list attr)]
+                                                      [required?  required?]))]
+        [(struct guid-type (_ entity))       (new foreign-key-editor% [id id] [label label] [attributes (list attr)] [required? required?] [entity entity])]))))
+
+(define symbol-editor-mixin
+  (mixin/cells (editor<%>) ()
+
+    ; -> symbol
+    (define/override (get-value)
+      (let ([str (super get-value)])
+        (and str (string->symbol str))))
+    
+    ; symbol -> void
+    (define/override (set-value! sym)
+      (super set-value! (and sym (symbol->string sym))))))
 
 ; Classes ----------------------------------------
 
@@ -193,18 +248,52 @@
 (define date-editor%                      (complete-attribute-editor-mixin date-field%))
 (define file-editor%                      (complete-attribute-editor-mixin file-field%))
 (define integer-editor%                   (complete-attribute-editor-mixin integer-field%))
+(define number-editor%                    (complete-attribute-editor-mixin number-field%))
 (define password-editor%                  (complete-attribute-editor-mixin password-field%))
 (define regexp-editor%                    (complete-attribute-editor-mixin regexp-field%))
 (define set-selector-editor%              (complete-attribute-editor-mixin set-selector%))
 (define set-selector-autocomplete-editor% (complete-attribute-editor-mixin set-selector-autocomplete%))
-(define string-editor%                    (complete-attribute-editor-mixin text-field%))
-(define text-editor%                      (complete-attribute-editor-mixin text-area%))
+(define text-field-editor%                (complete-attribute-editor-mixin text-field%))
+(define text-area-editor%                 (complete-attribute-editor-mixin text-area%))
 (define tiny-mce-editor%                  (complete-attribute-editor-mixin tiny-mce%))
+
+(define foreign-key-editor%
+  (class/cells combo-box-editor% ()
+    
+    ; Fields -------------------------------------
+    
+    ; (U entity #f)
+    (init-field entity #f #:accessor)
+    
+    ; Methods ------------------------------------
+    
+    ; -> (listof (cons integer string))
+    (define/override (get-options)
+      (let-sql ([entity entity])
+        (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
+    
+    ; (U snooze-struct #f) -> integer
+    (define/override (option->raw option)
+      (and option (guid? option) (snooze-struct-id option)))
+    
+    ; (U integer #f) -> snooze-struct
+    (define/override (raw->option raw)
+      (and raw 
+           (let ([id (string->number raw)])
+             (and id (find-by-id entity id)))))
+    
+    ; (U snooze-struct #f) -> string
+    (define/override (option->string option)
+      (if option
+          (format-snooze-struct option)
+          (format "-- No ~a selected --" (entity-pretty-name entity))))))
 
 ; Provide statements -----------------------------
 
 (provide editor<%>
+         attribute-editor<%>
          attribute-editor-mixin
+         entity-editor<%>
          entity-editor-mixin
          autocomplete-editor%
          check-box-editor%
@@ -217,6 +306,6 @@
          regexp-editor%
          set-selector%
          set-selector-autocomplete%
-         string-editor%
-         text-editor%
+         text-field-editor%
+         text-area-editor%
          tiny-mce-editor%)

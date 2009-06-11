@@ -25,6 +25,7 @@
   (mixin/cells (editor<%>) (editor-controller<%>)
     
     (inherit get-child-components
+             get-value
              parse
              validate
              value-changed?)
@@ -35,14 +36,6 @@
     (define/augment (get-html-requirements)
       (list* snooze-styles
              (inner null get-html-requirements)))
-    
-    ; -> any
-    (define/public (commit-changes)
-      (error "commit-changes must be overridden."))
-    
-    ; -> any
-    (define/public #:callback/return (on-update)
-      (process-parse-results (parse)))    
     
     ; -> xml
     (define/public (get-warning-notification)
@@ -59,6 +52,16 @@
     (define/public (get-commit-notification)
       (xml "Your changes have been saved successfully."))
     
+    ; (listof check-result) -> void
+    (define/public (update-check-labels! results)
+      (map (cut send <> set-results! results)
+           (filter (cut is-a? <> check-label<%>)
+                   (get-child-components))))
+    
+    ; -> any
+    (define/public #:callback/return (on-update)
+      (process-parse-results (debug* "parse-results" parse)))    
+    
     ; (listof check-result) -> any
     (define/private (process-parse-results results)
       (update-check-labels! results)
@@ -71,37 +74,43 @@
                                             (send (current-page) respond)]
             [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
-            [else                           (process-validate-results (validate))]))
+            [else                           (process-validate-results (debug* "validate-results" validate))]))
     
     ; (listof check-result) -> any
     (define/private (process-validate-results results)
       (update-check-labels! results)
-      (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
+      (cond [(ormap check-fatal? results)   (printf "validation fatal 2~n")
+                                            (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
+            [(ormap check-failure? results) (printf "validation failed 2~n")
+                                            (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
             [(ormap check-warning? results) (if (value-changed?)
                                                 (begin
+                                                  (printf "validation warning 1~n")
                                                   (notifications-add! (get-warning-notification))
                                                   (send (current-page) respond))
                                                 (begin0
+                                                  (printf "validation warning 2~n")
                                                   (commit-changes)
                                                   (notifications-add! (get-commit-notification))))]
             [else                           (begin0
+                                              (printf "validation passed~n")
                                               (commit-changes)
                                               (notifications-add! (get-commit-notification)))]))
     
-    ; (listof check-result) -> void
-    (define/public (update-check-labels! results)
-      (map (cut send <> set-results! results)
-           (filter (cut is-a? <> check-label<%>)
-                   (get-child-components))))))
+    ; -> any
+    (define/public (commit-changes)
+      (printf "committing changes~n")
+      (if (is-a? this entity-editor<%>)
+          (save! (get-value))
+          (error "editor is not an entity-editor: commit-changes must be overridden.")))))
 
 ; Classes ----------------------------------------
 
 (define entity-editor%
   (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-element%))))
-
+  
 ; Helpers ----------------------------------------
 
 ; component<%> -> symbol
