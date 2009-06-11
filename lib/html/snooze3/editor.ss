@@ -3,29 +3,31 @@
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
          "../browser-util.ss"
-         "../form-element.ss"
+         "../disableable-element.ss"
          "../html-element.ss"
          "../notification.ss"
          "check-label.ss"
+         "form-element.ss"
          "util.ss")
 
 ; Interfaces -------------------------------------
 
 ; interface
-(define snooze-editor<%>
+(define editor-controller<%>
   (interface ()
-    parse            ; -> (listof check-result)
-    validate         ; -> (listof check-result)
     on-update        ; -> any
     commit-changes   ; -> any
     value-changed?)) ; -> boolean
 
 ; Mixins -----------------------------------------
 
-(define snooze-editor-mixin
-  (mixin/cells (html-element<%>) (snooze-editor<%>)
+(define editor-controller-mixin
+  (mixin/cells (editor<%>) (editor-controller<%>)
     
-    (inherit get-child-components)
+    (inherit get-child-components
+             parse
+             validate
+             value-changed?)
     
     ; Methods ------------------------------------
     
@@ -33,20 +35,6 @@
     (define/augment (get-html-requirements)
       (list* snooze-styles
              (inner null get-html-requirements)))
-    
-    ; -> (listof check-result)
-    (define/public (parse)
-      (apply check-problems
-             (for/list ([child (get-child-components)])
-               (define message (and (is-a? child form-element<%>) (send child get-value-error)))
-               (check/annotate ([ann:form-elements (list child)])
-                 (if message
-                     (check-fail message)
-                     (check-pass))))))
-    
-    ; -> (listof check-result)
-    (define/public (validate)
-      (error "validate must be overridden."))
     
     ; -> any
     (define/public (commit-changes)
@@ -107,21 +95,12 @@
     (define/public (update-check-labels! results)
       (map (cut send <> set-results! results)
            (filter (cut is-a? <> check-label<%>)
-                   (get-child-components))))
-    
-    ; -> boolean
-    (define/public (value-changed?)
-      (ormap (lambda (component)
-               (or (and (is-a? component form-element<%>)
-                        (send component value-changed?))
-                   (and (is-a? component snooze-editor<%>)
-                        (send component value-changed?))))
-             (get-child-components)))))
+                   (get-child-components))))))
 
 ; Classes ----------------------------------------
 
-(define snooze-editor%
-  (class/cells (snooze-editor-mixin html-element%) ()))
+(define entity-editor%
+  (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-element%))))
 
 ; Helpers ----------------------------------------
 
@@ -133,6 +112,6 @@
 ; Provide statements -----------------------------
 
 (provide (all-from-out "util.ss")
-         snooze-editor<%>
-         snooze-editor-mixin
-         snooze-editor%)
+         editor-controller<%>
+         editor-controller-mixin
+         entity-editor%)

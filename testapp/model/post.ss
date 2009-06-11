@@ -2,11 +2,8 @@
 
 (require "db.ss")
 
-(define-persistent-struct post
-  ([subject type:string]
-   [content type:string])
-  #:table-name 'Posts)
+(define-entity post
+  ([subject string #:allow-null? #f]
+   [content string]))
 
-; Provide statements -----------------------------
-
-(provide (persistent-struct-out post))
+(provide-entity/contract post)

@@ -6,9 +6,8 @@
 
 ; Components -------------------------------------
 
-; snooze-vanilla-combo-box%
-(define snooze-foreign-key-combo-box%
-  (class/cells snooze-vanilla-combo-box% ()
+(define foreign-key-editor%
+  (class/cells combo-box-editor% ()
     
     ; Fields -------------------------------------
     
@@ -19,8 +18,8 @@
     
     ; -> (listof (cons integer string))
     (define/override (get-options)
-      (let-alias ([E entity])
-        (list* #f (select-all #:from E #:order ((asc E.guid))))))
+      (let-sql ([entity entity])
+        (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
     
     ; (U snooze-struct #f) -> integer
     (define/override (option->raw option)
@@ -40,4 +39,4 @@
 
 ; Provides ---------------------------------------
 
-(provide snooze-foreign-key-combo-box%)
+(provide foreign-key-editor%)

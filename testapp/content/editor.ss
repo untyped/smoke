@@ -2,8 +2,7 @@
 
 (require "../content-base.ss")
 
-(require (planet untyped/snooze:2)
-         (planet untyped/snooze:2/check/check)
+(require (planet untyped/snooze:3)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol))
 
@@ -38,7 +37,7 @@
 ; Components -------------------------------------
 
 (define editor-page
-  (singleton/cells (snooze-editor-mixin html-page%) ()
+  (singleton/cells (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-page%))) ()
     
     ; Fields -------------------------------------
     
@@ -47,11 +46,11 @@
       #:child #:accessor #:mutator)
     
     (field larger-field
-      (new snooze-integer-field% [id 'larger-field] [value 1] [predicate (by-key 'integer-fields)])
+      (new integer-editor% [id 'larger-field] [value 1] [attributes null])
       #:child #:accessor #:mutator)
     
     (field smaller-field
-      (new snooze-integer-field% [id 'smaller-field] [value 2] [predicate (by-key 'integer-fields)])
+      (new integer-editor% [id 'smaller-field] [value 2] [attributes null])
       #:child #:accessor #:mutator)
     
     (field submit-button
@@ -60,7 +59,8 @@
     
     ; Constructor --------------------------------
     
-    (super-new [title "Editor"])
+    (super-new [title "Editor"]
+               [editors (list larger-field smaller-field)])
     
     ; Methods ------------------------------------
     
