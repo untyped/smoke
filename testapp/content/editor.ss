@@ -12,32 +12,13 @@
 (define-controller (editor request)
   (call-with-connection
    (lambda ()
-     (let ([entity (send (send editor-page get-editor) get-entity)])
+     (let ([entity (send editor-page get-entity)])
        (let loop ([struct ((entity-defaults-constructor entity))])
-         (send (send editor-page get-editor) set-value! struct)
+         (send editor-page set-value! struct)
          (loop (send editor-page respond)))))))
-
-; Helpers ----------------------------------------
-
-; natural
-(define total-commits 0)
 
 ; Components -------------------------------------
 
 (define editor-page
-  (singleton/cells (editor-page-mixin html-page%) ()
-    
-    ; Fields -------------------------------------
-    
-    (field notification-pane (new notification-pane%) #:child)
-    
-    ; Constructor --------------------------------
-    
-    (super-new [entity kitchen-sink])
-    
-    ; Methods ------------------------------------
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml ,(send notification-pane render seed)
-           ,(super render seed)))))
+  (new (entity-editor-page-mixin (render-augride-mixin html-page%))
+       [entity kitchen-sink]))

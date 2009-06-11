@@ -104,52 +104,44 @@
           (save! (get-value))
           (error "editor is not an entity-editor: commit-changes must be overridden.")))))
 
-(define editor-page-mixin
-  (mixin/cells (html-component<%> html-page<%>) ()
-    
-    ; Fields -------------------------------------
-    
-    (init [(init-entity entity)])
-    
-    ; editor<%>
-    (field editor
-      (new entity-editor% [entity init-entity])
-      #:child #:accessor)
-    
-    ; submit-button%
-    (field submit-button
-      (new submit-button% [action (callback [editor on-update])])
-      #:child)
-    
-    ; Methods ------------------------------------
-
-    ; -> string
-    (define/override (get-title)
-      (let* ([title  (super get-title)]
-             [entity (send editor get-entity)]
-             [struct (send editor get-initial-value)])
-        (cond [title title]
-              [(and struct (snooze-struct-saved? struct))
-               (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
-              [struct (format "New ~a" (entity-pretty-name entity))]
-              [else   (format "Editing ~a" (entity-pretty-name entity))])))
-    
-    ; -> entity
-    (define/public (get-entity)
-      (send editor get-entity))
-    
-    ; -> any
-    (define/public (get-value)
-      (send editor get-value))
-    
-    ; any -> void
-    (define/public (set-value! val)
-      (send editor set-value! val))
-    
-    ; seed -> xml
-    (define/augride (render seed)
-      (xml ,(send editor render seed)
-           ,(send submit-button render seed)))))
+(define entity-editor-page-mixin
+  (compose (mixin/cells (entity-editor<%> html-page<%>) ()
+             
+             (inherit get-entity
+                      get-initial-value)
+             
+             ; Fields -------------------------------------
+             
+             (field notification-pane (new notification-pane%) #:child)
+             
+             ; submit-button%
+             (field submit-button (new submit-button% [action (callback on-update)]) #:child)
+             
+             ; Constructor --------------------------------
+             
+             (super-new)
+             
+             ; Methods ------------------------------------
+             
+             ; -> string
+             (define/override (get-title)
+               (let* ([title  (super get-title)]
+                      [entity (get-entity)]
+                      [struct (get-initial-value)])
+                 (cond [title title]
+                       [(and struct (snooze-struct-saved? struct))
+                        (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
+                       [struct (format "New ~a" (entity-pretty-name entity))]
+                       [else   (format "Editing ~a" (entity-pretty-name entity))])))
+             
+             ; seed -> xml
+             (define/override (render seed)
+               (xml ,(send notification-pane render seed)
+                    ,(super render seed)
+                    ,(send submit-button render seed))))
+           editor-controller-mixin
+           entity-editor-mixin
+           disableable-element-mixin))
 
 ; Classes ----------------------------------------
 
@@ -169,4 +161,4 @@
          editor-controller<%>
          editor-controller-mixin
          entity-editor%
-         editor-page-mixin)
+         entity-editor-page-mixin)

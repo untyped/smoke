@@ -20,6 +20,8 @@
     get-lang         ; -> string
     get-title))      ; -> frame
 
+; Mixins -----------------------------------------
+
 (define html-page-mixin
   (mixin/cells (page<%> html-element<%>) (html-page<%>)
     
@@ -298,6 +300,15 @@
                                   "children"
                                   ,(xml->string (render seed))))))))
 
+
+(define render-augride-mixin 
+  (mixin/cells (html-component<%>) ()
+    ; seed -> xml
+    (define/augride (render seed)
+      (xml))))
+
+; Classes ----------------------------------------
+
 (define html-page%
   (class/cells (html-page-mixin (page-mixin html-element%)) ()))
 
@@ -322,4 +333,5 @@
 
 (provide html-page<%>
          html-page-mixin
+         render-augride-mixin
          html-page%)

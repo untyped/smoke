@@ -12,7 +12,8 @@
 
 (define entity-editor<%>
   (interface (editor<%>)
-    get-entity))
+    get-entity
+    get-initial-value))
 
 ; Mixins -----------------------------------------
 
