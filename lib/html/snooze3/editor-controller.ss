@@ -110,7 +110,7 @@
 
 (define entity-editor%
   (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-element%))))
-  
+
 ; Helpers ----------------------------------------
 
 ; component<%> -> symbol
