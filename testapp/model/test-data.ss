@@ -22,23 +22,24 @@
 
 ; Program body -----------------------------------
 
-(call-with-connection
- (lambda ()
-   (ask-question
-    "Recreate tables?"
-    (lambda ()
-      (drop-table post)
-      (create-table post)))
-   (ask-question
-    "Create sample data?"
-    (lambda ()
-      (with-message
-       "Creating sample data"
-       (lambda ()
-         (for ([index (in-range 1000)])
-           (save! (make-post (format "Post ~a" index)
-                             (string-append (format "This is post number ~a." index)
-                                            #<<ENDPOST
+(define (recreate-test-data)
+  (call-with-connection
+   (lambda ()
+     (ask-question
+      "Recreate tables?"
+      (lambda ()
+        (for-each drop-table (list test-entity post))
+        (for-each create-table (list post test-entity))))
+     (ask-question
+      "Create sample data?"
+      (lambda ()
+        (with-message
+         "Creating sample data"
+         (lambda ()
+           (for ([index (in-range 1000)])
+             (save! (make-post (format "Post ~a" index)
+                               (string-append (format "This is post number ~a." index)
+                                              #<<ENDPOST
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed sed nisi nec urna rutrum pharetra. Morbi lectus. Fusce ultricies odio ac metus. Aliquam fringilla mauris vel purus. Nullam ornare semper tellus. Quisque consequat luctus nibh. Cras malesuada suscipit orci. Cras vel quam id risus dictum adipiscing. Ut tortor. Fusce nisi enim, fermentum sed, mattis nec, posuere vitae, metus. In sit amet enim. In hac habitasse platea dictumst. Quisque nunc magna, mollis ac, pharetra sit amet, semper eget, erat. In pellentesque. Sed viverra ipsum fermentum risus. Duis nisi nulla, pellentesque id, vehicula et, vehicula ut, mi. Suspendisse ornare, turpis eu imperdiet placerat, justo eros adipiscing libero, nec fermentum pede metus at nulla.
 
@@ -51,4 +52,4 @@ Nam aliquam diam ut nisi. Nulla leo risus, congue eget, rutrum vel, pellentesque
 Vestibulum vitae diam. Aliquam vulputate tempus arcu. Cras consequat vestibulum magna. Pellentesque sem. Proin bibendum. Quisque sed lectus. Cras ut sapien. Nulla facilisis tempus ipsum. Ut vulputate mauris et enim. Integer a augue. Nullam nec odio. Curabitur tempor mi eu mauris. Sed et nulla. Mauris massa justo, pulvinar at, imperdiet ac, dictum vitae, nunc. Aliquam eget enim sed augue accumsan auctor. Praesent est. Nam quis quam. Nam pellentesque magna luctus leo. Cras mollis elementum est.
 
 ENDPOST
-                                            ))))))))))
+                                              )))))))))))

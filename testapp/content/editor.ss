@@ -12,11 +12,10 @@
 (define-controller (editor request)
   (call-with-connection
    (lambda ()
-     (send (send editor-page get-editor)
-           set-value!
-           (select-one #:from  post #:order ((asc post.guid))))
-     (send editor-page respond)
-     (editor (current-request)))))
+     (let ([entity (send (send editor-page get-editor) get-entity)])
+       (let loop ([struct ((entity-defaults-constructor entity))])
+         (send (send editor-page get-editor) set-value! struct)
+         (loop (send editor-page respond)))))))
 
 ; Helpers ----------------------------------------
 
@@ -30,17 +29,12 @@
     
     ; Fields -------------------------------------
     
-    (field subject-field
-      (new integer-editor% [attributes (list (attr post subject))]))
-    
-    (field content-field
-      (new integer-editor% [attributes (list (attr post content))]))
-
     (field notification-pane
       (new notification-pane%)
       #:child)
     
-    (field editor (new entity-editor% [entity post])
+    (field editor
+      (new entity-editor% [entity kitchen-sink])
       #:child #:accessor)
     
     (field submit-button
@@ -49,7 +43,7 @@
     
     ; Constructor --------------------------------
     
-    (super-new [title "Editor"])
+    (super-new [title (format "~a Editor" (string-titlecase (entity-pretty-name (send editor get-entity))))])
     
     ; Methods ------------------------------------
     

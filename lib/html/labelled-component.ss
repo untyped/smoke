@@ -3,7 +3,7 @@
 (require "../../lib-base.ss"
          "html-component.ss")
 
-(define labelled<%>
+(define labelled-component<%>
   (interface ()
     ; seed -> xml
     render-label
@@ -12,8 +12,8 @@
     ; (U xml (seed -> xml) #f) -> void
     set-label!))
 
-(define label-mixin
-  (mixin/cells (html-component<%>) (labelled<%>)
+(define labelled-component-mixin
+  (mixin/cells (html-component<%>) (labelled-component<%>)
     
     ; (cell (U xml (seed -> xml) #f)
     (init-cell label #f #:accessor #:mutator)
@@ -29,7 +29,7 @@
 
 ; Provide statements -----------------------------
 
-(provide labelled<%>
-         label-mixin)
+(provide labelled-component<%>
+         labelled-component-mixin)
 
 

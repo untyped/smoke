@@ -15,7 +15,7 @@
 ; for a truth value.
 
 (define check-box%
-  (class/cells (label-mixin form-element%) ()
+  (class/cells (labelled-component-mixin form-element%) ()
     
     (inherit get-id
              get-enabled?
@@ -26,7 +26,10 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [value #f] #:override-accessor #:override-mutator)
+    (init-cell value #f #:override-accessor #:override-mutator)
+    
+    ; (cell boolean)
+    (init-cell show-label? #t #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

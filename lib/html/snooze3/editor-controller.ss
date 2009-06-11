@@ -2,12 +2,12 @@
 
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
-         "../browser-util.ss"
          "../disableable-element.ss"
          "../html-element.ss"
          "../notification.ss"
          "check-label.ss"
-         "form-element.ss"
+         "editor-interface.ss"
+         "entity-editor.ss"
          "util.ss")
 
 ; Interfaces -------------------------------------
@@ -60,44 +60,35 @@
     
     ; -> any
     (define/public #:callback/return (on-update)
-      (process-parse-results (debug* "parse-results" parse)))    
+      (process-parse-results (parse)))
     
     ; (listof check-result) -> any
     (define/private (process-parse-results results)
       (update-check-labels! results)
       (cond [(ormap check-warning? results) (print-check-fatals results #:id (debug-id this))
                                             (error (format "parse! method produced check-warnings:~n~s"
-                                                           (with-pretty-indent "  "
-                                                                               (pretty-format results))))
+                                                           (with-pretty-indent "  " (pretty-format results))))
                                             (send (current-page) respond)]
             [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
             [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
-            [else                           (process-validate-results (debug* "validate-results" validate))]))
+            [else                           (process-validate-results (validate))]))
     
     ; (listof check-result) -> any
     (define/private (process-validate-results results)
       (update-check-labels! results)
-      (cond [(ormap check-fatal? results)   (printf "validation fatal 2~n")
-                                            (print-check-fatals results #:id (debug-id this))
+      (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (printf "validation failed 2~n")
-                                            (notifications-add! (get-failure-notification))
+            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
             [(ormap check-warning? results) (if (value-changed?)
-                                                (begin
-                                                  (printf "validation warning 1~n")
-                                                  (notifications-add! (get-warning-notification))
-                                                  (send (current-page) respond))
-                                                (begin0
-                                                  (printf "validation warning 2~n")
-                                                  (commit-changes)
-                                                  (notifications-add! (get-commit-notification))))]
-            [else                           (begin0
-                                              (printf "validation passed~n")
-                                              (commit-changes)
-                                              (notifications-add! (get-commit-notification)))]))
+                                                (begin  (notifications-add! (get-warning-notification))
+                                                        (send (current-page) respond))
+                                                (begin0 (commit-changes)
+                                                        (notifications-add! (get-commit-notification))))]
+            [else                           (begin0 (commit-changes)
+                                                    (notifications-add! (get-commit-notification)))]))
     
     ; -> any
     (define/public (commit-changes)
