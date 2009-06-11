@@ -27,7 +27,7 @@
     
     ; -> string
     (define/public (get-date-format-example)
-      (date-format-string->example (get-date-format)))
+      (date->string (current-date) (get-date-format)))
     
     ; -> (U date #f)
     (define/override (get-value)
@@ -67,14 +67,6 @@
       (xml ,(super render seed)
            ,(opt-xml (get-show-date-label?)
               " example: " ,(get-date-format-example))))))
-
-; Helpers ----------------------------------------
-
-(define (date-format-string->example str)
-  (let ([now (current-date)])
-    (for/fold ([str str])
-              ([wildcard (in-list (regexp-match* #px"(~[a-zA-Z])" str))])
-              (regexp-replace* wildcard str (date->string now wildcard)))))
 
 ; Provide statements -----------------------------
 

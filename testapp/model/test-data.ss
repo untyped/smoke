@@ -28,15 +28,16 @@
      (ask-question
       "Recreate tables?"
       (lambda ()
-        (for-each drop-table (list test-entity post))
-        (for-each create-table (list post test-entity))))
+        (let ([entities (list post kitchen-sink)])
+          (for-each drop-table (reverse entities))
+          (for-each create-table entities))))
      (ask-question
       "Create sample data?"
       (lambda ()
         (with-message
          "Creating sample data"
          (lambda ()
-           (for ([index (in-range 1000)])
+           (for ([index (in-range 100)])
              (save! (make-post (format "Post ~a" index)
                                (string-append (format "This is post number ~a." index)
                                               #<<ENDPOST

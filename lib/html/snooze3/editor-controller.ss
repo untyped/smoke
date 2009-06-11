@@ -3,8 +3,11 @@
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
          "../disableable-element.ss"
+         "../html-component.ss"
          "../html-element.ss"
+         "../html-page.ss"
          "../notification.ss"
+         "../submit-button.ss"
          "check-label.ss"
          "editor-interface.ss"
          "entity-editor.ss"
@@ -54,9 +57,13 @@
     
     ; (listof check-result) -> void
     (define/public (update-check-labels! results)
-      (map (cut send <> set-results! results)
-           (filter (cut is-a? <> check-label<%>)
-                   (get-child-components))))
+      (let loop ([editors (list this)])
+        (match editors
+          [(list-rest curr rest)
+           (when (is-a? curr check-label<%>)
+             (send (car editors) set-results! results))
+           (loop (append rest (send curr get-editors)))]
+          [(list) (void)])))
     
     ; -> any
     (define/public #:callback/return (on-update)
@@ -97,6 +104,53 @@
           (save! (get-value))
           (error "editor is not an entity-editor: commit-changes must be overridden.")))))
 
+(define editor-page-mixin
+  (mixin/cells (html-component<%> html-page<%>) ()
+    
+    ; Fields -------------------------------------
+    
+    (init [(init-entity entity)])
+    
+    ; editor<%>
+    (field editor
+      (new entity-editor% [entity init-entity])
+      #:child #:accessor)
+    
+    ; submit-button%
+    (field submit-button
+      (new submit-button% [action (callback [editor on-update])])
+      #:child)
+    
+    ; Methods ------------------------------------
+
+    ; -> string
+    (define/override (get-title)
+      (let* ([title  (super get-title)]
+             [entity (send editor get-entity)]
+             [struct (send editor get-initial-value)])
+        (cond [title title]
+              [(and struct (snooze-struct-saved? struct))
+               (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
+              [struct (format "New ~a" (entity-pretty-name entity))]
+              [else   (format "Editing ~a" (entity-pretty-name entity))])))
+    
+    ; -> entity
+    (define/public (get-entity)
+      (send editor get-entity))
+    
+    ; -> any
+    (define/public (get-value)
+      (send editor get-value))
+    
+    ; any -> void
+    (define/public (set-value! val)
+      (send editor set-value! val))
+    
+    ; seed -> xml
+    (define/augride (render seed)
+      (xml ,(send editor render seed)
+           ,(send submit-button render seed)))))
+
 ; Classes ----------------------------------------
 
 (define entity-editor%
@@ -114,4 +168,5 @@
 (provide (all-from-out "util.ss")
          editor-controller<%>
          editor-controller-mixin
-         entity-editor%)
+         entity-editor%
+         editor-page-mixin)

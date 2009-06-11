@@ -25,30 +25,19 @@
 ; Components -------------------------------------
 
 (define editor-page
-  (singleton/cells html-page% ()
+  (singleton/cells (editor-page-mixin html-page%) ()
     
     ; Fields -------------------------------------
     
-    (field notification-pane
-      (new notification-pane%)
-      #:child)
-    
-    (field editor
-      (new entity-editor% [entity kitchen-sink])
-      #:child #:accessor)
-    
-    (field submit-button
-      (new submit-button% [action (callback [editor on-update])])
-      #:child)
+    (field notification-pane (new notification-pane%) #:child)
     
     ; Constructor --------------------------------
     
-    (super-new [title (format "~a Editor" (string-titlecase (entity-pretty-name (send editor get-entity))))])
+    (super-new [entity kitchen-sink])
     
     ; Methods ------------------------------------
     
     ; seed -> xml
-    (define/augment (render seed)
+    (define/override (render seed)
       (xml ,(send notification-pane render seed)
-           ,(send editor render seed)
-           ,(send submit-button render seed)))))
+           ,(super render seed)))))
