@@ -12,8 +12,7 @@
             (map (lambda (path/param)
                    (make-path/param (path/param-path path/param) null))
                  (url-path-base (url-path url)))
-            (url-query url)
-            (url-fragment url)))
+            null #f))
 
 ; Provide statements -----------------------------
 

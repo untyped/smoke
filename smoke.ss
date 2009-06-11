@@ -1,8 +1,7 @@
 #lang scheme/base
 
-(require (planet untyped/unlib:3/debug))
-
-(require "seed.ss"
+(require (planet untyped/mirrors:2)
+         "seed.ss"
          "class/class.ss"
          "lib/page.ss"
          "lib/html/autocomplete-field.ss"
@@ -42,7 +41,8 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out "seed.ss"
+(provide (all-from-out (planet untyped/mirrors:2)
+                       "seed.ss"
                        "class/class.ss"
                        "lib/page.ss"
                        "lib/html/autocomplete-field.ss"
