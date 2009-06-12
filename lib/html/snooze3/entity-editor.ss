@@ -27,20 +27,34 @@
     ; entity
     (init-field entity #:accessor)
     
-    ; (listof editor<%>)
-    (init-field editors (default-entity-editors entity) #:accessor #:children)
+    ; (listof attribute)
+    (init [attributes (and entity (entity-attributes entity))])
+    
+    ; (listof attribute-editor<%>)
+    (init-field editors
+      (or (and attributes
+               (default-entity-editors entity))
+          (error "entity-editor constructor: insufficient arguments"))
+      #:accessor #:children)
     
     ; (U snooze-struct #f)
     (cell initial-value #f #:accessor)
+    
+    (init [classes null])
+    
+    (super-new [classes (list* 'smoke-entity-editor 'ui-widget classes)])
     
     ; Methods ------------------------------------
     
     ; seed -> xml
     (define/override (render seed)
-      (xml (table (@ ,(core-html-attributes seed))
-                  ,@(for/list ([editor (in-list (get-editors))])
-                      (xml (tr (th ,(send editor render-label seed))
-                               (td ,(send editor render seed))))))))
+      (xml (div (@ ,(core-html-attributes seed))
+                (table (@ [class 'ui-widget])
+                       ,@(for/list ([editor (in-list (get-editors))])
+                           (xml (tr (th (@ [class "attribute-label ui-widget-header"])
+                                        ,(send editor render-label seed))
+                                    (td (@ [class "ui-widget-content"])
+                                        ,(send editor render seed)))))))))
     
     ; -> snooze-struct
     (define/public (get-value)
@@ -83,12 +97,6 @@
     ; -> (listof check-result)
     (define/public (validate)
       (check-snooze-struct (get-value)))))
-
-; Helpers ----------------------------------------
-
-; entity -> (listof attribute-editor<%>)
-(define (default-entity-editors entity)
-  (map default-attribute-editor (cddr (entity-attributes entity))))
 
 ; Provide statements -----------------------------
 

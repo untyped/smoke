@@ -2,16 +2,10 @@
 
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
-         "../disableable-element.ss"
-         "../html-component.ss"
-         "../html-element.ss"
-         "../html-page.ss"
          "../notification.ss"
-         "../submit-button.ss"
          "check-label.ss"
          "editor-interface.ss"
-         "entity-editor.ss"
-         "util.ss")
+         "entity-editor.ss")
 
 ; Interfaces -------------------------------------
 
@@ -104,50 +98,6 @@
           (save! (get-value))
           (error "editor is not an entity-editor: commit-changes must be overridden.")))))
 
-(define entity-editor-page-mixin
-  (compose (mixin/cells (entity-editor<%> html-page<%>) ()
-             
-             (inherit get-entity
-                      get-initial-value)
-             
-             ; Fields -------------------------------------
-             
-             (field notification-pane (new notification-pane%) #:child)
-             
-             ; submit-button%
-             (field submit-button (new submit-button% [action (callback on-update)]) #:child)
-             
-             ; Constructor --------------------------------
-             
-             (super-new)
-             
-             ; Methods ------------------------------------
-             
-             ; -> string
-             (define/override (get-title)
-               (let* ([title  (super get-title)]
-                      [entity (get-entity)]
-                      [struct (get-initial-value)])
-                 (cond [title title]
-                       [(and struct (snooze-struct-saved? struct))
-                        (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
-                       [struct (format "New ~a" (entity-pretty-name entity))]
-                       [else   (format "Editing ~a" (entity-pretty-name entity))])))
-             
-             ; seed -> xml
-             (define/override (render seed)
-               (xml ,(send notification-pane render seed)
-                    ,(super render seed)
-                    ,(send submit-button render seed))))
-           editor-controller-mixin
-           entity-editor-mixin
-           disableable-element-mixin))
-
-; Classes ----------------------------------------
-
-(define entity-editor%
-  (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-element%))))
-
 ; Helpers ----------------------------------------
 
 ; component<%> -> symbol
@@ -157,8 +107,5 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out "util.ss")
-         editor-controller<%>
-         editor-controller-mixin
-         entity-editor%
-         entity-editor-page-mixin)
+(provide editor-controller<%>
+         editor-controller-mixin)

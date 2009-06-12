@@ -209,6 +209,30 @@ textarea.placeholder {
     margin-bottom: 0px;
 }
 
+/* editors ------------------------------------ */
+
+.smoke-entity-editor th,
+.smoke-entity-editor td {
+  vertical-align: top;
+}
+
+.smoke-entity-editor .attribute-label {
+  text-align: right;
+}
+
+/* views -------------------------------------- */
+
+.smoke-entity-view th,
+.smoke-entity-view td {
+  vertical-align: top;
+  width: 100%;
+}
+
+.smoke-entity-view .attribute-label {
+  text-align: right;
+  width: 200px;
+}
+
 /* wizards ------------------------------------ */
 
 .smoke-wizard table.labels {

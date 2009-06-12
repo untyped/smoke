@@ -1,10 +1,8 @@
 #lang scheme/base
 
-(require scheme/match
-         srfi/26/cut
+(require "../../../test-base.ss"
          (prefix-in list: (only-in srfi/1/list filter))
          (planet untyped/unlib:3/gen)
-         "../../../test-base.ss"
          "report.ss")
 
 ; Tests ------------------------------------------

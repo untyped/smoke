@@ -4,7 +4,7 @@
          (planet untyped/snooze:3)
          (planet untyped/unlib:3/time)
          "../../../../lib-base.ss"
-         "../form-element.ss")
+         "../editor.ss")
 
 ; Constants --------------------------------------
 
@@ -77,9 +77,9 @@
  [crudl:delete 'delete] 
  [crudl:list   'list]
  [struct binder ([attributes  (listof attribute?)]
-                 [editors     (listof (is-a?/c snooze-form-element<%>))]
+                 [editors     (listof (is-a?/c attribute-editor<%>))]
                  [initialise! (-> snooze-struct? void)]
                  [values      (-> (listof (cons/c attribute? any/c)))])]
  [make-default-binder (-> attribute?
-                          (is-a?/c snooze-form-element<%>)
+                          (is-a?/c attribute-editor<%>)
                           binder?)])

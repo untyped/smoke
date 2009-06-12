@@ -5,7 +5,6 @@
          "../../submit-button.ss"
          "../../html-element.ss"
          "../editor.ss"
-         "../form-element.ss"
          "default-abstract.ss"
          "interfaces.ss")
 
@@ -13,8 +12,8 @@
 
 ; Sensible defaults for deleting a struct
 (define (default-delete-mixin)
-  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> crudl-review+delete+list<%> crudl-editor<%>) 
-    (crudl-review+delete<%> crudl-editor<%> snooze-editor<%>)
+  (mixin/cells (html-element<%> crud-element<%> crudl-element<%> crudl-review+delete+list<%> crudl-editor<%> editor-controller<%> entity-editor<%>) 
+    (crudl-review+delete<%> crudl-editor<%>)
     
     (inherit get-struct
              render-struct)

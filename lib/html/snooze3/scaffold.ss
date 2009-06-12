@@ -21,15 +21,6 @@
     (review-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element)))))))
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-update-element entity
-                                 #:crudl-mixin  [crudl-mixin  (default-crudl-mixin entity)]
-                                 #:crud-mixin   [crud-mixin   (default-crud-mixin)]
-                                 #:editor-mixin [editor-mixin (default-crudl-editor-mixin)]
-                                 #:update-mixin [update-mixin (default-create+update-mixin)])
-  (lambda (element)
-    (update-mixin (editor-mixin (crud-mixin (crudl-mixin element))))))
-
-; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
 (define (scaffold-delete-element entity
                                  #:crudl-mixin  [crudl-mixin  (default-crudl-mixin entity)]
                                  #:crud-mixin   [crud-mixin   (default-crud-mixin)]

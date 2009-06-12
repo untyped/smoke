@@ -8,11 +8,13 @@
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
+         "../../web-server/expired-continuation.ss"
          "../page.ss"
          "browser-util.ss"
          "html-box.ss"
          "html-component.ss"
-         "html-element.ss")
+         "html-element.ss"
+         "notification.ss")
 
 (define html-page<%>
   (interface (page<%>)
@@ -34,7 +36,6 @@
              get-dirty-components
              get-html-requirements/fold
              get-http-code
-             get-http-headers
              get-http-status
              get-http-timestamp
              get-id
@@ -80,14 +81,10 @@
     
     (super-new [classes (cons 'smoke-html-page classes)] [content-type content-type])
     
-    ; html-div%
-    ;
-    ; This placeholder acts to prevent the whole page content being
-    ; refreshed when a dialog is added or removed.
-    (field [dialog-placeholder (new html-box%
-                                    [id      (symbol-append (get-id) '-dialog-placeholder)]
-                                    [classes '(smoke-html-page-dialog-placeholder)])]
-      #:child #:accessor #:mutator)
+    ; notification-pane%
+    (field notification-pane 
+      (new notification-pane% [id (symbol-append (get-id) '-notifications)])
+      #:child #:accessor)
     
     ; Accessors ----------------------------------
     
@@ -95,16 +92,14 @@
     (define/public (get-form-id)
       (symbol-append (get-id) '-form))
     
-    ; -> (U html-dialog% #f)
-    (define/public (get-dialog)
-      (send dialog-placeholder get-content))
-    
-    ; (U html-dialog% #f) -> void
-    (define/public (set-dialog! new-dialog)
-      (define old-dialog (send dialog-placeholder get-content))
-      (when old-dialog (send old-dialog set-page! #f))
-      (send dialog-placeholder set-content! new-dialog)
-      (when new-dialog (send new-dialog set-page! this)))
+    ; -> (listof header)
+    (define/override (get-http-headers)
+      (assemble-list
+       [#t ,@no-cache-http-headers]
+       [(expiry-cookie-ref (current-request))
+        (begin (notifications-add! (xml "You have been redirected from an expired web address. "
+                                        "If you were editing data on the last page you visited, some changes may have been lost.") #t)
+               (make-cancel-expiry-header (current-request)))]))
     
     ; Response generation ------------------------
     
@@ -291,8 +286,8 @@
                     [enctype        "multipart/form-data"]
                     [accept-charset "utf-8"]
                     [action         "javascript:void(0)"])
-                 ,(inner (xml "Page under construction.") render seed)
-                 ,(send dialog-placeholder render seed))))
+                 ,(send notification-pane render seed)
+                 ,(inner (xml "Page under construction.") render seed))))
     
     ; seed -> js
     (define/override (get-on-render seed)

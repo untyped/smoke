@@ -3,7 +3,7 @@
 (require (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "form-element.ss"
-         "labelled-component.ss")
+         "labelled-element.ss")
 
 ; Browsers only submit values for HTML checkboxes to the server when they are checked.
 ; The absence of a value is supposed to be enough to tell that a checkbox was left unchecked.
@@ -15,7 +15,7 @@
 ; for a truth value.
 
 (define check-box%
-  (class/cells (labelled-component-mixin form-element%) ()
+  (class/cells (labelled-element-mixin form-element%) ()
     
     (inherit get-id
              get-enabled?
@@ -62,7 +62,6 @@
       (define wrapper-id (get-wrapper-id))
       (define hidden-id  (get-hidden-id))
       (define value      (get-value))
-      (define label      (get-label))
       (xml (span (@ [id ,wrapper-id])
                  (input (@ [id    ,hidden-id]
                            [name  ,hidden-id]
@@ -71,9 +70,8 @@
                  (input (@ ,(core-html-attributes seed)
                            [type "checkbox"]
                            ,(opt-xml-attr value checked "checked")))
-                 ,(opt-xml label
-                    " " (label (@ [for ,id])
-                               ,(render-label seed))))))
+                 ,(opt-xml (get-show-label?)
+                    ,(render-label seed)))))
     
     ; request -> void
     (define/augment (on-request request)

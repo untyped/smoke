@@ -10,7 +10,7 @@
          "../file-field.ss"
          "../form-element.ss"
          "../integer-field.ss"
-         "../labelled-component.ss"
+         "../labelled-element.ss"
          "../number-field.ss"
          "../password-field.ss"
          ;"../radio-button.ss"
@@ -25,7 +25,7 @@
 ; Interfaces -------------------------------------
 
 (define attribute-editor<%>
-  (interface (labelled-component<%> editor<%> check-label<%>)
+  (interface (editor<%> labelled-element<%> check-label<%>)
     get-attributes ; -> (listof attribute)
     restructure    ; snooze-struct -> snooze-struct
     destructure!)) ; snooze-struct -> void
@@ -33,9 +33,11 @@
 ; Mixins -----------------------------------------
 
 (define attribute-editor-mixin
-  (mixin/cells (form-element<%> labelled-component<%> check-label<%>) (attribute-editor<%>)
+  (mixin/cells (form-element<%> labelled-element<%> check-label<%>) (attribute-editor<%>)
     
-    (inherit get-id 
+    (inherit get-component-id
+             get-id 
+             set-id!
              get-value
              set-value!
              render-label
@@ -44,19 +46,29 @@
     
     ; Fields -------------------------------------
     
+    (super-new)
+    
     ; (listof attribute)
     (init-cell attributes null #:accessor)
     
     ; boolean
-    (init-field required? #f #:accessor)
+    (init-field required?
+      (and (pair? attributes)
+           (let ([attr (car attributes)])
+             (not (type-allows-null? (attribute-type attr)))))
+      #:accessor)
     
-    ; Constructor --------------------------------
+    (init [id    (if (pair? attributes)
+                     (let ([attr (car attributes)])
+                       (symbol-append (entity-name (attribute-entity attr)) '- (attribute-name attr)))
+                     (get-component-id))]
+          [label (if (pair? attributes)
+                     (let ([attr (car attributes)])
+                       (xml-quote (string-titlecase (attribute-pretty-name attr))))
+                     (xml-quote id))])
     
-    (super-new)
-    
-    (set-label! (xml-quote (string-titlecase (if (pair? attributes)
-                                                 (attribute-pretty-name (car attributes))
-                                                 (symbol->string (get-id))))))
+    (set-id! id)
+    (set-label! label)
     
     ; Methods ------------------------------------
     
@@ -76,8 +88,7 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (define id (get-wrapper-id))
-      (xml (span (@ [id ,id])
+      (xml (span (@ [id ,(get-wrapper-id)])
                  ,(super render seed) " "
                  ,(opt-xml required? "(required) ")
                  ,(render-check-label seed))))
@@ -85,16 +96,16 @@
     ; snooze-struct -> snooze-struct
     (define/public (destructure! struct)
       (match (get-attributes)
-        [(list (? attribute? attr))
+        [(list-rest (? attribute? attr) _)
          (set-value! (snooze-struct-ref struct attr))]
-        [attrs (error "editing multiple attributes: destructure! must be overridden" attrs)]))
+        [attrs (raise-type-error 'attribute-editor.destructure! "(list attribute attribute ...)" attrs)]))
     
     ; snooze-struct -> snooze-struct
     (define/public (restructure struct)
       (match (get-attributes)
-        [(list (? attribute? attr))
+        [(list-rest (? attribute? attr) _)
          (snooze-struct-set struct attr (get-value))]
-        [attrs (error "editing multiple attributes: restructure must be overridden" attrs)]))
+        [attrs (raise-type-error 'attribute-editor.restructure "(list attribute attribute ...)" attrs)]))
     
     ; -> (listof check-result)
     (define/public (parse)
@@ -120,7 +131,7 @@
 ; Classes ----------------------------------------
 
 (define complete-attribute-editor-mixin
-  (compose attribute-editor-mixin check-label-mixin labelled-component-mixin))
+  (compose attribute-editor-mixin check-label-mixin labelled-element-mixin))
 
 (define autocomplete-editor%              (complete-attribute-editor-mixin autocomplete-field%))
 (define check-box-editor%                 (attribute-editor-mixin (check-label-mixin check-box%)))
@@ -174,25 +185,22 @@
 ; attribute -> attribute-editor<%>
 (define (default-attribute-editor attr)
   (let* ([entity    (attribute-entity attr)]
-         [id        (symbol-append (entity-name entity) '- (attribute-name attr) '-field)]
-         [label     (string-titlecase (attribute-pretty-name attr))]
-         [type      (attribute-type attr)]
-         [required? (not (type-allows-null? type))])
+         [type      (attribute-type attr)])
     (match type
-      [(struct guid-type (_ entity)) (new foreign-key-editor% [id id] [label label] [attributes (list attr)] [required? required?] [entity entity])]
-      [(? boolean-type?)             (new check-box-editor%   [id id] [label label] [attributes (list attr)] [required? required?] [show-label? #f])]
-      [(? integer-type?)             (new integer-editor%     [id id] [label label] [attributes (list attr)] [required? required?])]
-      [(? real-type?)                (new number-editor%      [id id] [label label] [attributes (list attr)] [required? required?])]
-      [(? time-utc-type?)            (new (time-utc-editor-mixin date-editor%) [id id] [label label] [attributes (list attr)] [required? required?] [size 10])]
-      [(? time-tai-type?)            (new (time-tai-editor-mixin date-editor%) [id id] [label label] [attributes (list attr)] [required? required?] [size 10])]
+      [(struct guid-type (_ entity)) (new foreign-key-editor% [attributes (list attr)] [entity entity])]
+      [(? boolean-type?)             (new check-box-editor%   [attributes (list attr)] [show-label? #f])]
+      [(? integer-type?)             (new integer-editor%     [attributes (list attr)])]
+      [(? real-type?)                (new number-editor%      [attributes (list attr)])]
+      [(? time-utc-type?)            (new (time-utc-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
+      [(? time-tai-type?)            (new (time-tai-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
       [(struct string-type (_ max-length))
        (if max-length
-           (new text-field-editor% [id id] [label label] [attributes (list attr)] [required? required?] [size 50] [max-length max-length])
-           (new text-area-editor%  [id id] [label label] [attributes (list attr)] [required? required?] [cols 50] [rows 10]))]
+           (new text-field-editor% [attributes (list attr)] [size 50] [max-length max-length])
+           (new text-area-editor%  [attributes (list attr)] [cols 50] [rows 10]))]
       [(struct symbol-type (_ max-length))
        (if max-length
-           (new (symbol-editor-mixin text-field-editor%) [id id] [label label] [attributes (list attr)] [required? required?] [size 50] [max-length max-length])
-           (new (symbol-editor-mixin text-area-editor%)  [id id] [label label] [attributes (list attr)] [required? required?] [cols 50] [rows 10]))])))
+           (new (symbol-editor-mixin text-field-editor%) [attributes (list attr)] [size 50] [max-length max-length])
+           (new (symbol-editor-mixin text-area-editor%)  [attributes (list attr)] [cols 50] [rows 10]))])))
 
 ; Helpers ----------------------------------------
 

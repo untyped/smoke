@@ -7,7 +7,8 @@
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "form-element.ss"
-         "disableable-element.ss")
+         "disableable-element.ss"
+         "labelled-element.ss")
 
 ; Both radio-group% and all radio-button%s must be added as children of
 ; the component in which they are rendered.
@@ -77,10 +78,11 @@
           (when binding (set-selected/id! (string->symbol binding))))))))
 
 (define radio-button%
-  (class/cells disableable-element% ()
+  (class/cells (labelled-element-mixin disableable-element%) ()
     
     (inherit get-id
-             core-html-attributes)
+             core-html-attributes
+             render-label)
     
     ; Fields -----------------------------------
     
@@ -93,9 +95,6 @@
     ; by equality-testing the value of the selected item, hence we need
     ; distinct values by default.
     (init-cell [value (gensym/interned 'radio-button)] #:accessor #:mutator)
-    
-    ; (cell xml)
-    (init-cell [label #f] #:accessor #:mutator)
     
     ; Constructor ------------------------------
     
@@ -129,7 +128,6 @@
       (define group    (get-group))
       (define name     (send group get-id))
       (define value    (get-id))
-      (define label    (get-label))
       (define checked? (equal? (get-value) (send group get-value)))
       (define enabled? (get-enabled?))
       (xml (input (@ ,@(core-html-attributes seed)
@@ -138,8 +136,7 @@
                      [value ,value]
                      ,@(if checked? (xml-attrs [checked "checked"]) null)
                      ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
-           ,(opt-xml label
-              " " (label (@ [for ,id]) ,label))))
+           ,(render-label seed)))
     
     ; seed -> js
     (define/augment (get-on-click seed)

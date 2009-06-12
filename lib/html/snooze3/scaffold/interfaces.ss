@@ -37,7 +37,7 @@
 
 ; Editor elements inherit from snooze editor, and have a submit button label method
 (define crudl-editor<%>
-  (interface (snooze-editor<%>)
+  (interface (editor-controller<%>)
     get-button-label))
 
 ; All review-delete-list elements must:
@@ -59,7 +59,7 @@
 
 ; create and update pages need to convert attributes into editor components
 (define crudl-create+update<%>
-  (interface (crudl-element<%> crud-element<%> snooze-editor<%>)
+  (interface (crudl-element<%> crud-element<%> editor-controller<%>)
     make-binder/attrs  ; attribute -> binder
     get-binder))       ; attribute -> binder
 

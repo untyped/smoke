@@ -71,11 +71,11 @@
 ; Defaults for editor mixins: force snooze-editor compliance, and customise button text
 (define (default-crudl-editor-mixin)
   (let ([crudl-extension-mixin 
-         (mixin/cells (snooze-editor<%>) (crudl-editor<%>)
+         (mixin/cells (editor-controller<%>) (crudl-editor<%>)
            ; string -> submit-button
            (define/public (get-button-label)
              "Okay"))])
-    (lambda (element) (crudl-extension-mixin (snooze-editor-mixin element)))))
+    (lambda (element) (crudl-extension-mixin (editor-controller-mixin (entity-editor-mixin element))))))
 
 
 
