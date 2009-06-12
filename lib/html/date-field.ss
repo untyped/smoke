@@ -3,6 +3,7 @@
 (require srfi/19
          (planet untyped/unlib:3/time)
          "../../lib-base.ss"
+         "browser-util.ss"
          "form-element.ss"
          "text-field.ss")
 
@@ -15,15 +16,32 @@
 (define date-field%
   (class/cells text-field% (date-field<%>)    
     
+    (inherit get-id)
+    
     ; Fields -------------------------------------    
     
     ; (cell string)
-    (init-cell date-format "~Y-~m-~d ~H:~M" #:accessor #:mutator)
+    (init-cell date-format
+      "~Y-~m-~d ~H:~M"
+      #:accessor #:mutator)
     
     ; (cell boolean)
     (init-cell show-date-label? #f #:accessor #:mutator)
     
+    ; (cell (U string #f))
+    (init-cell date-picker-format (date-format->jquery-ui-date-format date-format) #:accessor #:mutator)
+    
+    (init [classes null])
+    
+    (super-new [classes (list* 'smoke-date-field classes)])
+    
     ; Public methods -----------------------------
+    
+    ; -> (listof (U xml (seed -> xml)))
+    (define/augment (get-html-requirements)
+      (if (get-date-picker-format)
+          (list* jquery-ui-script (inner null get-html-requirements))
+          (inner null get-html-requirements)))
     
     ; -> string
     (define/public (get-date-format-example)
@@ -41,7 +59,7 @@
                                      (raise-exn exn:smoke:form 
                                        (format "value must be in the format: ~a" (get-date-format-example))
                                        this))])
-          (string->date val fmt))))
+          (and val (string->date val fmt)))))
     
     ; -> (U time-utc #f)
     (define/public (get-time-utc)
@@ -66,7 +84,62 @@
     (define/override (render seed)
       (xml ,(super render seed)
            ,(opt-xml (get-show-date-label?)
-              " example: " ,(get-date-format-example))))))
+              " example: " ,(get-date-format-example))))
+    
+    ; seed -> js
+    (define/augment (get-on-attach seed)
+      (let ([fmt (get-date-picker-format)])
+        (js ,(opt-js fmt
+               (!dot ($ ,(format "#~a" (get-id)))
+                     (datepicker (!object [dateFormat      ,fmt]
+                                          [showOn          "button"]
+                                          [buttonImage     "/images/jquery-ui/calendar.gif"]
+                                          [buttonImageOnly #t]))))
+            ,(inner (js) get-on-attach seed))))
+    
+    ; seed -> js
+    (define/augment (get-on-detach seed)
+      (let ([fmt (get-date-picker-format)])
+        (js ,(opt-js fmt
+               (!dot ($ ,(format "#~a" (get-id)))
+                     (datepicker "destroy")))
+            ,(inner (js) get-on-detach seed))))))
+
+; Helpers ----------------------------------------
+
+; string -> (U string #f)
+(define (date-format->jquery-ui-date-format fmt)
+  (let/ec return
+    (regexp-replace*
+     #px"~."
+     (regexp-replace*
+      #px"(~.)?([^~]+)(~.)?"
+      (regexp-replace* #px"'" fmt "''")
+      (lambda (a b c d)
+        (if b
+            (if d
+                (format "~a'~a'~a" b c d)
+                (format "~a'~a'" b c))
+            (if d
+                (format "'~a'~a" c d)
+                (format "'~a'" c)))))
+     (match-lambda
+       ["~~" "~"]
+       ["~a" "D"]
+       ["~A" "DD"]
+       ["~b" "M"]
+       ["~B" "MM"]
+       ["~d" "dd"]
+       ["~e" "d"]
+       ["~h" "M"]
+       #;["~H" (return #f)]
+       #;["~k" (return #f)]
+       ["~m" "mm"]
+       #;["~M" (return #f)]
+       #;["~S" (return #f)]
+       ["~y" "y"]
+       ["~Y" "yy"]
+       [_ (return #f)]))))
 
 ; Provide statements -----------------------------
 

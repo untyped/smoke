@@ -18,7 +18,7 @@
 ; Mixins -----------------------------------------
 
 (define attribute-view-mixin
-  (mixin/cells (html-element<%> labelled-element<%> check-label<%>) (attribute-view<%>)
+  (mixin/cells (html-element<%> labelled-element<%> check-label<%> view<%>) (attribute-view<%>)
     
     (inherit core-html-attributes
              get-component-id
@@ -52,10 +52,6 @@
     
     ; Methods ------------------------------------
     
-    ; -> (listof editor<%>)
-    (define/public (get-views)
-      null)
-    
     ; check-result -> boolean
     (define/override (report-result? result)
       (or (memq this (check-result-annotation result ann:form-elements))
@@ -69,15 +65,11 @@
     ; seed -> xml
     (define/override (render seed)
       (xml (span (@ ,(core-html-attributes seed))
-                 ,(render-value seed)
+                 ,(let ([val (get-value)])
+                    (if (snooze-struct? val)
+                        (xml-quote (format-snooze-struct val))
+                        (xml-quote val)))
                  ,(render-check-label seed))))
-    
-    ; seed -> xml
-    (define/public (render-value seed)
-      (let ([val (get-value)])
-        (if (snooze-struct? val)
-            (xml-quote (format-snooze-struct val))
-            (xml-quote val))))
     
     ; snooze-struct -> snooze-struct
     (define/public (destructure! struct)
@@ -89,9 +81,10 @@
 ; Classes ----------------------------------------
 
 (define complete-attribute-view-mixin
-  (compose attribute-view-mixin check-label-mixin labelled-element-mixin))
+  (compose attribute-view-mixin check-label-mixin labelled-element-mixin simple-view-mixin))
 
-(define attribute-view% (complete-attribute-view-mixin html-element%))
+(define attribute-view%
+  (complete-attribute-view-mixin html-element%))
 
 ; Procedures -------------------------------------
 

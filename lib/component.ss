@@ -12,12 +12,13 @@
     render                 ; seed -> content
     get-child-components   ; -> (listof component<%>)
     get-all-components     ; -> (listof component<%>)
-    get-dirty-components)) ; -> (listof component<%>)
+    get-dirty-components   ; -> (listof component<%>)
+    custom-print))         ; output-port boolean (U symbol #f) -> void
 
 ; Classses ---------------------------------------
 
 (define component%
-  (class/cells object/cells% (component<%>)
+  (class/cells object/cells% (component<%> printable<%>)
     
     (inherit dirty?)
     
@@ -110,7 +111,31 @@
       (if (dirty?)
           (list this)
           (append-map (cut send <> get-dirty-components)
-                      (get-child-components))))))
+                      (get-child-components))))
+    
+    ; Printing -----------------------------------
+    
+    ; -> (U symbol #f)
+    (define (get-class-name)
+      (define-values (class object-skipped?)
+        (object-info this))
+      (define-values (class-name field-count field-name-list field-accessor field-mutator super-class class-skipped?) 
+        (if object-skipped?
+            (list #f #f #f #f #f #f #t)
+            (class-info class)))
+      class-name)
+    
+    ; output-port -> void
+    (define/public (custom-write out)
+      (custom-print out #t (get-class-name)))
+    
+    ; output-port -> void
+    (define/public (custom-display out)
+      (custom-print out #f (get-class-name)))
+    
+    ; output-port boolean (U symbol #f) -> void
+    (define/public (custom-print out write? class-name)
+      (fprintf out "#(~a ~a)" (or class-name 'unknown-component (get-component-id))))))
 
 ; Procedures -------------------------------------
 

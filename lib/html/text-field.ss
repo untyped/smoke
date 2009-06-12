@@ -55,13 +55,14 @@
                           binding))))))
     
     ; seed -> js
-    (define/augride (get-on-attach seed)
+    (define/augment (get-on-attach seed)
       (define raw         (get-raw))
       (define placeholder (get-placeholder))
       (js ,(opt-js (and placeholder (string=? raw ""))
              (!dot ($ ,(format "#~a" (get-id)))
                    (addClass "placeholder")
-                   (val ,placeholder)))))
+                   (val ,placeholder)))
+          ,(inner (js) get-on-attach seed)))
     
     ; seed -> js
     (define/augride (get-on-focus seed)

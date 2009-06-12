@@ -13,14 +13,17 @@
 (define entity-editor<%>
   (interface (editor<%>)
     get-entity
-    get-initial-value))
+    get-struct
+    set-struct!
+    get-initial-struct))
 
 ; Mixins -----------------------------------------
 
 (define entity-editor-mixin
-  (mixin/cells (html-element<%>) (entity-editor<%>)
+  (mixin/cells (html-element<%> editor<%>) (entity-editor<%>)
     
-    (inherit core-html-attributes)
+    (inherit core-html-attributes
+             get-editors)
     
     ; Fields -------------------------------------
     
@@ -31,17 +34,15 @@
     (init [attributes (and entity (entity-data-attributes entity))])
     
     ; (listof attribute-editor<%>)
-    (init-field editors
-      (or (and attributes (map default-attribute-editor attributes))
-          (error "entity-editor constructor: insufficient arguments"))
-      #:accessor #:children)
+    (init [editors    (or (and attributes (map default-attribute-editor attributes))
+                          (error "entity-editor constructor: insufficient arguments"))])
     
     ; (U snooze-struct #f)
-    (cell initial-value #f #:accessor)
+    (cell initial-struct #f #:accessor)
     
     (init [classes null])
     
-    (super-new [classes (list* 'smoke-entity-editor 'ui-widget classes)])
+    (super-new [classes (list* 'smoke-entity-editor 'ui-widget classes)] [editors editors])
     
     ; Methods ------------------------------------
     
@@ -54,40 +55,27 @@
                                (td ,(send editor render seed))))))))
     
     ; -> snooze-struct
-    (define/public (get-value)
-      (let ([init (get-initial-value)])
+    (define/public (get-struct)
+      (let ([init (get-initial-struct)])
         (if (snooze-struct? init)
-            (for/fold ([struct (get-initial-value)])
-                      ([editor (in-list editors)])
+            (for/fold ([struct init])
+                      ([editor (in-list (get-editors))])
                       (send editor restructure struct))
-            (raise-type-error 'entity-editor.get-value "snooze-struct" #f))))
+            (raise-type-error 'entity-editor.get-struct "snooze-struct" #f))))
     
     ; snooze-struct -> void
-    (define/public (set-value! struct)
+    (define/public (set-struct! struct)
       (unless (snooze-struct? struct)
-        (raise-type-error 'entity-editor.set-value! "snooze-struct" struct))
-      (web-cell-set! initial-value-cell struct)
-      (for ([editor (in-list editors)])
+        (raise-type-error 'entity-editor.set-struct! "snooze-struct" struct))
+      (web-cell-set! initial-struct-cell struct)
+      (for ([editor (in-list (get-editors))])
         (send editor destructure! struct)))
-    
-    ; -> boolean
-    (define/public (value-valid?)
-      (not (check-failures? (check-snooze-struct (get-value)))))
-    
-    ; -> boolean
-    (define/public (value-changed?)
-      (for/or ([editor (in-list (get-editors))])
-        (send editor value-changed?)))
-    
+        
     ; -> (listof check-result)
-    (define/public (parse)
-      (apply check-problems
-             (for/list ([editor (in-list (get-editors))])
-               (send editor parse))))
-    
-    ; -> (listof check-result)
-    (define/public (validate)
-      (check-snooze-struct (get-value)))))
+    (define/override (validate)
+      (check-problems
+       (super validate)
+       (check-snooze-struct (get-struct))))))
 
 ; Provide statements -----------------------------
 

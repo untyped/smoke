@@ -57,22 +57,22 @@
       (send editor get-entity))
     
     ; -> (U snooze-struct #f)
-    (define/public (get-initial-value)
-      (send editor get-initial-value))
+    (define/public (get-initial-struct)
+      (send editor get-initial-struct))
     
     ; -> (U snooze-struct #f)
-    (define/public (get-value)
-      (send editor get-value))
+    (define/public (get-struct)
+      (send editor get-struct))
     
     ; snooze-struct -> void
-    (define/public (set-value! val)
-      (send editor set-value! val))
+    (define/public (set-struct! struct)
+      (send editor set-struct! struct))
     
     ; -> string
     (define/override (get-title)
       (let* ([title  (super get-title)]
              [entity (get-entity)]
-             [struct (get-initial-value)])
+             [struct (get-initial-struct)])
         (cond [title title]
               [(and struct (snooze-struct-saved? struct))
                (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
@@ -87,7 +87,11 @@
 ; Classes ----------------------------------------
 
 (define entity-editor%
-  (editor-controller-mixin (entity-editor-mixin (disableable-element-mixin html-element%))))
+  (class/cells (editor-controller-mixin (entity-editor-mixin (simple-editor-mixin html-element%))) ()
+    (inherit get-struct)
+    ; -> void
+    (define/override (commit-changes)
+      (save! (get-struct)))))
 
 ; Provide statements -----------------------------
 

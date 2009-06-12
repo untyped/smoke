@@ -49,18 +49,18 @@
       (send view get-entity))
     
     ; -> (U snooze-struct #f)
-    (define/public (get-value)
-      (send view get-value))
+    (define/public (get-struct)
+      (send view get-struct))
     
     ; snooze-struct -> void
-    (define/public (set-value! val)
-      (send view set-value! val))
+    (define/public (set-struct! struct)
+      (send view set-struct! struct))
     
     ; -> string
     (define/override (get-title)
       (let* ([title  (super get-title)]
              [entity (get-entity)]
-             [struct (get-value)])
+             [struct (get-struct)])
         (cond [title title]
               [struct (format "~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
               [else   (entity-pretty-name entity)])))
@@ -108,18 +108,18 @@
       (send view get-entity))
     
     ; -> (U snooze-struct #f)
-    (define/public (get-value)
-      (send view get-value))
+    (define/public (get-struct)
+      (send view get-struct))
     
     ; (U snooze-struct #f) -> void
-    (define/public (set-value! val)
-      (send view set-value! val))
+    (define/public (set-struct! struct)
+      (send view set-struct! struct))
     
     ; -> string
     (define/override (get-title)
       (let* ([title  (super get-title)]
              [entity (get-entity)]
-             [struct (get-value)])
+             [struct (get-struct)])
         (cond [title title]
               [struct (format "Delete ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
               [else   (format "Delete ~a" (entity-pretty-name entity))])))
@@ -131,7 +131,7 @@
     
     ; -> snooze-struct
     (define/public #:callback/return (on-delete)
-      (delete! (get-value)))))
+      (delete! (get-struct)))))
 
 ; Helpers ----------------------------------------
 

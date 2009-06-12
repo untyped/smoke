@@ -5,20 +5,21 @@
          "../../../lib-base.ss"
          "../browser-util.ss"
          "../html-element.ss"
+         "checkable.ss"
+         "editor-interface.ss"
          "util.ss")
 
 ; Interfaces -------------------------------------
 
 (define check-label<%>
-  (interface ()
-    report-result?                  ; check-result -> void
-    set-results!                    ; (listof check-result) -> void
-    render-check-label))            ; seed [boolean] -> xml
+  (interface (checkable<%>)
+    report-result?       ; check-result -> void
+    render-check-label)) ; seed [boolean] -> xml
 
 ; Mixins -----------------------------------------
 
 (define check-label-mixin
-  (mixin/cells (html-element<%>) (check-label<%>)
+  (mixin/cells (html-element<%> checkable<%>) (check-label<%>)
     
     (inherit get-id
              core-html-attributes)
@@ -26,13 +27,18 @@
     ; Fields -------------------------------------
     
     ; (cell (listof check-result))
-    (init-cell [results null] #:accessor #:mutator)
+    (init-cell [check-results null] #:accessor)
     
     ; Methods ------------------------------------
     
     ; check-result -> boolean
     (define/public (report-result? result)
-      (error "report-result? must be overridden"))
+      (and (memq this (check-result-annotation result ann:form-elements)) #t))
+    
+    ; (listof check-result) -> void
+    (define/override (set-check-results! results)
+      (super set-check-results! results)
+      (web-cell-set! check-results-cell results))
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
@@ -55,10 +61,9 @@
       ; (listof check-result)
       (define reportable-results
         (filter (cut report-result? <>) 
-                (get-results)))
+                (get-check-results)))
       ; (U 'check-success 'check-warning 'check-failure 'check-exn)
-      (define class
-        (check-results->class reportable-results))
+      (define class (check-results->class reportable-results))
       ; xml
       (xml (span (@ [class ,(if tooltip? "check-label tooltip-anchor" "check-label")])
                  ,(opt-xml (not (eq? class 'check-success))
@@ -68,7 +73,7 @@
 ; Classes ----------------------------------------
 
 (define check-label%
-  (class/cells (check-label-mixin html-element%) ()
+  (class/cells (check-label-mixin simple-editor%) ()
     
     (inherit get-id
              core-html-attributes

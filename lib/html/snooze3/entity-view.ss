@@ -17,9 +17,10 @@
 ; Mixins -----------------------------------------
 
 (define entity-view-mixin
-  (mixin/cells (html-element<%>) (entity-view<%>)
+  (mixin/cells (html-element<%> view<%>) (entity-view<%>)
     
-    (inherit core-html-attributes)
+    (inherit core-html-attributes
+             get-views)
     
     ; Fields -------------------------------------
     
@@ -30,26 +31,20 @@
     (init [attributes (and entity (entity-data-attributes entity))])
     
     ; (listof attribute-view<%>)
-    (init-field views
-      (or (and attributes (map default-attribute-view attributes))
-          (error "entity-editor constructor: insufficient arguments"))
-      #:accessor #:children)
+    (init [views (or (and attributes (map default-attribute-view attributes))
+                     (error "entity-view constructor: insufficient arguments"))])
     
     ; (cell (U snooze-struct #f))
-    (cell value #f #:accessor)
+    (cell struct #f #:accessor)
         
     (init [classes null])
     
-    (super-new [classes (list* 'smoke-entity-view 'ui-widget classes)])
+    (super-new [classes (list* 'smoke-entity-view 'ui-widget classes)] [views views])
 
     ; Methods ------------------------------------
     
     ; seed -> xml
     (define/override (render seed)
-      (render-value seed))
-    
-    ; seed -> xml
-    (define/public (render-value seed)
       (xml (table (@ ,(core-html-attributes seed))
                   ,@(for/list ([view (in-list (get-views))])
                       (xml (tr (th (@ [class "attribute-label"])
@@ -57,15 +52,15 @@
                                (td ,(send view render seed))))))))
     
     ; snooze-struct -> void
-    (define/public (set-value! struct)
+    (define/public (set-struct! struct)
       (unless (snooze-struct? struct)
-        (raise-type-error 'entity-view.set-value! "snooze-struct" struct))
-      (web-cell-set! value-cell struct)
-      (for ([view (in-list views)])
+        (raise-type-error 'entity-view.set-struct! "snooze-struct" struct))
+      (web-cell-set! struct-cell struct)
+      (for ([view (in-list (get-views))])
         (send view destructure! struct)))))
 
 (define entity-view%
-  (entity-view-mixin html-element%))
+  (entity-view-mixin (simple-view-mixin html-element%)))
 
 ; Provide statements -----------------------------
 

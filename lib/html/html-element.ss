@@ -77,7 +77,16 @@
     (define/override (get-on-render seed)
       (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
                                   "replace"
-                                  ,(xml->string (render seed))))))))
+                                  ,(xml->string (render seed))))))
+    
+    ; Printing -----------------------------------
+    
+    ; output-port boolean (U symbol #f) -> void
+    (define/override (custom-print out write? class-name)
+      (fprintf out "#(~a ~a ~a)"
+               (or class-name 'unknown-html-element)
+               (get-component-id)
+               (get-id)))))
 
 (define html-element%
   (class/cells (html-element-mixin html-component%) ()

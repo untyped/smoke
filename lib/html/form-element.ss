@@ -18,7 +18,12 @@
 (define form-element-mixin    
   (mixin/cells (disableable-element<%>) (form-element<%>)
     
-    (inherit get-id get-classes get-enabled? get-style get-tooltip)    
+    (inherit get-classes
+             get-component-id
+             get-enabled?
+             get-id
+             get-style
+             get-tooltip)    
     
     ; Public methods -----------------------------
     
@@ -61,8 +66,19 @@
                      #:classes classes
                      #:style   style
                      #:tooltip title)              
-              (xml-attrs [name ,id])))))
-
+              (xml-attrs [name ,id])))
+    
+    ; Printing -----------------------------------
+    
+    ; output-port boolean (U symbol #f) -> void
+    (define/override (custom-print out write? class-name)
+      (fprintf out
+               (if write? "#(~a ~a ~a ~s)" "#(~a ~a ~a ~a)")
+               (or class-name 'unknown-form-element)
+               (get-component-id)
+               (get-id)
+               (with-handlers ([exn:smoke:form? (lambda _ (format "bad value: ~a" (get-value-error)))])
+                 (get-value))))))
 
 (define form-element%
   (class/cells (form-element-mixin disableable-element%) ()))

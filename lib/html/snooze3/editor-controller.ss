@@ -2,6 +2,7 @@
 
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
+         "../html-element.ss"
          "../notification.ss"
          "check-label.ss"
          "editor-interface.ss"
@@ -11,21 +12,19 @@
 
 ; interface
 (define editor-controller<%>
-  (interface ()
+  (interface (editor<%>)
     on-update        ; -> any
-    commit-changes   ; -> any
-    value-changed?)) ; -> boolean
+    commit-changes)) ; -> any
 
 ; Mixins -----------------------------------------
 
 (define editor-controller-mixin
-  (mixin/cells (editor<%>) (editor-controller<%>)
+  (mixin/cells (html-element<%> editor<%>) (editor-controller<%>)
     
-    (inherit get-child-components
-             get-value
-             parse
+    (inherit parse
              validate
-             value-changed?)
+             editor-changed?
+             set-check-results!)
     
     ; Methods ------------------------------------
     
@@ -48,24 +47,14 @@
     
     (define/public (get-commit-notification)
       (xml "Your changes have been saved successfully."))
-    
-    ; (listof check-result) -> void
-    (define/public (update-check-labels! results)
-      (let loop ([editors (list this)])
-        (match editors
-          [(list-rest curr rest)
-           (when (is-a? curr check-label<%>)
-             (send (car editors) set-results! results))
-           (loop (append rest (send curr get-editors)))]
-          [(list) (void)])))
-    
+        
     ; -> any
     (define/public #:callback/return (on-update)
       (process-parse-results (parse)))
     
     ; (listof check-result) -> any
     (define/private (process-parse-results results)
-      (update-check-labels! results)
+      (set-check-results! results)
       (cond [(ormap check-warning? results) (print-check-fatals results #:id (debug-id this))
                                             (error (format "parse! method produced check-warnings:~n~s"
                                                            (with-pretty-indent "  " (pretty-format results))))
@@ -78,12 +67,12 @@
     
     ; (listof check-result) -> any
     (define/private (process-validate-results results)
-      (update-check-labels! results)
+      (set-check-results! results)
       (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
             [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
-            [(ormap check-warning? results) (if (value-changed?)
+            [(ormap check-warning? results) (if (editor-changed?)
                                                 (begin  (notifications-add! (get-warning-notification))
                                                         (send (current-page) respond))
                                                 (begin0 (commit-changes)
@@ -93,10 +82,7 @@
     
     ; -> any
     (define/public (commit-changes)
-      (printf "committing changes~n")
-      (if (is-a? this entity-editor<%>)
-          (save! (get-value))
-          (error "editor is not an entity-editor: commit-changes must be overridden.")))))
+      (error "commit-changes must be overridden"))))
 
 ; Helpers ----------------------------------------
 
