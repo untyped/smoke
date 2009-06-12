@@ -109,12 +109,10 @@
     
     ; -> (listof check-result)
     (define/public (parse)
-      (with-handlers
-          ([exn:smoke:form?
-            (lambda (exn)
-              (check/annotate ([ann:form-elements (list this)]
-                               [ann:attrs         (get-attributes)])
-                (check-fail (exn-message exn))))])
+      (with-handlers ([exn:smoke:form? (lambda (exn)
+                                         (check/annotate ([ann:form-elements (list this)]
+                                                          [ann:attrs         (get-attributes)])
+                                           (check-fail (exn-message exn))))])
         (get-value)
         null))
     

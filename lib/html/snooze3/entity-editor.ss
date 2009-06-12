@@ -83,13 +83,7 @@
     (define/public (parse)
       (apply check-problems
              (for/list ([editor (in-list (get-editors))])
-               (check/annotate ([ann:form-elements (list editor)])
-                 (let ([message (with-handlers ([exn:smoke:form? exn-message])
-                                  (send editor get-value)
-                                  #f)])
-                   (if message
-                       (check-fail message)
-                       (check-pass)))))))
+               (send editor parse))))
     
     ; -> (listof check-result)
     (define/public (validate)
