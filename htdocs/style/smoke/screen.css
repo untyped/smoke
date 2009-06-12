@@ -214,10 +214,15 @@ textarea.placeholder {
 .smoke-entity-editor th,
 .smoke-entity-editor td {
   vertical-align: top;
+  padding: .5em;
 }
 
 .smoke-entity-editor .attribute-label {
   text-align: right;
+}
+
+.smoke-entity-editor textarea {
+  vertical-align: top;
 }
 
 /* views -------------------------------------- */

@@ -7,6 +7,7 @@
          "../html-element.ss"
          "../html-page.ss"
          "../submit-button.ss"
+         "attribute-view.ss"
          "view-interface.ss"
          "entity-view.ss")
 
@@ -90,7 +91,7 @@
     (init [attributes (and entity (entity-attributes entity))])
     
     ; (listof attribute-view<%>)
-    (init [views (default-entity-views entity)])
+    (init [views (and attributes (map default-attribute-view attributes))])
     
     ; entity-view%
     (init-field view

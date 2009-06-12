@@ -31,8 +31,7 @@
     
     ; (listof attribute-view<%>)
     (init-field views
-      (or (and attributes
-               (map default-attribute-view attributes))
+      (or (and attributes (map default-attribute-view attributes))
           (error "entity-editor constructor: insufficient arguments"))
       #:accessor #:children)
     
@@ -53,10 +52,9 @@
     (define/public (render-value seed)
       (xml (table (@ ,(core-html-attributes seed))
                   ,@(for/list ([view (in-list (get-views))])
-                      (xml (tr (th (@ [class "attribute-label ui-widget-header"])
+                      (xml (tr (th (@ [class "attribute-label"])
                                    ,(send view render-label seed))
-                               (td (@ [class "ui-widget-content"])
-                                   ,(send view render seed))))))))
+                               (td ,(send view render seed))))))))
     
     ; snooze-struct -> void
     (define/public (set-value! struct)
@@ -74,6 +72,3 @@
 (provide entity-view<%>
          entity-view-mixin
          entity-view%)
-
-(provide/contract
- [default-entity-views (-> entity? (listof (is-a?/c attribute-view<%>)))])

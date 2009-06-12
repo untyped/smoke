@@ -7,6 +7,7 @@
          "../html-element.ss"
          "../html-page.ss"
          "../submit-button.ss"
+         "attribute-editor.ss"
          "editor-controller.ss"
          "editor-interface.ss"
          "entity-editor.ss")

@@ -196,11 +196,11 @@
       [(struct string-type (_ max-length))
        (if max-length
            (new text-field-editor% [attributes (list attr)] [size 50] [max-length max-length])
-           (new text-area-editor%  [attributes (list attr)] [cols 50] [rows 10]))]
+           (new text-area-editor%  [attributes (list attr)] [cols 50] [rows 5]))]
       [(struct symbol-type (_ max-length))
        (if max-length
            (new (symbol-editor-mixin text-field-editor%) [attributes (list attr)] [size 50] [max-length max-length])
-           (new (symbol-editor-mixin text-area-editor%)  [attributes (list attr)] [cols 50] [rows 10]))])))
+           (new (symbol-editor-mixin text-area-editor%)  [attributes (list attr)] [cols 50] [rows 5]))])))
 
 ; Helpers ----------------------------------------
 
@@ -246,7 +246,10 @@
          text-field-editor%
          text-area-editor%
          tiny-mce-editor%
-         foreign-key-editor%)
+         foreign-key-editor%
+         time-utc-editor-mixin
+         time-tai-editor-mixin
+         symbol-editor-mixin)
 
 (provide/contract
  [default-attribute-editor (-> attribute? (is-a?/c attribute-editor<%>))])

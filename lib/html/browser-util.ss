@@ -20,6 +20,10 @@
                 [media "screen, projection"]))
        (!raw "<![endif]-->")))
 
+(define jquery-ui-script
+  (xml (script (@ [type "text/javascript"]
+                  [src  "/scripts/jquery-ui/jquery-ui-1.7.1.custom.min.js"]))))
+
 (define tooltip-script
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/smoke/tooltip.js"]))
@@ -67,6 +71,7 @@
 
 (provide/contract
  [smoke-styles                    xml?]
+ [jquery-ui-script                xml?]
  [tooltip-script                  xml?]
  [rollover-script                 xml?]
  [show-hide-script                xml?]

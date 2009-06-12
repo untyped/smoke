@@ -32,8 +32,7 @@
     
     ; (listof attribute-editor<%>)
     (init-field editors
-      (or (and attributes
-               (default-entity-editors entity))
+      (or (and attributes (map default-attribute-editor attributes))
           (error "entity-editor constructor: insufficient arguments"))
       #:accessor #:children)
     
@@ -48,13 +47,11 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (xml (div (@ ,(core-html-attributes seed))
-                (table (@ [class 'ui-widget])
-                       ,@(for/list ([editor (in-list (get-editors))])
-                           (xml (tr (th (@ [class "attribute-label ui-widget-header"])
-                                        ,(send editor render-label seed))
-                                    (td (@ [class "ui-widget-content"])
-                                        ,(send editor render seed)))))))))
+      (xml (table (@ ,(core-html-attributes seed))
+                  ,@(for/list ([editor (in-list (get-editors))])
+                      (xml (tr (th (@ [class "attribute-label"])
+                                   ,(send editor render-label seed))
+                               (td ,(send editor render seed))))))))
     
     ; -> snooze-struct
     (define/public (get-value)
@@ -102,6 +99,3 @@
 
 (provide entity-editor<%>
          entity-editor-mixin)
-
-(provide/contract
- [default-entity-editors (-> entity? (listof (is-a?/c attribute-editor<%>)))])
