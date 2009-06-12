@@ -27,7 +27,7 @@
     (init [entity #f])
     
     ; (listof attribute)
-    (init [attributes (and entity (entity-attributes entity))])
+    (init [attributes (and entity (entity-data-attributes entity))])
     
     ; (listof attribute-editor<%>)
     (init [editors (and attributes (map default-attribute-editor attributes))])
