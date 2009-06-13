@@ -20,6 +20,7 @@
          "../text-area.ss"
          "../text-field.ss"
          "../tiny-mce.ss"
+         "../time-field.ss"
          "check-label.ss"
          "editor-interface.ss")
 
@@ -144,6 +145,7 @@
 (define set-selector-autocomplete-editor% (complete-attribute-editor-mixin set-selector-autocomplete%))
 (define text-field-editor%                (complete-attribute-editor-mixin text-field%))
 (define text-area-editor%                 (complete-attribute-editor-mixin text-area%))
+(define time-editor%                      (complete-attribute-editor-mixin time-field%))
 (define tiny-mce-editor%                  (complete-attribute-editor-mixin tiny-mce%))
 
 (define foreign-key-editor%
@@ -302,6 +304,7 @@
          autocomplete-editor%
          check-box-editor%
          combo-box-editor%
+         complete-attribute-editor-mixin
          vanilla-combo-box-editor%
          date-editor%
          file-editor%
@@ -312,6 +315,7 @@
          set-selector-autocomplete%
          text-field-editor%
          text-area-editor%
+         time-editor%
          tiny-mce-editor%
          foreign-key-editor%
          simple-attribute-editor%

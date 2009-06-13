@@ -125,7 +125,7 @@
     
     ; Methods ------------------------------------
     
-    (define/augment (render seed)
+    (define/augride (render seed)
       (send report render seed))))
 
 
