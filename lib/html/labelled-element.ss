@@ -1,7 +1,8 @@
 #lang scheme/base
 
 (require "../../lib-base.ss"
-         "html-element.ss")
+         "html-element.ss"
+         "form-element.ss")
 
 (define labelled-element<%>
   (interface (html-element<%>)
@@ -29,10 +30,14 @@
       (let ([id    (get-id)]
             [label (get-label)])
         (opt-xml label
-          (label (@ [for ,id])
-                 ,(if (procedure? label)
-                      (label seed)
-                      label)))))))
+          ,(if (is-a? this form-element<%>)
+               (xml (label (@ [for ,id])
+                           ,(if (procedure? label)
+                                (label seed)
+                                label)))
+               (if (procedure? label)
+                   (label seed)
+                   label)))))))
 
 ; Provide statements -----------------------------
 

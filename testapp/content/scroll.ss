@@ -14,8 +14,6 @@
 (define scroll-page
   (singleton/cells html-page% ()
     
-    (inherit set-dialog!)
-    
     ; Fields -------------------------------------
     
     ; text-area%

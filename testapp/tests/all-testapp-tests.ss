@@ -18,18 +18,18 @@
 
 (define all-testapp-tests
   (test-suite "testapp"
-    counter-tests
-    current-request-tests
-    requirements-tests
-    redirect-tests
-    notification-tests
-    editor-tests
-    form-tests
-    form-tests/hidden
+    ;counter-tests
+    ;current-request-tests
+    ;requirements-tests
+    ;redirect-tests
+    ;notification-tests
+    ;editor-tests
+    ;form-tests
+    ;form-tests/hidden
     tab-tests
-    segfault-tests
-    autocomplete-tests
-    tooltip-tests))
+    ;segfault-tests
+    ;autocomplete-tests
+    #;tooltip-tests))
 
 ; Provide statements -----------------------------
 

@@ -15,8 +15,6 @@
 (define tooltip-page
   (singleton/cells html-page% ()
     
-    (inherit set-dialog!)
-    
     ; Fields -------------------------------------
     
     ; Constructor --------------------------------

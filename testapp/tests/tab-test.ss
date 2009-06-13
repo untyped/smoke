@@ -3,12 +3,6 @@
 (require srfi/13/string
          "../../test-base.ss")
 
-; Helpers ----------------------------------------
-
-; integer -> void
-(define (select-tab num)
-  (click/wait (node/xpath (format "//ul[@class='labels']/li[~a]/a" (add1 num)))))
-
 ; Tests ------------------------------------------
 
 (define tab-tests
@@ -18,27 +12,37 @@
       (open/wait "/tab")
       (check-equal? (title-ref) "Tab pane"))
     
-    (test-case "initial editor content"
-      (check-equal? (js-ref (js (!dot Smoke (findById "editor") value))) "Content"))
+    (test-case "initial tabs"
+      (for ([id (in-list '(tab-pane
+                           tab1 editor
+                           tab2 inline-preview
+                           tab4 nested-tab-pane
+                           tab41 nested-inline-preview))])
+        (with-check-info (['id id])
+          (check-true (node-exists? (node/id id)))))
+      (for ([id (in-list '(tab3 demand-preview tab42 nested-demand-preview))])
+        (with-check-info (['id id])
+          (check-false (node-exists? (node/id id))))))
     
-    (test-case "initial preview content"
-      (select-tab 1)
-      (check-equal? (inner-html-ref (node/tag 'div (node/class 'current-tab))) "Content")
-      (reload/wait)
-      (check-equal? (inner-html-ref (node/tag 'div (node/class 'current-tab))) "Content"))
-    
+    (test-case "initial content"
+      (check-equal? (js-ref (js (!dot ($ "#editor") (val)))) "Content")
+      (check-equal? (inner-html-ref (node/id 'inline-preview)) "Content")
+      (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "Content"))
+        
     (test-case "enter new content"
-      (select-tab 0)
       (enter-text (node/id 'editor) "New content")
-      (check-equal? (js-ref (js (!dot Smoke (findById "editor") value))) "New content")
       (reload/wait)
-      (check-equal? (js-ref (js (!dot Smoke (findById "editor") value))) "New content"))
+      (read-line)
+      (check-equal? (js-ref (js (!dot ($ "#editor") (val)))) "New content")
+      (check-equal? (inner-html-ref (node/id 'inline-preview)) "New content")
+      (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "New content"))
     
-    (test-case "initial preview content"
-      (select-tab 1)
-      (check-equal? (inner-html-ref (node/tag 'div (node/class 'current-tab))) "New content")
-      (reload/wait)
-      (check-equal? (inner-html-ref (node/tag 'div (node/class 'current-tab))) "New content"))))
+    (test-case "select tabs"
+      (click/wait (node/jquery "#tab-pane ul li:eq(2)"))
+      (check-true (node-exists? (node/id 'tab3)))
+      (check-true (node-exists? (node/id 'demand-preview)))
+      (check-equal? (inner-html-ref (node/id 'demand-preview)) "New content"))
+    ))
 
 ; Provide statements -----------------------------
 

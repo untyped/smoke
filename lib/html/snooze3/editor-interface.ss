@@ -30,7 +30,12 @@
     (init-field editors null #:accessor #:children)
         
     ; Methods ------------------------------------
-            
+    
+    ; (listof check-result) -> void
+    (define/public (set-check-results! results)
+      (for-each (cut send <> set-check-results! results)
+                (get-editors)))
+    
     ; -> (listof check-result)
     (define/public (parse)
       (apply check-problems (map (cut send <> parse) (get-editors))))
@@ -39,11 +44,6 @@
     (define/public (validate)
       (apply check-problems (map (cut send <> validate)
                                    (get-editors))))
-    
-    ; (listof check-result) -> void
-    (define/public (set-check-results! results)
-      (for-each (cut send <> set-check-results! results)
-                (get-editors)))
     
     ; -> boolean
     (define/public (editor-changed?)

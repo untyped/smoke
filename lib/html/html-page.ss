@@ -106,9 +106,8 @@
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
       (assemble-list
-       #;[(deploying-for-development?) firebug-script]
-       [#t                           smoke-styles]
-       [#t                           ,@(inner null get-html-requirements)]))
+       [#t smoke-styles]
+       [#t ,@(inner null get-html-requirements)]))
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])

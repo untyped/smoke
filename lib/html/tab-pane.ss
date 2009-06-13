@@ -2,31 +2,47 @@
 
 (require srfi/26/cut
          "../../lib-base.ss"
-         "html-element.ss")
+         "browser-util.ss"
+         "html-element.ss"
+         "labelled-element.ss")
 
-; Components -------------------------------------
+; Interfaces -------------------------------------
+
+(define tab<%>
+  (interface (labelled-element<%>)
+    ; -> boolean
+    is-inline?))
+
+; Mixins -----------------------------------------
+
+(define tab-mixin
+  (compose
+   (mixin/cells (html-element<%>) (tab<%>)
+     
+     ; Fields -------------------------------------
+     
+     ; (field boolean)
+     (init-field inline? #f #:accessor is-inline?)
+     
+     ; Constructor --------------------------------
+     
+     ; (listof symbol)
+     (init [classes null])
+     
+     (super-new [classes `(smoke-tab ,@classes)]))
+   labelled-element-mixin))
+
+; Classes ----------------------------------------
 
 (define tab%
-  (class/cells html-element% ()
+  (class/cells (tab-mixin html-element%) ()
     
     (inherit core-html-attributes)
     
     ; Fields -------------------------------------
     
-    ; (cell xml)
-    (init-cell label
-      #:accessor #:mutator)
-    
-    ; (cell html-component<%>)
-    (init-cell content
-      #:child #:accessor #:mutator)
-    
-    ; (listof symbol)
-    (init [classes null])
-    
-    ; Constructor --------------------------------
-    
-    (super-new [classes (cons 'smoke-tab classes)])
+    ; html-component<%>
+    (init-field content #:child #:accessor #:mutator)
     
     ; Methods ------------------------------------
     
@@ -44,28 +60,38 @@
     ; Fields -------------------------------------
     
     ; (cell (U (listof tab%) (-> (listof tab%)))
-    (init-cell tabs
-      #:mutator)
+    (init-cell tabs #:mutator)
     
     ; (cell (U tab% #f))
-    (init-cell [current-tab (if (procedure? tabs)
-                                (car (tabs))
-                                (car tabs))]
-      #:child #:accessor #:mutator)
+    (init-cell current-tab
+      (if (procedure? tabs)
+          (car (tabs))
+          (car tabs))
+      #:accessor #:mutator)
+    
+    ; Constructor --------------------------------
     
     ; (listof symbol)
     (init [classes null])
     
-    ; Constructor --------------------------------
-    
-    (super-new [classes (cons 'smoke-tab-pane classes)])
+    (super-new [classes `(smoke-tab-pane ,@classes)])
     
     ; Methods ------------------------------------
     
+    ; -> (listof tab<%>)
+    (define/override (get-child-components)
+      (let ([current-tab (get-current-tab)])
+        (for/fold ([accum null])
+                  ([tab   (in-list (reverse (get-tabs)))])
+                  (let ([current? (eq? tab current-tab)]
+                        [inline?  (send tab is-inline?)])
+                    (if (or current? inline?)
+                        (cons tab accum)
+                        accum)))))
+    
     ; -> (listof tab%)
     (define/public (get-tabs)
-      (define tabs 
-        (web-cell-ref tabs-cell))
+      (define tabs (web-cell-ref tabs-cell))
       (if (procedure? tabs)
           (tabs)
           tabs))
@@ -76,6 +102,12 @@
                (and (eq? (send tab get-component-id) id) tab))
              (get-tabs)))
     
+    ; -> (listof (U xml (seed -> xml)))
+    (define/augment (get-html-requirements)
+      (list* jquery-ui-script
+             jquery-ui-styles
+             (inner null get-html-requirements)))
+    
     ; seed -> xml
     (define/override (render seed)
       ; (listof tab%)
@@ -84,38 +116,48 @@
       ; tab%
       (define current-tab
         (get-current-tab))
-      ; xml
+      ; (listof xml)
+      ; (listof xml)
+      (define-values (labels-xml tabs-xml)
+        (for/fold ([label-accum null]
+                   [tab-accum null])
+                  ([tab (in-list (reverse tabs))])
+                  (let ([current? (eq? tab current-tab)]
+                        [inline?  (send tab is-inline?)])
+                    (values (let ([href (if (or current? inline?)
+                                            (format "#~a" (send tab get-id))
+                                            (embed seed (callback on-load (send tab get-component-id))))])
+                              (cons (xml (li (a (@ [href ,href])
+                                                ,(send tab render-label seed))))
+                                    label-accum))
+                            (if (or current? inline?)
+                                (cons (send tab render seed) tab-accum)
+                                tab-accum)))))
       (xml (div (@ ,@(core-html-attributes seed))
-                ,(opt-xml (not (null? tabs))
-                   (ul (@ [class 'labels])
-                       ,@(map (lambda (tab)
-                                ; symbol
-                                (define id
-                                  (send tab get-component-id))
-                                ; boolean
-                                (define current?
-                                  (eq? tab current-tab))
-                                ; (U symbol #f)
-                                (define class
-                                  (and current? 'current))
-                                ; (U callback #f)
-                                (define onclick
-                                  (and (not current?)
-                                       (embed/ajax seed (callback on-select id))))
-                                ; xml
-                                (xml (li (@ ,(opt-xml-attr class))
-                                         (a (@ [class "left"] ,(opt-xml-attr onclick))
-                                            (span (@ [class "right"])
-                                                  ,(send tab get-label))))))
-                              (get-tabs)))
-                   (div (@ [class 'current-tab])
-                        ,(send current-tab render seed))))))
+                           ,(opt-xml (pair? tabs)
+                              (ul ,@labels-xml)
+                              ,@tabs-xml))))
+    
+    ; seed -> js
+    (define/augment (get-on-attach seed)
+      (js (!dot ($ ,(format "#~a" (get-id))) (tabs))
+          ,(inner (js) get-on-attach seed)))
+    
+    ; seed -> js
+    (define/augment (get-on-detach seed)
+      (js ,(inner (js) get-on-detach seed)
+          (!dot ($ ,(format "#~a" (get-id))) (tabs "destroy"))))
     
     ; integer -> void
-    (define/public #:callback (on-select id)
-      (set-current-tab! (get-tab id)))))
+    (define/public #:callback/return (on-load cid)
+      (send/suspend/dispatch
+       (lambda (embed-url)
+         (let ([seed (make-seed (current-page) embed-url)])
+           (make-html-response (send (get-tab cid) render seed))))))))
 
 ; Provide statements -----------------------------
 
-(provide tab%
+(provide tab<%>
+         tab-mixin
+         tab%
          tab-pane%)
