@@ -85,6 +85,10 @@
     (define/override (get-child-components)
       (get-tabs))
     
+    ; -> boolean
+    (define/override (dirty?)
+      (web-cell-changed? tabs-cell))
+    
     ; -> (listof tab%)
     (define/public (get-tabs)
       (define tabs (web-cell-ref tabs-cell))
@@ -132,18 +136,34 @@
     
     ; seed -> js
     (define/augment (get-on-attach seed)
-      (js (!block (function onTabShow (evt ui)
-                    (var [panelId (!dot ui panel id)])
-                    ,@(for/fold ([accum null])
-                                ([tab   (in-list (get-tabs))])
-                                (cons (opt-js (not (send tab get-inline?))
-                                        (if (== panelId ,(send tab get-id))
+      (define current-tab (get-current-tab))
+      
+      (define-values (on-tab-show-clauses current-tab-pos)
+        (for/fold ([on-tab-show-accum     null]
+                   [current-tab-pos-accum 0])
+                  ([tab   (in-list (get-tabs))]
+                   [index (in-naturals)])
+                  (values (if (send tab get-inline?)
+                              on-tab-show-accum
+                              (cons (js (if (&& (!= panelId currentTabId)
+                                                (== panelId ,(send tab get-id)))
                                             (!block (!dot console (log (+ "Loading " panelId)))
+                                                    (= currentTabId panelId)
                                                     ,(embed/ajax seed (callback on-load (send tab get-id))))))
-                                      accum)))
+                                    on-tab-show-accum))
+                          (if (eq? tab current-tab)
+                              index
+                              current-tab-pos-accum))))
+      
+      (js (!block (var [currentTabId  ,(send (get-current-tab) get-id)]
+                       [currentTabPos ,current-tab-pos]
+                       [onTabShow     (function (evt ui)
+                                        (var [panelId (!dot ui panel id)])
+                                        (!dot Smoke (log evt ui))
+                                        ,@on-tab-show-clauses)])
                   (!dot ($ ,(format "#~a" (get-id)))
-                        (tabs (!object [show     onTabShow]
-                                       [selected ,(send (get-current-tab) get-id)])))
+                        (tabs (!object [selected currentTabPos]
+                                       [show     onTabShow])))
                   ,(inner (js) get-on-attach seed))))
     
     ; seed -> js
@@ -153,7 +173,8 @@
     
     ; integer -> void
     (define/public #:callback (on-load id)
-      (let ([current-tab (get-current-tab)])
+      (let ([current-tab (get-tab id)])
+        (set-current-tab! current-tab)
         (for ([tab (in-list (get-tabs))])
           (let* ([tab-id   (send tab get-id)]
                  [current? (eq? tab current-tab)]

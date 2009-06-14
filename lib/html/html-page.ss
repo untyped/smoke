@@ -61,9 +61,6 @@
     ; (cell string)
     (init-cell [generator "Smoke by Untyped"] #:accessor #:mutator)
     
-    ; (cell boolean)
-    (init-cell [debug-javascript? #f] #:accessor #:mutator)
-    
     ; (cell (U (list integer integer integer) #f))
     (cell [callback-codes #f] #:accessor #:mutator)
     

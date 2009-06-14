@@ -94,7 +94,7 @@
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
+                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix (string->symbol (format "~a.~a" 'id 'cell-id))])
                                                                      (make-web-cell value))]))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
