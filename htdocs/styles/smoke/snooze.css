@@ -47,22 +47,7 @@ img.check-error.icon {
     position: static;
     clear: both;
     border-collapse: collapse;
-    border: 1px solid #aaa;
     margin: 3px 0px;
-}
-
-.smoke-snooze-report thead {
-    border: 1px solid #aaa;
-}
-
-.smoke-snooze-report tfoot {
-    border: 1px solid #aaa;
-}
-
-.smoke-snooze-report td,
-.smoke-snooze-report th {
-    border-left: 1px solid #aaa;
-    background: #fff;
 }
 
 .smoke-snooze-report th {
@@ -72,10 +57,6 @@ img.check-error.icon {
 .smoke-snooze-report th a,
 .smoke-snooze-report th span.not-sortable {
   padding: 4px 5px;
-}
-
-.smoke-snooze-report th.sort:hover {
-    background: #ffa;
 }
 
 .smoke-snooze-report th span.not-sortable {
@@ -171,30 +152,6 @@ img.check-error.icon {
     padding: 0px;
     text-align: center;
     white-space: nowrap;
-    border: 1px solid #fff;
-    border-right: 1px solid #aaa;
-}
-
-.smoke-snooze-report table.pager td:hover {
-    border-top: 1px solid #e7e7e7;
-    border-bottom: 1px solid #e7e7e7;
-    background-color: #e7e7e7;
-}
-
-.smoke-snooze-report table.pager td.spacer,
-.smoke-snooze-report table.pager td.last  {
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #fff;
-    background-color: #fff;
-}
-
-.smoke-snooze-report table.pager td.last {
-    border-right: none;
-}
-
-.smoke-snooze-report table.pager td.spacer:hover,
-.smoke-snooze-report table.pager td.last:hover  {
-    background-color: #fff;
 }
 
 .smoke-snooze-report table.pager td span,
@@ -206,25 +163,6 @@ img.check-error.icon {
     display: block;
     text-decoration: none;
     text-align: center;
-}
-
-.smoke-snooze-report table.pager td.current {
-    font-weight: bold;
-    background-color: #9BF;
-    border: 1px solid #aaa;
-}
-
-/* [DJB] class for fixed navigation links in page */
-
-.smoke-snooze-report table.pager td.fixed {
-    border: 1px solid #aaa;
-    background-color: #eee;
-    font-weight: bold;
-}
-.smoke-snooze-report table.pager td.fixed:hover {
-    border: 1px solid #bbb;
-    background-color: #e7e7e7;
-    font-weight: bold;
 }
 
 .smoke-snooze-report table.pager a:hover {
