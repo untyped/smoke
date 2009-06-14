@@ -85,14 +85,11 @@
       (define id (send this get-component-id))
       (js (try ,(call-with-frame (frame-parent (current-frame))
                   (cut get-on-detach seed))
-               (catch exn
-                 (!dot console (log (+ "Failed to detach: " (? (!dot exn description) (!dot exn description) exn))))))
+               (catch exn (!dot Smoke (badDetach id exn))))
           (try ,(get-on-render seed)
-               (catch exn
-                 (!dot console (log (+ "Failed to render: " (? (!dot exn description) (!dot exn description) exn))))))
+               (catch exn (!dot Smoke (badRender id exn))))
           (try ,(get-on-attach seed)
-               (catch exn
-                 (!dot console (log (+ "Failed to attach: " (? (!dot exn description) (!dot exn description) exn))))))))
+               (catch exn (!dot Smoke (badAttach id exn))))))
     
     ; seed -> js
     ;

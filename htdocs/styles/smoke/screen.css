@@ -1,9 +1,3 @@
-/* html-element ------------------------------- */
-
-.smoke-hidden-component {
-  display: none;
-}
-
 /* text-field --------------------------------- */
 
 input.placeholder,
@@ -95,48 +89,30 @@ textarea.placeholder {
 
 /* notification ------------------------------- */
 
-.smoke-notifications .notification {
-    position: relative;
-    background: #ffe url(/images/smoke/flash-background.png) repeat-x;
-    padding: .5em 2.5em .5em .5em;
-    border: 1px solid #aaa;
-}
+.smoke-notifications { width: 100%; }
+.smoke-notifications .notification { position: relative; margin-bottom: .5em; 
+    background: #ffe url(/images/smoke/flash-background.png) repeat-x; }
+.smoke-notifications .notification-content { margin: .5em 2.5em .5em .5em; }
 
-.smoke-notifications img.sticky {
-    position: absolute;
-    top: .5em;
-    right: 2em;
-}
+.smoke-notifications .notification-sticky { position: absolute; top: .5em; right: 40px; }
+.smoke-notifications .notification-sticky { background: url(/images/smoke/sticky.png); }
+.smoke-notifications .notification-sticky { position: absolute; top: .5em; right: 40px; }
 
-.smoke-notifications .dismiss {
-    position: absolute;
-    top: .5em;
-    right: .5em;
-}
-
-.smoke-notifications .dismiss + * {
-    margin-top: 0px;
-}
-
-.smoke-notifications .notification :last-child {
-    margin-bottom: 0px;
-}
+.smoke-notifications .notification-dismiss { position: absolute; top: .5em; right: 16px; cursor: pointer; }
+.smoke-notifications .notification-dismiss { background: url(/images/smoke/dismiss.png); }
+.smoke-notifications .notification-dismiss:hover { background: url(/images/smoke/dismiss-hover.png); }
+.smoke-notifications .notification-dismiss.ui-state-hover { border: none; }
 
 /* editors ------------------------------------ */
 
 .smoke-entity-editor th,
-.smoke-entity-editor td {
-  vertical-align: top;
-  padding: .5em;
-}
+.smoke-entity-editor td { vertical-align: top; padding: .5em; }
 
-.smoke-entity-editor .attribute-label {
-  text-align: right;
-}
+.smoke-entity-editor .attribute-label { text-align: right; }
 
-.smoke-entity-editor textarea {
-  vertical-align: top;
-}
+.smoke-entity-editor input,
+.smoke-entity-editor textarea,
+.smoke-entity-editor select { vertical-align: top; }
 
 /* views -------------------------------------- */
 

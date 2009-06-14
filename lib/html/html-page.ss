@@ -105,9 +105,10 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
-      (assemble-list
-       [#t smoke-styles]
-       [#t ,@(inner null get-html-requirements)]))
+      (list* jquery-ui-script
+             jquery-ui-styles
+             smoke-styles
+             (inner null get-html-requirements)))
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])

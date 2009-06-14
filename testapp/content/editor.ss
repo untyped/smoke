@@ -14,7 +14,7 @@
    (lambda ()
      (let ([entity (send editor-page get-entity)])
        (let loop ([struct ((entity-defaults-constructor entity))])
-         (send editor-page set-value! struct)
+         (send editor-page set-struct! struct)
          (loop (send editor-page respond)))))))
 
 ; Components -------------------------------------

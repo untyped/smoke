@@ -61,12 +61,10 @@ if (!window.console.log) {
     Smoke.triggerUpdateEvent(true);
   };
   
-  // Submit and update events ======================
+  // Submit and update events ====================
   
   // string object -> event
   Smoke.makeSmokeEvent = function (evtType, evtBase) {
-    // [DJG] This looks dodgy to me (no prevent method) but it's what jQuery does.
-    // I guess we're no worse off than if we used the jQuery defaults.
     return $.extend(evtBase, {
 				 	type            : evtType,
 				 	target          : document,
@@ -86,19 +84,36 @@ if (!window.console.log) {
     return $("*").add([document, window]).trigger("smoke-page-update", arguments);
   };
   
-  // Submit data ===================================
+  // Logging messages ============================
+  
+  // string event -> void  
+  Smoke.badAttach = function (id, evt) {
+    Smoke.log("Failed to attach", id, evt);
+  };
+  
+  // string event -> void  
+  Smoke.badRender = function (id, evt) {
+    Smoke.log("Failed to render", id, evt);
+  };
+
+  // string event -> void  
+  Smoke.badDetach = function (id, evt) {
+    Smoke.log("Failed to detach", id, evt);
+  };
+  
+  // Submit data =================================
   
   // hashOf(string string)
   // Hash of form name (or pseudo-name) to value.
   Smoke.submitData = {};
   
   // string -> any
-  Smoke.getSubmitData = function(key) {
+  Smoke.getSubmitData = function (key) {
     return Smoke.submitData[key];
   };
   
   // string any -> void
-  Smoke.setSubmitData = function(key, val) {
+  Smoke.setSubmitData = function (key, val) {
     Smoke.submitData[key] = val;
   };
   
@@ -107,7 +122,7 @@ if (!window.console.log) {
     delete Smoke.submitData[key];
   };
   
-  // AJAX ==========================================
+  // AJAX ========================================
   
   // U(string, arrayOf(string)) [object] -> void
   //
@@ -164,7 +179,7 @@ if (!window.console.log) {
       + "if the problem persists.");
   };
   
-  // DOM manipulation ==============================
+  // DOM manipulation ============================
   
   //  element
   //  (U "replace" "children" "beforeBegin" "afterBegin" "beforeEnd" "afterEnd")
@@ -261,42 +276,8 @@ if (!window.console.log) {
       }
     }
   };
-  
-  // Dialog boxes ==================================
-  
-  // -> object(width: integer, height: integer)
-  Smoke.getViewportDimensions = function () {
-    // Most browsers:
-    if (typeof(window.innerWidth) == 'number') {
-  
-      return {
-        width:  window.innerWidth,
-        height: window.innerHeight
-      };
-  
-    // IE6 (standards compliant mode):
-    } else if (document.documentElement
-               && (document.documentElement.clientWidth
-               || document.documentElement.clientHeight)) {
-  
-      return {
-        width:  document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight
-      };
-  
-    // Other IEs:
-    } else if (document.body && (document.body.clientWidth
-                             || document.body.clientHeight)) {
-  
-      return {
-        width:  document.body.clientWidth,
-        height: document.body.clientHeight
-      };
-  
-    }
-  };
-  
-  // Delirium support ==============================
+    
+  // Delirium support ============================
   
   // hashOf(function -> function)
   //

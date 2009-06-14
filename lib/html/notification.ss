@@ -6,6 +6,7 @@
          "../../web-server/session-cell.ss"
          "browser-util.ss"
          "html-element.ss"
+         "jquery-ui-util.ss"
          "notification-internal.ss")
 
 ; Session cell -----------------------------------
@@ -51,17 +52,16 @@
 (define notification-pane%
   (class/cells html-element% ()
     
-    (inherit get-id
-             core-html-attributes)
+    (inherit get-id core-html-attributes)
     
     ; (cell (listof symbol))
     (cell visible-notifications null #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
-    (init [classes '(smoke-notifications)])
+    (init [classes null])
     
-    (super-new [classes classes])
+    (super-new [classes (list* 'smoke-notifications 'ui-widget classes)])
     
     ; Methods ------------------------------------
     
@@ -82,19 +82,18 @@
                               [dismiss-id      (string-append notification-id "-dismiss")])
                          (xml (div (@ [id    ,notification-id]
                                       [class ,(if (notification-sticky? notification)
-                                                  "notification sticky"
-                                                  "notification")])
+                                                  "notification ui-state-highlight ui-corner-all"
+                                                  "notification ui-state-highlight ui-corner-all")])
                                    ,(opt-xml (notification-sticky? notification)
-                                      (img (@ [class "sticky"]
-                                              [src   "/images/smoke/sticky.png"]
-                                              [title "Sticky notification"]
-                                              [alt   "Sticky notification"])))
-                                   (img (@ [id    ,dismiss-id]
-                                           [class "dismiss rollover"]
-                                           [src   "/images/smoke/dismiss.png"]
-                                           [title "Dismiss this notification"]
-                                           [alt   "Dismiss this notification"]))
-                                   ,(notification-xml notification)))))))))
+                                      (span (@ [class "ui-icon notification-sticky"]
+                                               [title "Sticky notification"]
+                                               [alt   "Sticky notification"])))
+                                   (span (@ [id    ,dismiss-id]
+                                            [class "ui-icon notification-dismiss"]
+                                            [title "Dismiss this notification"]
+                                            [alt   "Dismiss this notification"]))
+                                   (div (@ [class "notification-content"])
+                                        ,(notification-xml notification))))))))))
     
     ; -> boolean
     (define/override (dirty?)
@@ -114,18 +113,17 @@
                      [notification-selector (format "#notification-~a" id)]
                      [dismiss-selector      (string-append notification-selector "-dismiss")])
                 (js (!dot ($ ,dismiss-selector)
+                          (hover (function () (!dot ($ this) (addClass "ui-state-hover")))
+                                 (function () (!dot ($ this) (removeClass "ui-state-hover"))))
                           (click (function ()
-                                   ,(if (notification-sticky? notification)
-                                        (embed/ajax seed (callback on-dismiss id))
-                                        (js))
-                                   (!dot ($ ,dismiss-selector) 
-                                         (unbind))
-                                   (!dot ($ ,notification-selector)
-                                         (unbind)
+                                   (!dot ($ this) (unbind))
+                                   (!dot ($ this) (parent) (unbind)
                                          (fadeOut "fast"
                                                   (function ()
                                                     (!dot ($ ,notification-selector)
-                                                          (remove)))))))))))))
+                                                          (remove))
+                                                    ,(opt-js (notification-sticky? notification)
+                                                       ,(embed/ajax seed (callback on-dismiss id))))))))))))))
     
     ; symbol -> void
     (define/public #:callback (on-dismiss id)

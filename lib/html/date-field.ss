@@ -26,16 +26,27 @@
       #:accessor #:mutator)
     
     ; (cell boolean)
-    (init-cell show-date-label? #f #:accessor #:mutator)
+    (init-cell show-date-label? #f
+      #:accessor #:mutator)
     
     ; (cell (U string #f))
-    (init-cell date-picker-format (date-format->jquery-ui-date-format date-format) #:accessor #:mutator)
+    (init-cell date-picker-format
+      (date-format->jquery-ui-date-format date-format)
+      #:accessor #:mutator)
     
-    (init [classes null])
+    ; Constructor --------------------------------
     
-    (super-new [classes (list* 'smoke-date-field classes)])
+    (init [classes     null]
+          [max-length  (date-format->max-length date-format)]
+          [size        max-length]
+          [placeholder (get-date-format-example)])
     
-    ; Public methods -----------------------------
+    (super-new [classes     (list* 'smoke-date-field classes)]
+               [size        size]
+               [max-length  max-length]
+               [placeholder placeholder])
+    
+    ; Methods ------------------------------------
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
@@ -106,6 +117,33 @@
             ,(inner (js) get-on-detach seed))))))
 
 ; Helpers ----------------------------------------
+
+; (U string #f) -> (U natural #f)
+(define (date-format->max-length fmt)
+  (and fmt (for/fold ([accum (string-length fmt)])
+                     ([card (in-list (regexp-match* #px"~." fmt))])
+                     (+ accum (match card
+                                ["~~" -1]
+                                ["~a" 2]
+                                ["~A" 8]
+                                ["~b" 2]
+                                ["~B" 8]
+                                ["~d" 1]
+                                ["~e" 1]
+                                ["~h" 1]
+                                ["~H" 1]
+                                ["~k" 1]
+                                ["~m" 1]
+                                ["~M" 1]
+                                ["~S" 1]
+                                ["~y" 1]
+                                ["~Y" 3]
+                                ["~z" 4]
+                                [_    1])))))
+
+; (U string #f) -> (U natural #f)
+(define (date-format->size fmt)
+  (and fmt (date-format->max-length fmt)))
 
 ; string -> (U string #f)
 (define (date-format->jquery-ui-date-format fmt)

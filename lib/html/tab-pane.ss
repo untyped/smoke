@@ -10,41 +10,42 @@
 
 (define tab<%>
   (interface (labelled-element<%>)
-    ; -> boolean
-    is-inline?))
+    get-inline?             ; -> boolean
+    get-content-visible?    ; -> boolean
+    set-content-visible?!)) ; boolean -> void
 
-; Mixins -----------------------------------------
-
-(define tab-mixin
-  (compose
-   (mixin/cells (html-element<%>) (tab<%>)
-     
-     ; Fields -------------------------------------
-     
-     ; (field boolean)
-     (init-field inline? #f #:accessor is-inline?)
-     
-     ; Constructor --------------------------------
-     
-     ; (listof symbol)
-     (init [classes null])
-     
-     (super-new [classes `(smoke-tab ,@classes)]))
-   labelled-element-mixin))
-
-; Classes ----------------------------------------
+; Classes -----------------------------------------
 
 (define tab%
-  (class/cells (tab-mixin html-element%) ()
+  (class/cells (labelled-element-mixin html-element%) (tab<%>)
     
     (inherit core-html-attributes)
     
     ; Fields -------------------------------------
     
+    ; boolean
+    (init-field inline? #:accessor)
+    
     ; html-component<%>
     (init-field content #:child #:accessor #:mutator)
     
+    ; Constructor --------------------------------
+    
+    (init [classes null])
+    
+    (super-new [classes `(smoke-tab ,@classes)])
+    
+    (send content set-visible?! inline?)
+    
     ; Methods ------------------------------------
+    
+    ; -> boolean
+    (define/public (get-content-visible?)
+      (send content get-visible?))
+    
+    ; boolean -> void
+    (define/public (set-content-visible?! val)
+      (send content set-visible?! val))
     
     ; seed -> xml
     (define/override (render seed)
@@ -76,18 +77,13 @@
     
     (super-new [classes `(smoke-tab-pane ,@classes)])
     
+    (send current-tab set-content-visible?! #t)
+    
     ; Methods ------------------------------------
     
     ; -> (listof tab<%>)
     (define/override (get-child-components)
-      (let ([current-tab (get-current-tab)])
-        (for/fold ([accum null])
-                  ([tab   (in-list (reverse (get-tabs)))])
-                  (let ([current? (eq? tab current-tab)]
-                        [inline?  (send tab is-inline?)])
-                    (if (or current? inline?)
-                        (cons tab accum)
-                        accum)))))
+      (get-tabs))
     
     ; -> (listof tab%)
     (define/public (get-tabs)
@@ -99,7 +95,7 @@
     ; symbol -> (U tab% #f)
     (define/public (get-tab id)
       (ormap (lambda (tab)
-               (and (eq? (send tab get-component-id) id) tab))
+               (and (eq? (send tab get-id) id) tab))
              (get-tabs)))
     
     ; -> (listof (U xml (seed -> xml)))
@@ -122,26 +118,33 @@
         (for/fold ([label-accum null]
                    [tab-accum null])
                   ([tab (in-list (reverse tabs))])
-                  (let ([current? (eq? tab current-tab)]
-                        [inline?  (send tab is-inline?)])
-                    (values (let ([href (if (or current? inline?)
-                                            (format "#~a" (send tab get-id))
-                                            (embed seed (callback on-load (send tab get-component-id))))])
-                              (cons (xml (li (a (@ [href ,href])
-                                                ,(send tab render-label seed))))
-                                    label-accum))
-                            (if (or current? inline?)
-                                (cons (send tab render seed) tab-accum)
-                                tab-accum)))))
+                  (values
+                   ; Labels:
+                   (cons (xml (li (a (@ [href ,(format "#~a" (send tab get-id))])
+                                     ,(send tab render-label seed))))
+                         label-accum)
+                   ; Tabs:
+                   (cons (send tab render seed) tab-accum))))
       (xml (div (@ ,@(core-html-attributes seed))
-                           ,(opt-xml (pair? tabs)
-                              (ul ,@labels-xml)
-                              ,@tabs-xml))))
+                ,(opt-xml (pair? tabs)
+                   (ul ,@labels-xml)
+                   ,@tabs-xml))))
     
     ; seed -> js
     (define/augment (get-on-attach seed)
-      (js (!dot ($ ,(format "#~a" (get-id))) (tabs))
-          ,(inner (js) get-on-attach seed)))
+      (js (!block (function onTabShow (evt ui)
+                    (var [panelId (!dot ui panel id)])
+                    ,@(for/fold ([accum null])
+                                ([tab   (in-list (get-tabs))])
+                                (cons (opt-js (not (send tab get-inline?))
+                                        (if (== panelId ,(send tab get-id))
+                                            (!block (!dot console (log (+ "Loading " panelId)))
+                                                    ,(embed/ajax seed (callback on-load (send tab get-id))))))
+                                      accum)))
+                  (!dot ($ ,(format "#~a" (get-id)))
+                        (tabs (!object [show     onTabShow]
+                                       [selected ,(send (get-current-tab) get-id)])))
+                  ,(inner (js) get-on-attach seed))))
     
     ; seed -> js
     (define/augment (get-on-detach seed)
@@ -149,15 +152,17 @@
           (!dot ($ ,(format "#~a" (get-id))) (tabs "destroy"))))
     
     ; integer -> void
-    (define/public #:callback/return (on-load cid)
-      (send/suspend/dispatch
-       (lambda (embed-url)
-         (let ([seed (make-seed (current-page) embed-url)])
-           (make-html-response (send (get-tab cid) render seed))))))))
+    (define/public #:callback (on-load id)
+      (let ([current-tab (get-current-tab)])
+        (for ([tab (in-list (get-tabs))])
+          (let* ([tab-id   (send tab get-id)]
+                 [current? (eq? tab current-tab)]
+                 [inline?  (send tab get-inline?)]
+                 [loaded?  (eq? tab-id id)])
+            (send tab set-content-visible?! (or current? inline? loaded?))))))))
 
 ; Provide statements -----------------------------
 
 (provide tab<%>
-         tab-mixin
          tab%
          tab-pane%)

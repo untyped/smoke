@@ -71,7 +71,7 @@
     (define/public (render/fold seed)
       (if (get-visible?)
           (inner (xml) render seed)
-          (xml (span (@ [id ,(get-id)] [class 'smoke-hidden-component])))))
+          (xml (span (@ [id ,(get-id)] [class 'ui-helper-hidden])))))
     
     ; seed -> js
     (define/override (get-on-render seed)
