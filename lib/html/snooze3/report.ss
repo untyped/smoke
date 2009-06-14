@@ -296,7 +296,7 @@
     
     ; seed integer integer integer -> xml
     (define/public (render-position seed start count total)
-      (xml (div (@ [class "position"])
+      (xml (div (@ [class "position ui-helper-clearfix"])
                 ,(opt-xml (not (zero? total))
                    (div (@ [class "item-count"])
                         "Displaying items " ,(max 1 (min total (if start (add1 start) 1)))
