@@ -51,12 +51,15 @@
     ; (cell integer): [DJB] number of pages added to left and right in pager
     (init-cell [pager-cell-count 4] #:accessor #:mutator)
     
+    ; Classes ----------------------------------
+    
+    
     ; Constructor ------------------------------
     
     ; (listof symbol)
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-snooze-report classes)])
+    (super-new [classes (list* 'smoke-snooze-report 'ui-widget classes)])
     
     ; (U view #f)
     ; (U filter #f)
@@ -304,19 +307,19 @@
     
     ; seed integer integer integer -> xml
     (define/public (render-pager seed start count total)
-      ;  (U 'current 'fixed #f)
       ;  integer
       ;  (U integer string)
       ;  [#:title (U string #f)]
-      ;  [#:display? boolean]
+      ;  [#:active?   boolean]
+      ;  [#:disabled? boolean]
       ; ->
       ;  xml
-      (define (link class to text #:title [title #f] #:display? [display? #t])
-        (xml (td (@ ,(opt-xml-attr class)
+      (define (link to text #:title [title #f] #:active? [active? #f] #:disabled? [disabled? #f])
+        (xml (td (@ [class ,(cond [active?   'ui-state-active]
+                                  [disabled? "ui-state-default ui-state-disabled"]
+                                  [else      'ui-state-default])]
                     ,(opt-xml-attr title))
-                 ,(if (and display? (not (eq? class 'current)))
-                      (xml (a (@ [onclick ,(embed/ajax seed (callback on-page to))]) ,text))
-                      (xml (span ,text))))))
+                 (a (@ [onclick ,(embed/ajax seed (callback on-page to))]) ,text))))
       
       ; [DJB] page windowing
       ; integer integer -> (values integer integer)
@@ -365,34 +368,30 @@
         ;   < Prev 1 2 Next >
         ; for each page that can be viewed.
         (table (@ [class "pager"]) 
-               (tr ,(link 'fixed 0 (xml (& laquo)) 
+               (tr ,(link 0 (xml (& laquo))                    ; formerly 'fixed
                           #:title "Jump to page 1"
-                          #:display? (not (zero? current-page)))
-                   ,(link 'fixed (max 0 (- start count))
+                          #:disabled? (zero? current-page))
+                   ,(link (max 0 (- start count))              ; formerly 'fixed
                           (xml (& lsaquo)) 
                           #:title "Previous page"
-                          #:display? (not (zero? current-page)))
+                          #:disabled? (zero? current-page))
                    ; ellipsis
                    ,(if (not (zero? pager-first-page)) 
                         (xml (td (@ [class 'spacer]) (span "...")))
                         (xml (td (@ [class 'spacer]) (span (& nbsp)))))
                    ,@(for/list ([i (in-range lowest-item highest-item count)])
-                       (let* ([class (and (>= i start)
-                                          (< i (+ start count)) 
-                                          'current)])
-                         (link class i (add1 (/ i count)))))
+                       (link i (add1 (/ i count)) #:active? (and (>= i start) (< i (+ start count)))))
                    ; ellipsis
                    ,(if (not (= last-page pager-last-page)) 
                         (xml (td (@ [class 'last]) (span "...")))
                         (xml (td (@ [class 'last]) (span (& nbsp)))))
-                   ,(link 'fixed (min last-item (+ start count))
+                   ,(link (min last-item (+ start count))      ; formerly 'fixed
                           (xml (& rsaquo))
                           #:title "Next page"
-                          #:display? (< current-page (sub1 last-page)))
-                   ,(link 'fixed last-item (xml (& raquo)) 
-                          #:title (string-append "Jump to page " 
-                                                 (number->string last-page))
-                          #:display? (< current-page (sub1 last-page)))))))
+                          #:disabled? (not (< current-page (sub1 last-page))))
+                   ,(link last-item (xml (& raquo))            ; formerly 'fixed
+                          #:title (string-append "Jump to page " (number->string last-page))
+                          #:disabled? (not (< current-page (sub1 last-page))))))))
     
     ; seed (listof column) -> xml
     (define/public (render-head seed cols)
@@ -491,13 +490,22 @@
     
     ; seed -> js
     (define/augride (get-on-attach seed)
-      (js ,@(filter-map (lambda (col)
-                          (let ([sort-id (send col get-sort-id)]) ; (U symbol #f)
-                            ; Unsortable columns need no attaching:
-                            (and sort-id (js (!dot ($ ,(format "#~a" sort-id))
-                                                   (click (function ()
-                                                            ,(embed/ajax seed (callback on-sort (symbol->string (send col get-id)))))))))))
-                        (get-visible-columns))))
+      (js ,@(filter-map 
+             (lambda (col)
+               (let ([sort-id (send col get-sort-id)]) ; (U symbol #f)
+                 ; Unsortable columns need no attaching:
+                 (and sort-id (js (!dot ($ ,(format "#~a" sort-id))
+                                        (click (function ()
+                                                 ,(embed/ajax seed (callback on-sort (symbol->string (send col get-id)))))))
+                                  (!dot ($ ,(format "#~a .ui-state-default:not(.ui-state-disabled):not(.not-sortable)" 
+                                                    (get-id)))
+                                        (hover (function (event ui)
+                                                 (!dot ($ this) (addClass "ui-state-hover")))
+                                               (function (event ui)
+                                                 (!dot ($ this) (removeClass "ui-state-hover")))))
+                                  (!dot ($ ,(format "#~a .snooze-report-table tbody > tr" (get-id)))
+                                        (addClass "ui-widget-content"))))))
+             (get-visible-columns))))
     
     ; seed -> js
     (define/augride (get-on-detach seed)

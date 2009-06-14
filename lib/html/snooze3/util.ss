@@ -119,7 +119,7 @@
 (define snooze-styles
   (xml (link   (@ [rel  "stylesheet"]
                   [type "text/css"]
-                  [href "/style/smoke/snooze.css"]))))
+                  [href "/styles/smoke/snooze.css"]))))
 
 
 ; Provide statements -----------------------------
