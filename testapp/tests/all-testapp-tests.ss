@@ -24,8 +24,8 @@
     ;redirect-tests
     ;notification-tests
     ;editor-tests
-    ;form-tests
-    ;form-tests/hidden
+    form-tests
+    form-tests/hidden
     tab-tests
     ;segfault-tests
     ;autocomplete-tests

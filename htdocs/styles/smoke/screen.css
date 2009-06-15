@@ -24,6 +24,11 @@ textarea.placeholder {
 .ui-picker .ui-picker-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; padding: .2em .6em .3em .6em; line-height: 1.4em; width: auto; overflow: visible; }
 .ui-picker .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
 
+/* radio-combo -------------------------------- */
+
+.smoke-radio-combo.radio-combo-horizontal { display: inline; }
+.smoke-radio-combo.radio-combo-horizontal .radio-combo-item { display: inline; padding-right: 1.5em; }
+
 /* tooltip ------------------------------------ */
 
 /*

@@ -26,7 +26,7 @@
     (cell [selected #f] #:accessor)
     
     ; (cell (list-of radio-button%))
-    (init-cell [buttons null] #:accessor #:mutator)
+    (cell [buttons null] #:accessor #:mutator)
     
     ; Constructor ------------------------------
     

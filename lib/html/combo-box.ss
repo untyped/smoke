@@ -74,15 +74,15 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (define id        (get-id))
-      (define raw-value (get-raw-value))
-      (define options   (get-options))
-      (xml (select (@ ,(core-html-attributes seed))
-                   ,@(for/list ([option (get-options)])
-                       (define raw (option->raw option))
-                       (xml (option (@ [value ,raw]
-                                       ,(opt-xml-attr (equal? raw raw-value) selected "selected"))
-                                    ,(option->string option)))))))
+      (let ([id        (get-id)]
+            [raw-value (get-raw-value)]
+            [options   (get-options)])
+        (xml (select (@ ,(core-html-attributes seed))
+                     ,@(for/list ([option (get-options)])
+                         (let* ([raw      (option->raw option)]
+                                [selected (and (equal? raw raw-value) "selected")])
+                           (xml (option (@ [value ,raw] ,(opt-xml-attr selected))
+                                        ,(option->string option)))))))))
     
     ; request -> void
     (define/augment (on-request request)
@@ -131,7 +131,7 @@
       (unless (assq (get-value) options)
         (set-value! (and (not (null? options))
                          (caar options)))))
-      
+    
     ; (U bolean symbol number) -> string
     (define/override (option->raw option)
       (match option

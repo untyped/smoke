@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require "db.ss")
+(require (planet untyped/unlib:3:16/enumeration)
+         "db.ss")
 
 (define-entity post
   ([subject string #:allow-null? #f #:max-length 128]
@@ -8,6 +9,22 @@
   #:pretty-formatter
   (lambda (post)
     (post-subject post)))
+
+(define-enum short-enum
+  ([a "first option"]
+   [b "second option"]
+   [c "third option"]
+   [d "fourth option"]))
+
+(define-enum long-enum
+  ([a "first option"]
+   [b "second option"]
+   [c "third option"]
+   [d "fourth option"]
+   [e "fifth option"]
+   [f "getting boring"]
+   [g "really boring"]
+   [h "are we done yet"]))
 
 (define-entity kitchen-sink
   ([a-boolean                 boolean]
@@ -19,6 +36,8 @@
    [a-10-char-symbol          symbol    #:max-length 10]
    [a-time-utc                time-utc]
    [a-time-tai                time-tai]
+   [a-short-enum              enum      #:values short-enum]
+   [a-long-enum               enum      #:values long-enum]
    [a-post                    post]
    [a-required-integer        integer   #:allow-null? #f]
    [a-required-real           real      #:allow-null? #f]
@@ -28,7 +47,12 @@
    [a-required-10-char-symbol symbol    #:allow-null? #f #:max-length 10]
    [a-required-time-utc       time-utc  #:allow-null? #f]
    [a-required-time-tai       time-tai  #:allow-null? #f]
+   [a-required-short-enum     enum      #:allow-null? #f #:values short-enum]
+   [a-required-long-enum      enum      #:allow-null? #f #:values long-enum]
    [a-required-post           post      #:allow-null? #f]))
 
-(provide-entity/contract post)
-(provide-entity/contract kitchen-sink)
+(provide/contract/entities
+ [entity     post]
+ [entity     kitchen-sink]
+ [short-enum enum?]
+ [long-enum  enum?])

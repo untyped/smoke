@@ -83,6 +83,8 @@
                                                                    (b  . "Option 4")
                                                                    (#t . "Option 5")
                                                                    (#f . "Option 6"))])
+                       ,(new radio-combo% [id 'radio-combo-h] [vertical? #f] [options '((1 . "Option 1") (a . "Option 2") (#t . "Option 3"))])
+                       ,(new radio-combo% [id 'radio-combo-v] [vertical? #t] [options '((1 . "Option 1") (a . "Option 2") (#t . "Option 3"))])
                        ,(new file-field% [id 'file-field] [size 20])
                        ,radio-group
                        ,@radio-buttons
@@ -123,6 +125,6 @@
     (define/public #:callback (on-toggle-visibility id)
       (refresh!)
       (for/or ([control (get-controls)])
-              (and (eq? (send control get-id) id)
-                   (send control set-visible?! (not (send control get-visible?)))
-                   #t)))))
+        (and (eq? (send control get-id) id)
+             (send control set-visible?! (not (send control get-visible?)))
+             #t)))))

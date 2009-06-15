@@ -15,122 +15,19 @@
          "../labelled-element.ss"
          "../number-field.ss"
          "../password-field.ss"
-         ;"../radio-button.ss"
+         "../radio-combo.ss"
          "../regexp-field.ss"
          "../set-selector.ss"
          "../text-area.ss"
          "../text-field.ss"
          "../tiny-mce.ss"
          "../time-field.ss"
+         "attribute-editor-internal.ss"
          "check-label.ss"
-         "editor-interface.ss")
-
-; Interfaces -------------------------------------
-
-(define attribute-editor<%>
-  (interface (editor<%> labelled-element<%> check-label<%>)
-    get-attributes ; -> (listof attribute)
-    restructure    ; snooze-struct -> snooze-struct
-    destructure!)) ; snooze-struct -> void
-
-; Mixins -----------------------------------------
-
-(define attribute-editor-mixin
-  (mixin/cells (form-element<%> labelled-element<%> editor<%> check-label<%>) (attribute-editor<%>)
-    
-    (inherit get-component-id
-             get-id 
-             set-id!
-             get-value
-             set-value!
-             render-label
-             render-check-label
-             set-label!
-             value-changed?)
-    
-    ; Fields -------------------------------------
-    
-    (super-new)
-    
-    ; (listof attribute)
-    (init-cell attributes null #:accessor)
-    
-    ; boolean
-    (init-field required?
-      (and (pair? attributes)
-           (let ([attr (car attributes)])
-             (not (type-allows-null? (attribute-type attr)))))
-      #:accessor)
-    
-    (init [id    (or (attributes->id attributes) (get-component-id))]
-          [label (or (attributes->label attributes) (xml-quote id))])
-    
-    (set-id! id)
-    (set-label! label)
-    
-    ; Methods ------------------------------------
-    
-    ; check-result -> boolean
-    (define/override (report-result? result)
-      (or (super report-result? result)
-          (ormap (cut check-result-has-attribute? result <>)
-                 (get-attributes))))
-    
-    ; -> symbol
-    (define/public (get-wrapper-id)
-      (symbol-append (get-id) '-wrapper))
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml (span (@ [id ,(get-wrapper-id)])
-                 ,(super render seed) " "
-                 ,(opt-xml required? "(required) ")
-                 ,(render-check-label seed))))
-    
-    ; snooze-struct -> snooze-struct
-    (define/public (destructure! struct)
-      (match (get-attributes)
-        [(list-rest (? attribute? attr) _)
-         (set-value! (snooze-struct-ref struct attr))]
-        [attrs (raise-type-error 'attribute-editor.destructure! "(list attribute attribute ...)" attrs)]))
-    
-    ; snooze-struct -> snooze-struct
-    (define/public (restructure struct)
-      (match (get-attributes)
-        [(list-rest (? attribute? attr) _)
-         (snooze-struct-set struct attr (get-value))]
-        [attrs (raise-type-error 'attribute-editor.restructure "(list attribute attribute ...)" attrs)]))
-    
-    ; -> (listof check-result)
-    (define/override (parse)
-      (check-problems
-       (with-handlers ([exn:smoke:form?
-                        (lambda (exn)
-                          (check/annotate ([ann:form-elements (list this)]
-                                           [ann:attrs         (get-attributes)])
-                            (check-fail (exn-message exn))))])
-         (get-value)
-         null)
-       (super parse)))
-    
-    ; -> boolean
-    (define/override (editor-changed?)
-      (or (value-changed?)
-          (super editor-changed?)))
-    
-    ; seed -> js
-    (define/override (get-on-render seed)
-      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-wrapper-id)))
-                                  "replace"
-                                  ,(xml->string (render seed))))))))
+         "editor-interface.ss"
+         "foreign-key-editor.ss")
 
 ; Classes ----------------------------------------
-
-(define complete-attribute-editor-mixin
-  (compose attribute-editor-mixin
-           check-label-mixin
-           simple-editor-mixin
-           labelled-element-mixin))
 
 (define autocomplete-editor%              (complete-attribute-editor-mixin autocomplete-field%))
 (define check-box-editor%                 (attribute-editor-mixin (check-label-mixin (simple-editor-mixin check-box%))))
@@ -141,6 +38,7 @@
 (define integer-editor%                   (complete-attribute-editor-mixin integer-field%))
 (define number-editor%                    (complete-attribute-editor-mixin number-field%))
 (define password-editor%                  (complete-attribute-editor-mixin password-field%))
+(define radio-combo-editor%               (complete-attribute-editor-mixin radio-combo%))
 (define regexp-editor%                    (complete-attribute-editor-mixin regexp-field%))
 (define set-selector-editor%              (complete-attribute-editor-mixin set-selector%))
 (define set-selector-autocomplete-editor% (complete-attribute-editor-mixin set-selector-autocomplete%))
@@ -148,89 +46,6 @@
 (define text-area-editor%                 (complete-attribute-editor-mixin text-area%))
 (define time-editor%                      (complete-attribute-editor-mixin time-field%))
 (define tiny-mce-editor%                  (complete-attribute-editor-mixin tiny-mce%))
-
-(define foreign-key-editor%
-  (class/cells vanilla-combo-box-editor% ()
-    
-    ; Fields -------------------------------------
-    
-    ; (U entity #f)
-    (init-field entity #:accessor)
-    
-    ; Methods ------------------------------------
-    
-    ; -> (listof (cons integer string))
-    (define/override (get-options)
-      (let-sql ([entity (entity-default-alias (get-entity))])
-        (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
-    
-    ; (U guid #f) -> (U integer #f)
-    (define/override (option->raw option)
-      (and (guid? option)
-           (snooze-struct-id option)))
-    
-    ; (U string #f) -> guid
-    (define/override (raw->option raw)
-      (and raw (let ([id (string->number raw)])
-                 (and id (find-by-id entity id)))))
-    
-    ; (U snooze-struct #f) -> string
-    (define/override (option->string option)
-      (if option
-          (format-snooze-struct option)
-          (format "-- No ~a selected --" (entity-pretty-name entity))))))
-
-(define simple-attribute-editor%
-  (class/cells (labelled-element-mixin (check-label-mixin (simple-editor-mixin html-element%))) (attribute-editor<%>)
-    
-    (inherit core-html-attributes
-             get-component-id
-             set-id!
-             render-check-label
-             set-label!)
-    
-    ; Fields -------------------------------------
-    
-    ; (listof attribute)
-    (init-cell attributes null #:accessor)
-    
-    ; boolean
-    (init-field required?
-      (and (pair? attributes)
-           (let ([attr (car attributes)])
-             (not (type-allows-null? (attribute-type attr)))))
-      #:accessor)
-    
-    (init [id    (or (attributes->id attributes) (get-component-id))]
-          [label (if (pair? attributes)
-                     (let ([attr (car attributes)])
-                       (xml-quote (string-titlecase (attribute-pretty-name attr))))
-                     (xml-quote id))])
-    
-    (super-new [id id] [label label])
-    
-    ; Methods ------------------------------------
-    
-    ; check-result -> boolean
-    (define/override (report-result? result)
-      (or (super report-result? result)
-          (ormap (cut check-result-has-attribute? result <>)
-                 (get-attributes))))
-    
-    ; seed -> xml
-    (define/overment (render seed)
-      (xml (span (@ ,(core-html-attributes seed))
-                 ,(inner (xml) render seed) " "
-                 ,(opt-xml required? "(required) ")
-                 ,(render-check-label seed))))
-    
-    ; snooze-struct -> snooze-struct
-    (define/public (destructure! struct)
-      (error "simple-attribute-editor.destructure! must be overridden"))
-    
-    ; snooze-struct -> snooze-struct
-    (define/public (restructure struct)
-      (error "simple-attribute-editor.restructure must be overridden"))))
 
 ; Procedures -------------------------------------
 
@@ -245,12 +60,21 @@
          [(? boolean-type?)             (new check-box-editor%   [attributes (list attr)] [show-label? #f])]
          [(? integer-type?)             (new integer-editor%     [attributes (list attr)])]
          [(? enum-type?)                (let* ([enum          (enum-type-enum type)]
-                                               [value->string (if enum (cut enum-prettify enum <>) symbol->string)])
-                                          (new combo-box-editor%   
-                                               [attributes (list attr)]
-                                               [options `(,@(if (type-allows-null? type) '((#f . "-- No selection --")) null)
-                                                          ,@(for/list ([val (in-list (enum-type-values type))])
-                                                              (cons val (value->string val))))]))]
+                                               [values        (enum-type-values type)]
+                                               [value->string (if enum
+                                                                  (cut enum-prettify enum <>)
+                                                                  symbol->string)]
+                                               [use-radio?    (< (length values) 5)]
+                                               [options       `(,@(if (type-allows-null? type)
+                                                                      (if use-radio?
+                                                                          '((#f . "None"))
+                                                                          '((#f . "-- No selection --")))
+                                                                      null)
+                                                                ,@(for/list ([val (in-list values)])
+                                                                    (cons val (value->string val))))])
+                                          (if use-radio?
+                                              (new radio-combo-editor% [attributes (list attr)] [options options] [vertical? #f])
+                                              (new combo-box-editor%   [attributes (list attr)] [options options])))]
          [(? real-type?)                (new number-editor%      [attributes (list attr)])]
          [(? time-utc-type?)            (new (time-utc-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
          [(? time-tai-type?)            (new (time-tai-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
@@ -293,43 +117,25 @@
     (define/override (set-value! sym)
       (super set-value! (and sym (symbol->string sym))))))
 
-; (listof attribute) -> (U symbol #f)
-(define (attributes->id attributes)
-  (and (pair? attributes)
-       (let ([attr (car attributes)])
-         (gensym/interned (symbol-append (entity-name (attribute-entity attr)) '- (attribute-name attr))))))
-
-; (listof attribute) -> (U xml #f)
-(define (attributes->label attributes)
-  (and (pair? attributes)
-       (let ([attr (car attributes)])
-         (xml-quote (string-titlecase (attribute-pretty-name attr))))))
-
 ; Provide statements -----------------------------
 
-(provide attribute-editor<%>
-         attribute-editor-mixin
+(provide (all-from-out "attribute-editor-internal.ss"
+                       "foreign-key-editor.ss")
          autocomplete-editor%
          check-box-editor%
          combo-box-editor%
-         complete-attribute-editor-mixin
          vanilla-combo-box-editor%
          date-editor%
          file-editor%
          integer-editor%
          password-editor%
          regexp-editor%
-         set-selector%
-         set-selector-autocomplete%
+         set-selector-editor%
+         set-selector-autocomplete-editor%
          text-field-editor%
          text-area-editor%
          time-editor%
-         tiny-mce-editor%
-         foreign-key-editor%
-         simple-attribute-editor%
-         time-utc-editor-mixin
-         time-tai-editor-mixin
-         symbol-editor-mixin)
+         tiny-mce-editor%)
 
 (provide/contract
  [attribute-editor-defaults (parameter/c procedure?)]

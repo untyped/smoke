@@ -259,6 +259,35 @@
         (check-combo-value 'combo-box "Option 5")
         (check-printed-value 'combo-box #t)))
     
+    (test-suite "radio-combo"
+
+      (test-case "initial value"
+        (check-field-value 'radio-combo-h "1")
+        (check-printed-value 'radio-combo-h 1))
+      
+      (test-case "full"
+        (select (node/id 'radio-combo-h) "b")
+        (click/wait (node/id 'submit-button))
+        (check-field-value 'radio-combo-h "b")
+        (check-printed-value 'radio-combo-h "b"))
+      
+      (test-case "ajax"
+        (select (node/id 'radio-combo-h) "1")
+        (click/wait (node/id 'ajax-submit-button))
+        (check-field-value 'radio-combo-h "1")
+        (check-printed-value 'radio-combo-h 1))
+      
+      (test-case "symbol"
+        (select (node/id 'radio-combo-h) "b")
+        (click/wait (node/id 'ajax-submit-button))
+        (check-field-value 'radio-combo-h "b")
+        (check-printed-value 'radio-combo-h 'b))
+      
+      (test-case "boolean"
+        (select (node/id 'radio-combo-h) "--yes--")
+        (click/wait (node/id 'ajax-submit-button))
+        (check-field-value 'radio-combo-h "--yes--")))
+    
     (test-suite "radio-button"
       
       (test-case "initial"
