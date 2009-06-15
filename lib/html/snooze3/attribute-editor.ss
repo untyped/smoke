@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
+         (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/symbol)
          "../../../lib-base.ss"
          "../autocomplete-field.ss"
@@ -56,10 +57,10 @@
     
     ; boolean
     (init-field required?
-                (and (pair? attributes)
-                     (let ([attr (car attributes)])
-                       (not (type-allows-null? (attribute-type attr)))))
-                #:accessor)
+      (and (pair? attributes)
+           (let ([attr (car attributes)])
+             (not (type-allows-null? (attribute-type attr)))))
+      #:accessor)
     
     (init [id    (or (attributes->id attributes) (get-component-id))]
           [label (or (attributes->label attributes) (xml-quote id))])
@@ -161,7 +162,7 @@
     ; -> (listof (cons integer string))
     (define/override (get-options)
       (let-sql ([entity (entity-default-alias (get-entity))])
-               (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
+        (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
     
     ; (U guid #f) -> (U integer #f)
     (define/override (option->raw option)
@@ -195,10 +196,10 @@
     
     ; boolean
     (init-field required?
-                (and (pair? attributes)
-                     (let ([attr (car attributes)])
-                       (not (type-allows-null? (attribute-type attr)))))
-                #:accessor)
+      (and (pair? attributes)
+           (let ([attr (car attributes)])
+             (not (type-allows-null? (attribute-type attr)))))
+      #:accessor)
     
     (init [id    (or (attributes->id attributes) (get-component-id))]
           [label (if (pair? attributes)
@@ -243,13 +244,13 @@
          [(struct guid-type (_ entity)) (new foreign-key-editor% [attributes (list attr)] [entity entity])]
          [(? boolean-type?)             (new check-box-editor%   [attributes (list attr)] [show-label? #f])]
          [(? integer-type?)             (new integer-editor%     [attributes (list attr)])]
-         [(? enum-type?)                (new combo-box-editor%   
-                                             [attributes (list attr)]
-                                             [options `(,@(if (type-allows-null? type) 
-                                                              (list (cons #f "-- No selection --"))
-                                                              null)
-                                                        ,@(for/list ([enum-val (in-list (enum-type-values type))])
-                                                            (cons enum-val (symbol->string enum-val))))])]
+         [(? enum-type?)                (let* ([enum          (enum-type-enum type)]
+                                               [value->string (if enum (cut enum-prettify enum <>) symbol->string)])
+                                          (new combo-box-editor%   
+                                               [attributes (list attr)]
+                                               [options `(,@(if (type-allows-null? type) '((#f . "-- No selection --")) null)
+                                                          ,@(for/list ([val (in-list (enum-type-values type))])
+                                                              (cons val (value->string val))))]))]
          [(? real-type?)                (new number-editor%      [attributes (list attr)])]
          [(? time-utc-type?)            (new (time-utc-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
          [(? time-tai-type?)            (new (time-tai-editor-mixin date-editor%) [attributes (list attr)] [size 10])]
