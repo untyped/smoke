@@ -22,11 +22,11 @@
 
 (define tooltip-script
   (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/smoke/tooltip.js"]))
-       (link (@ [rel   "stylesheet"]
-                [href  "/styles/smoke/tooltip.css"]
-                [type  "text/css"]
-                [media "screen, projection"]))))
+                  [src  "/scripts/smoke/tooltip.js"]))))
+
+(define picker-script
+  (xml (script (@ [type "text/javascript"]
+                  [src  "/scripts/smoke/picker.js"]))))
 
 (define rollover-script
   (xml (script (@ [type "text/javascript"]
@@ -81,6 +81,7 @@
 (provide/contract
  [smoke-styles                    xml?]
  [tooltip-script                  xml?]
+ [picker-script                   xml?]
  [rollover-script                 xml?]
  [show-hide-script                xml?]
  [excanvas-script                 xml?]

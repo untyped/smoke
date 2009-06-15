@@ -23,11 +23,11 @@
     
     ; Fields -------------------------------------
     
-    ; boolean
-    (init-field inline? #:accessor)
-    
     ; html-component<%>
     (init-field content #:child #:accessor #:mutator)
+    
+    ; boolean
+    (init-field inline? #f #:accessor)
     
     ; Constructor --------------------------------
     
@@ -56,12 +56,16 @@
   (class/cells html-element% ()
     
     (inherit get-id
+             get-classes
              core-html-attributes)
     
     ; Fields -------------------------------------
     
     ; (cell (U (listof tab%) (-> (listof tab%)))
     (init-cell tabs #:mutator)
+    
+    ; boolean
+    (init-cell vertical? #f #:accessor #:mutator)
     
     ; (cell (U tab% #f))
     (init-cell current-tab
@@ -116,6 +120,11 @@
       ; tab%
       (define current-tab
         (get-current-tab))
+      ; (listof symbol)
+      (define classes
+        (if (get-vertical?)
+            (list* 'ui-tabs-vertical (get-classes))
+            (get-classes)))
       ; (listof xml)
       ; (listof xml)
       (define-values (labels-xml tabs-xml)
@@ -129,7 +138,7 @@
                          label-accum)
                    ; Tabs:
                    (cons (send tab render seed) tab-accum))))
-      (xml (div (@ ,@(core-html-attributes seed))
+      (xml (div (@ ,@(core-html-attributes seed #:classes classes))
                 ,(opt-xml (pair? tabs)
                    (ul ,@labels-xml)
                    ,@tabs-xml))))

@@ -5,6 +5,51 @@ textarea.placeholder {
     color: #aaa;
 }
 
+/* vertical tab-pane -------------------------- */
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav { -moz-border-radius: 0px; -webkit-border-radius: 0px; }
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav * { -moz-border-radius: 0px; -webkit-border-radius: 0px; max-width: 16ex; float: left; clear: left; }
+.ui-tabs.ui-tabs-vertical .ui-tabs-panel { }
+
+/* picker ------------------------------------- */
+
+/*
+ * Adapted from the standard jQuery UI Dialog plugin (http://jqueryui.com/demos/dialog/).
+ * See /scripts/smoke/picker.js for the original Copyright info.
+ */
+
+.ui-picker { position: relative; width: 300px; margin-top: 2px; overflow: auto; font-size: .8em; }
+.ui-picker .ui-picker-content { padding: .25em .5em; border: none; background: none; }
+.ui-picker .ui-picker-buttonpane { text-align: left; border: none; background: none; margin: .5em 0 0 0; padding: .3em 1em .5em .4em; }
+.ui-picker .ui-picker-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; padding: .2em .6em .3em .6em; line-height: 1.4em; width: auto; overflow: visible; }
+.ui-picker .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
+
+/* tooltip ------------------------------------ */
+
+/*
+ * Adapted from a tutorial by Remy Sharp (http://jqueryfordesigners.com/coda-popup-bubbles/),
+ * originally inspired by the web page for Coda by Panic (http://www.panic.com/coda).
+ */
+
+.tooltip-anchor {
+  position: relative;
+}
+
+.tooltip-anchor .tooltip {
+  display: none;
+  position: absolute;
+
+  min-width: 200px;
+  max-width: 500px;
+
+  border: 1px solid #aaa;
+  background: #fff;
+  padding: 3px;
+  -webkit-border-radius: 4px;
+
+  z-index: 1;
+}
+
 /* autocomplete-field ------------------------- */
 
 .smoke-autocomplete-field {

@@ -160,7 +160,7 @@ if (!window.console.log) {
                      },
         dataType   : "text",
         success    : function (responseText) {
-                       console.log(responseText);
+                       // console.log(responseText);
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },

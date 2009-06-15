@@ -55,7 +55,8 @@
       offsetY:       7,
       scrollbarSize: 20,
       time:          150,
-      delay:         250
+      delay:         250,
+      mode:          "hover"
     }, settings);
       
     // integer
