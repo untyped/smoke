@@ -37,10 +37,10 @@
                               #:where ,(get-where)
                               #:order ,(get-order)))))
     
-    ; (U guid #f) -> (U integer #f)
+    ; (U guid #f) -> (U string #f)
     (define/override (option->raw option)
       (and (guid? option)
-           (snooze-struct-id option)))
+           (number->string (snooze-struct-id option))))
     
     ; (U string #f) -> guid
     (define/override (raw->option raw)
