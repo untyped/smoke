@@ -77,6 +77,10 @@
     (define/public (option->classes option)
       null)
     
+    ; any -> (U string symbol #f)
+    (define/public (option->id option)
+      #f)
+    
     ; seed -> xml
     (define/override (render seed)
       (let ([id        (get-id)]
@@ -87,8 +91,9 @@
                          (let* ([raw      (option->raw option)]
                                 [selected (and (equal? raw raw-value) "selected")]
                                 [classes  (option->classes option)]
-                                [class    (and classes (string-join classes " "))])
-                           (xml (option (@ [value ,raw] ,(opt-xml-attr selected) ,(opt-xml-attr class))
+                                [id       (option->id option)]
+                                [class    (and classes (string-join (map string+symbol->string classes) " "))])
+                           (xml (option (@ [value ,raw]  ,(opt-xml-attr id) ,(opt-xml-attr class) ,(opt-xml-attr selected))
                                         ,(option->string option)))))))))
     
     ; request -> void
@@ -160,6 +165,14 @@
     (define/override (option->string option)
       (or (assoc-value/default option (web-cell-ref options-cell) #f)
           (error (format "Not a valid option: ~s ~s" (web-cell-ref options-cell) option))))))
+
+; Helpers ----------------------------------------
+
+; (U string symbol) -> string
+(define (string+symbol->string val)
+  (if (string? val)
+      val
+      (symbol->string val)))
 
 ; Provide statements -----------------------------
 
