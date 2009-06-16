@@ -23,7 +23,7 @@
              get-enabled?
              get-id
              get-style
-             get-tooltip)    
+             get-tooltip)
     
     ; Public methods -----------------------------
     

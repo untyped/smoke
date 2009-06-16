@@ -19,12 +19,23 @@
     ; (U entity #f)
     (init-field entity #:accessor)
     
+    ; (cell (U sql-expr #f))
+    (init-cell where #f #:accessor #:mutator)
+    
+    ; (cell (listof sql-order))
+    (init-cell order
+      (let-sql ([entity (get-entity)])
+        (sql-list (asc entity.guid)))
+      #:accessor #:mutator)
+    
     ; Methods ------------------------------------
     
     ; -> (listof (cons integer string))
     (define/override (get-options)
-      (let-sql ([entity (entity-default-alias (get-entity))])
-        (list* #f (select-all #:from entity #:order ((asc entity.guid))))))
+      (let-sql ([entity (get-entity)])
+        (list* #f (select-all #:from  entity
+                              #:where ,(get-where)
+                              #:order ,(get-order)))))
     
     ; (U guid #f) -> (U integer #f)
     (define/override (option->raw option)
