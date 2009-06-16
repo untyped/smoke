@@ -2,6 +2,7 @@
 
 (require scheme/match
          scheme/pretty
+         (only-in scheme/string string-join)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
          "../../lib-base.ss"
@@ -72,6 +73,10 @@
     (define/public (option->string option)
       (error "option->string must be overridden."))
     
+    ; any -> (listof string)
+    (define/public (option->classes option)
+      null)
+    
     ; seed -> xml
     (define/override (render seed)
       (let ([id        (get-id)]
@@ -80,8 +85,10 @@
         (xml (select (@ ,(core-html-attributes seed))
                      ,@(for/list ([option (get-options)])
                          (let* ([raw      (option->raw option)]
-                                [selected (and (equal? raw raw-value) "selected")])
-                           (xml (option (@ [value ,raw] ,(opt-xml-attr selected))
+                                [selected (and (equal? raw raw-value) "selected")]
+                                [classes  (option->classes option)]
+                                [class    (and classes (string-join classes " "))])
+                           (xml (option (@ [value ,raw] ,(opt-xml-attr selected) ,(opt-xml-attr class))
                                         ,(option->string option)))))))))
     
     ; request -> void
