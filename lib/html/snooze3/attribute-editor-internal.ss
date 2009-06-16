@@ -124,13 +124,13 @@
                                   "replace"
                                   ,(xml->string (render seed))))))))
 
-; Classes ----------------------------------------
-
 (define complete-attribute-editor-mixin
   (compose attribute-editor-mixin
            check-label-mixin
            simple-editor-mixin
            labelled-element-mixin))
+
+; Classes ----------------------------------------
 
 (define simple-attribute-editor%
   (class/cells (labelled-element-mixin (check-label-mixin (simple-editor-mixin html-element%))) (attribute-editor<%>)
