@@ -90,7 +90,7 @@
     ; seed -> js
     (define/augride (get-on-key-down seed)
       (js (if (== (!dot evt keyCode) 13)
-              (= (!dot evt cancelBubble) #t))))
+              (!dot evt (stopPropagation)))))
     
     ; seed -> js
     (define/augride (get-on-page-submit seed)

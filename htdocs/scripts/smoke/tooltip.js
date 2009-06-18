@@ -120,8 +120,6 @@
             Math.min(anchorTop + offsetY,
               viewBottom - toolHeight - offsetY - scrollbarSize)) - anchorTop;
           
-          console.log(anchor.absolutePosition());
-          
           // reset position of tooltip box
           tooltip.css({ left: posX, top: posY });
   

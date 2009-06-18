@@ -308,10 +308,10 @@
 
 ; (listof requirement) (listof requirement) -> (listof requirement)
 (define (filter-new-requirements prev-reqs curr-reqs)
-  (filter-map (lambda (req)
-                (and (not (memq req prev-reqs))
-                     req))
-              curr-reqs))
+  (remove-duplicates
+   (filter-map (lambda (req)
+                 (and (not (memq req prev-reqs)) req))
+               curr-reqs)))
 
 ; (listof (U any (seed -> any))) seed -> (listof any)
 (define (render-requirements reqs seed)

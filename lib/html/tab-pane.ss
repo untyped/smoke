@@ -156,8 +156,7 @@
                               on-tab-show-accum
                               (cons (js (if (&& (!= panelId currentTabId)
                                                 (== panelId ,(send tab get-id)))
-                                            (!block (!dot console (log (+ "Loading " panelId)))
-                                                    (= currentTabId panelId)
+                                            (!block (= currentTabId panelId)
                                                     ,(embed/ajax seed (callback on-load (send tab get-id))))))
                                     on-tab-show-accum))
                           (if (eq? tab current-tab)
@@ -168,7 +167,6 @@
                        [currentTabPos ,current-tab-pos]
                        [onTabShow     (function (evt ui)
                                         (var [panelId (!dot ui panel id)])
-                                        (!dot Smoke (log evt ui))
                                         ,@on-tab-show-clauses)])
                   (!dot ($ ,(format "#~a" (get-id)))
                         (tabs (!object [selected currentTabPos]
