@@ -25,11 +25,12 @@
     ; Fields -------------------------------------
     
     ; (cell symbol)
-    (init-field [component-id (gensym/interned 'smoke)]
+    (init-field component-id
+      (gensym/interned 'smoke)
       #:accessor)
     
     ; (cell (alistof symbol (-> (listof component<%>)))
-    (cell [child-registry null])
+    (cell child-registry null)
     
     ; Request handling ---------------------------
     

@@ -14,13 +14,13 @@
     ; Fields -------------------------------------
     
     ; (cell string)
-    (cell [raw ""] #:accessor)
+    (cell raw "" #:accessor)
     
     ; (cell boolean)
-    (init-cell [allow-blank? #t] #:accessor #:mutator)
+    (init-cell allow-blank? #t #:accessor #:mutator)
     
     ; (cell (U 'uppercase 'lowercase #f))
-    (cell [case-conversion #f] #:accessor)
+    (cell case-conversion #f #:accessor)
     
     ; Constructor --------------------------------
     

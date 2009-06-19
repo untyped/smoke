@@ -15,7 +15,7 @@
     
     ; Fields -------------------------------------
     
-    (cell [counter 0] #:accessor #:mutator)
+    (cell counter 0 #:accessor #:mutator)
     
     (super-new [title "Counter"])
     

@@ -17,7 +17,7 @@
     
     ; Fields -------------------------------------
     
-    (init-field [report #f])
+    (init-field report #f)
     
     ; Methods ------------------------------------
     

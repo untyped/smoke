@@ -11,8 +11,7 @@
     ; Fields -------------------------------------
     
     ; (cell (U html-component% #f))
-    (cell [content #f]
-      #:optional-child #:accessor #:mutator)
+    (cell content #f #:optional-child #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

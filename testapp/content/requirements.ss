@@ -16,8 +16,7 @@
     ; Fields -------------------------------------
     
     ; (cell (listof html-component<%>))
-    (cell [children null]
-      #:children #:accessor #:mutator)
+    (cell children null #:children #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

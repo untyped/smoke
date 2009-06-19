@@ -19,7 +19,7 @@
     (init-cell action #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [label "OK"] #:accessor #:mutator)
+    (init-cell label "OK" #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

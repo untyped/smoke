@@ -15,10 +15,10 @@
     ; Fields -----------------------------------
     
     ; (cell (U natural #f))
-    (init-cell [rows #f] #:accessor #:mutator)
+    (init-cell rows #f #:accessor #:mutator)
     
     ; (cell (U natural #f))
-    (init-cell [cols #f] #:accessor #:mutator)
+    (init-cell cols #f #:accessor #:mutator)
 
     ; Constructor ------------------------------
     

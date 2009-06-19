@@ -143,10 +143,10 @@ ENDXML
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [always-dirty? #f] #:accessor #:mutator)
+    (init-cell always-dirty? #f #:accessor #:mutator)
     
     ; (cell (listof html-component<%>))
-    (init-cell [children null] #:children #:accessor #:mutator)
+    (init-cell children null #:children #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

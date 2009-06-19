@@ -14,16 +14,15 @@
     ; Fields -------------------------------------
     
     ; (cell (listof any))
-    (init-cell [items null]
-      #:accessor #:mutator)
+    (init-cell items null #:accessor #:mutator)
     
     ; form-element<%>
-    (init-field [editor (new text-field%)]
+    (init-field editor
+      (new text-field%)
       #:child #:accessor)
     
     ; (cell boolean)
-    (init-cell [editor-visible? #f]
-      #:accessor #:mutator)
+    (init-cell editor-visible? #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

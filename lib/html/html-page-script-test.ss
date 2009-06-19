@@ -55,8 +55,7 @@
     ; Fields -------------------------------------
     
     ; (cell (listof html-component<%>))
-    (init-cell [children null]
-      #:children #:accessor #:mutator)
+    (init-cell children null #:children #:accessor #:mutator)
     
     (super-new [style "border: 1px solid #aaa; padding: 2px; margin: 4px"])
     

@@ -115,7 +115,7 @@
     ; Fields -------------------------------------
     
     ; (cell (alistof (U boolean symbol number) string))
-    (init-cell [options null])
+    (init-cell options null)
     
     ; Constructor --------------------------------
     

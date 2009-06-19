@@ -17,24 +17,19 @@
     (super-new)
     
     ; (cell (U symbol #f))
-    (cell [id (get-component-id)]
-      #:accessor #:mutator)
+    (cell id (get-component-id) #:accessor #:mutator)
     
     ; (cell (listof symbol))
-    (init-cell [classes null]
-      #:accessor #:mutator)
+    (init-cell classes null #:accessor #:mutator)
     
     ; (cell (U string #f))
-    (init-cell [style #f] 
-      #:accessor #:mutator)
+    (init-cell style #f #:accessor #:mutator)
     
     ; (cell (U string #f))
-    (init-cell [tooltip #f]
-      #:accessor #:mutator)
+    (init-cell tooltip #f #:accessor #:mutator)
     
     ; (cell boolean)
-    (init-cell [visible? #t] 
-      #:accessor #:mutator)
+    (init-cell visible? #t #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

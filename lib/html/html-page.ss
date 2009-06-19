@@ -44,31 +44,33 @@
     ; Fields -------------------------------------
     
     ; (cell xml)
-    (init-cell [doctype xhtml-1.0-transitional-doctype] #:accessor #:mutator)
+    (init-cell doctype
+      xhtml-1.0-transitional-doctype
+      #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [lang "en"] #:accessor #:mutator)
+    (init-cell lang "en" #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [title "Untitled"] #:accessor #:mutator)
+    (init-cell title "Untitled" #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [description #f] #:accessor #:mutator)
+    (init-cell description #f #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [keywords #f] #:accessor #:mutator)
+    (init-cell keywords #f #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [generator "Smoke by Untyped"] #:accessor #:mutator)
+    (init-cell generator "Smoke by Untyped" #:accessor #:mutator)
     
     ; (cell (U (list integer integer integer) #f))
-    (cell [callback-codes #f] #:accessor #:mutator)
+    (cell callback-codes #f #:accessor #:mutator)
     
     ; (cell (listof (U xml (seed -> xml))))
-    (cell [current-html-requirements null] #:accessor #:mutator)
+    (cell current-html-requirements null #:accessor #:mutator)
     
     ; (cell (listof (U js (seed -> js))))
-    (cell [current-js-requirements null] #:accessor #:mutator)
+    (cell current-js-requirements null #:accessor #:mutator)
     
     ; string
     (init [content-type "text/html; charset=utf-8"])

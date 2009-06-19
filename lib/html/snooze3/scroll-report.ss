@@ -13,12 +13,10 @@
     ; Fields -------------------------------------
     
     ; (cell integer)
-    (init-cell [total 1000] 
-      #:accessor #:mutator)
+    (init-cell total 1000 #:accessor #:mutator)
     
     ; (cell integer)
-    (init-cell [count 25]
-      #:accessor #:mutator)
+    (init-cell count 25 #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

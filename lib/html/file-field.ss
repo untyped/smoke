@@ -22,7 +22,7 @@
     ; Fields -------------------------------------
     
     ; (cell (U natural #f))
-    (init-cell [size #f] #:accessor #:mutator)
+    (init-cell size #f #:accessor #:mutator)
 
     ; Constructor --------------------------------
     

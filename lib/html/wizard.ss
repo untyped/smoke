@@ -27,11 +27,11 @@
     
     ; (cell xml)
     (init-cell label
-               #:accessor #:mutator)
+      #:accessor #:mutator)
     
     ; (cell html-component<%>)
     (init-cell content
-               #:child #:accessor #:mutator)
+      #:child #:accessor #:mutator)
     
     ; (listof symbol)
     (init [classes null])    
@@ -76,32 +76,35 @@
     
     ; (cell (listof wizard-step%))
     (init-cell wizard-steps
-               #:accessor #:mutator)
+      #:accessor #:mutator)
     
     ; (cell (U wizard-step% #f))
-    (init-cell [current-wizard-step (car wizard-steps)]
-               #:child #:accessor #:mutator)
+    (init-cell current-wizard-step
+      (car wizard-steps)
+      #:child #:accessor #:mutator)
     
     ; wizard-step that preceded current wizard step
     ; (cell (U wizard-step% #f))
-    (init-cell [directed-from #f] #:accessor #:mutator)
+    (init-cell directed-from #f #:accessor #:mutator)
     
     ; (listof symbol)
     (init [classes null])
     
     ; submit-button%
-    (field [next-field (new submit-button% 
-                            [id 'next-button]
-                            [label "Next >>"]
-                            [action (callback on-next)])]
-           #:child)
+    (field next-field
+      (new submit-button% 
+           [id 'next-button]
+           [label "Next >>"]
+           [action (callback on-next)])
+      #:child)
     
     
-    #;(field [previous-field (new submit-button% 
-                                  [id 'back-button]
-                                  [label "<< Back"]
-                                  [action (callback on-back)])]
-             #:child)
+    #;(field previous-field
+        (new submit-button% 
+             [id 'back-button]
+             [label "<< Back"]
+             [action (callback on-back)])
+        #:child)
     
     ; Constructor --------------------------------
     

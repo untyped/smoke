@@ -19,27 +19,23 @@
     ; Fields -------------------------------------
     
     ; (cell (U natural #f))
-    (init-cell [size #f]
-      #:accessor #:mutator)
+    (init-cell size #f #:accessor #:mutator)
     
     ; (cell (U natural #f))
-    (init-cell [max-length #f]
-      #:accessor #:mutator)
+    (init-cell max-length #f #:accessor #:mutator)
     
     ; (cell (listof option))
     ;
     ; where option: 
     ;   string          if multi-column? is #f
     ;   (listof string) if multi-column? is #t
-    (init-cell [options null]
-      #:mutator)
+    (init-cell options null #:mutator)
     
     ; (cell integer)
-    (init-cell [min-trigger-length 3] 
-      #:accessor #:mutator)
+    (init-cell min-trigger-length 3 #:accessor #:mutator)
     
-    (init-cell [multi-column? #f]
-      #:accessor #:mutator)
+    ; (cell boolean)
+    (init-cell multi-column? #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

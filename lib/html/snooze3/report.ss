@@ -25,31 +25,34 @@
     ; Fields -----------------------------------
     
     ; view-combo-box%
-    (field [view-field (new view-combo-box% [report this] [on-change (callback on-view-change)])]
-           #:child #:accessor)
+    (field view-field
+      (new view-combo-box% [report this] [on-change (callback on-view-change)])
+      #:child #:accessor)
     
     ; filter-combo-box%
-    (field [filter-field (new filter-combo-box% [report this] [on-change (callback on-filter-change)])]
-           #:child #:accessor)
+    (field filter-field
+      (new filter-combo-box% [report this] [on-change (callback on-filter-change)])
+      #:child #:accessor)
     
     ; text-field%
-    (field [pattern-field (new text-field% [on-change (callback on-pattern-change)])]
-           #:child #:accessor)
+    (field pattern-field
+      (new text-field% [on-change (callback on-pattern-change)])
+      #:child #:accessor)
     
     ; (cell (U snooze-report-column% #f))
     (init-cell sort-col #:accessor #:mutator)
     
     ; (cell (U 'asc 'desc))
-    (init-cell [sort-dir 'asc] #:accessor #:mutator)
+    (init-cell sort-dir 'asc #:accessor #:mutator)
     
     ; (cell integer)
-    (init-cell [start 0] #:accessor #:mutator)
+    (init-cell start 0 #:accessor #:mutator)
     
     ; (cell integer)
-    (init-cell [count 1000000] #:accessor #:mutator)
+    (init-cell count 1000000 #:accessor #:mutator)
     
     ; (cell integer): [DJB] number of pages added to left and right in pager
-    (init-cell [pager-cell-count 4] #:accessor #:mutator)
+    (init-cell pager-cell-count 4 #:accessor #:mutator)
     
     ; Classes ----------------------------------
     

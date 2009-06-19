@@ -23,10 +23,10 @@
     ; Fields -------------------------------------
     
     ; (cell (U radio-button% #f))
-    (cell [selected #f] #:accessor)
+    (cell selected #f #:accessor)
     
     ; (cell (list-of radio-button%))
-    (cell [buttons null] #:accessor #:mutator)
+    (cell buttons null #:accessor #:mutator)
     
     ; Constructor ------------------------------
     
@@ -87,14 +87,14 @@
     ; Fields -----------------------------------
     
     ; (cell radio-group%)
-    (cell [group #f] #:accessor)
+    (cell group #f #:accessor)
     
     ; (cell any)
     ; Given a gensym by default, to make explicit the link between 
     ; radio-group:selected and radio-group:value. This link is created
     ; by equality-testing the value of the selected item, hence we need
     ; distinct values by default.
-    (init-cell [value (gensym/interned 'radio-button)] #:accessor #:mutator)
+    (init-cell value (gensym/interned 'radio-button) #:accessor #:mutator)
     
     ; Constructor ------------------------------
     

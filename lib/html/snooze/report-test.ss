@@ -169,7 +169,8 @@
     
     ; Fields -------------------------------------
     
-    (field [report (new test-report% [id 'report])]
+    (field report
+      (new test-report% [id 'report])
       #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------

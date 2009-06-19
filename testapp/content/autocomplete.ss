@@ -18,22 +18,21 @@
     
     ; Fields -------------------------------------
     
-    (field [autocomplete
-            (new autocomplete-field%
-                 [id        'autocomplete]
-                 [options   '("Alpha" "Alpaca" "Alpine" "Alpacino" "Other" "Otter")]
-                 [on-change (callback on-autocomplete-change)])]
+    (field autocomplete
+      (new autocomplete-field%
+           [id        'autocomplete]
+           [options   '("Alpha" "Alpaca" "Alpine" "Alpacino" "Other" "Otter")]
+           [on-change (callback on-autocomplete-change)])
       #:accessor #:mutator #:child)
     
-    (field [button
-            (new button%
-                 [id 'button]
-                 [on-click (callback on-complete-refresh)]
-                 [label "Refresh the page via AJAX"])]
+    (field button
+      (new button%
+           [id 'button]
+           [on-click (callback on-complete-refresh)]
+           [label "Refresh the page via AJAX"])
       #:accessor #:mutator #:child)
     
-    (cell [change-count 0]
-      #:accessor #:mutator)
+    (cell change-count 0 #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

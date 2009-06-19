@@ -19,7 +19,7 @@
     ; Fields -------------------------------------
     
     ; snooze-report%
-    (init-field [report #f] #:accessor #:mutator)
+    (init-field report #f #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

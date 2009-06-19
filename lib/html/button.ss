@@ -15,7 +15,7 @@
     ; Fields -------------------------------------
     
     ; (cell string)
-    (init-cell [label #f] #:accessor #:mutator)
+    (init-cell label #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

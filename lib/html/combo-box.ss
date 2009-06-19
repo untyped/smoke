@@ -29,7 +29,7 @@
     ; "Raw" version of the selected value that can be embedded in XML output.
     ;
     ; This is converted to/from the "real" selected value using raw->item and item->raw.
-    (cell [raw-value #f] #:accessor #:mutator)
+    (cell raw-value #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -117,7 +117,7 @@
     ; Fields -------------------------------------
     
     ; (cell (alistof (U boolean symbol number) string))
-    (init-cell [options null])
+    (init-cell options null)
     
     ; Constructor --------------------------------
     

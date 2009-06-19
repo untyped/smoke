@@ -27,7 +27,7 @@
     ; Fields -------------------------------------
     
     ; (cell (listof check-result))
-    (init-cell [check-results null] #:accessor)
+    (init-cell check-results null #:accessor)
     
     ; Methods ------------------------------------
     
@@ -82,11 +82,11 @@
     ; Fields -------------------------------------
     
     ; (cell (check-result -> boolean))
-    (init-cell [predicate (lambda (result) #t)]
+    (init-cell predicate
+      (lambda (result) #t)
       #:accessor #:mutator)
     
-    (init-field [tooltip? #t]
-      #:accessor #:mutator)
+    (init-field tooltip? #t #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

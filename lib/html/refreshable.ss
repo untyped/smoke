@@ -12,8 +12,7 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [refresh? #f]
-      #:accessor)
+    (init-cell refresh? #f #:accessor)
     
     ; Methods ------------------------------------
     

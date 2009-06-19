@@ -33,7 +33,7 @@
     ; Fields -------------------------------------
     
     ; (hasheqof symbol callback-metadata)
-    (field [callback-metadata-cache (make-hasheq)])
+    (field callback-metadata-cache (make-hasheq))
     
     ; Rendering and scripts ----------------------
     

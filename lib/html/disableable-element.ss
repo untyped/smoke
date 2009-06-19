@@ -20,7 +20,7 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [enabled? #t] #:accessor #:mutator)
+    (init-cell enabled? #t #:accessor #:mutator)
     
     ; Public methods -----------------------------    
     

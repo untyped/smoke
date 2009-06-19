@@ -13,12 +13,10 @@
     ; Fields -------------------------------------
     
     ; (cell (U integer #f))
-    (init-field [min-value #f]
-      #:accessor #:mutator)
+    (init-field min-value #f #:accessor #:mutator)
     
     ; (cell (U integer #f))
-    (init-field [max-value #f]
-      #:accessor #:mutator)
+    (init-field max-value #f #:accessor #:mutator)
     
     ; Public methods -----------------------------
     

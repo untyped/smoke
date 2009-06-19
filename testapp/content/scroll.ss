@@ -17,9 +17,10 @@
     ; Fields -------------------------------------
     
     ; text-area%
-    (field [report (new scroll-report%
-                        [id    'report]
-                        [style "width: 100%; height: 600px"])]
+    (field report
+      (new scroll-report%
+           [id    'report]
+           [style "width: 100%; height: 600px"])
       #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------

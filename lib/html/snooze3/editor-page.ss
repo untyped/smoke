@@ -91,7 +91,14 @@
     (inherit get-struct)
     ; -> void
     (define/override (commit-changes)
-      (save! (get-struct)))))
+      (let ([struct (get-struct)])
+        (call-with-transaction 
+         #:metadata (list (if (snooze-struct-saved? struct)
+                              (format "Created ~a" (format-snooze-struct struct))
+                              (format "Updated ~a" (format-snooze-struct struct))))
+         (lambda ()
+           (save! struct)
+           (clear-continuation-table!)))))))
 
 ; Provide statements -----------------------------
 

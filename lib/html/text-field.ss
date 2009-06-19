@@ -15,13 +15,13 @@
     ; Fields -------------------------------------
     
     ; (cell (U natural #f))
-    (init-cell [size #f] #:accessor #:mutator)
+    (init-cell size #f #:accessor #:mutator)
     
     ; (cell (U natural #f))
-    (init-cell [max-length #f] #:accessor #:mutator)
+    (init-cell max-length #f #:accessor #:mutator)
     
     ; (cell (U string #f))
-    (init-cell [placeholder #f] #:accessor #:mutator)
+    (init-cell placeholder #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

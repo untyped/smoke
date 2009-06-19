@@ -27,16 +27,18 @@
     
     ; Fields -------------------------------------
     ; string
-    (init-field [disabled-text "N/A"] #:accessor #:mutator)
+    (init-field disabled-text "N/A" #:accessor #:mutator)
     ; string
-    (init-field [empty-text "(none)"] #:accessor #:mutator)
+    (init-field empty-text "(none)" #:accessor #:mutator)
     
     ; (cell (listof (alistof (U boolean symbol number) string)))
-    (init-cell [selected-items null] #:accessor)
-    (init-cell [available-items null] #:accessor)
+    (init-cell selected-items null #:accessor)
+    (init-cell available-items null #:accessor)
     
     ; html-component%
-    (init-field [editor (new text-input%)] #:child #:accessor #:mutator)
+    (init-field editor
+      (new text-input%)
+      #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

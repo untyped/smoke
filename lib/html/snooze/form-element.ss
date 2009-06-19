@@ -40,8 +40,9 @@
     ; Fields -------------------------------------
     
     ; (cell (check-result -> boolean))
-    (init-cell [predicate (lambda (result) #t)]
-               #:accessor #:mutator)
+    (init-cell predicate
+      (lambda (result) #t)
+      #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

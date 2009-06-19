@@ -23,12 +23,12 @@
       (let ([do-checks ; string string string -> void
              (lambda (name typed expected)
                (lambda (name typed expected)
-               (with-check-info (['sequence-name name])
-                 (when typed
-                   (enter-text (node/id 'password-field) typed)
-                   (click/wait (node/id 'submit-button)))
-                 (check-equal? (js-ref (js (!dot (!index ,(node/id 'password-field) 0) value))) #f)
-                 (check-equal? (inner-html-ref (node/id 'password-field-value)) expected))))])
+                 (with-check-info (['sequence-name name])
+                   (when typed
+                     (enter-text (node/id 'password-field) typed)
+                     (click/wait (node/id 'submit-button)))
+                   (check-equal? (js-ref (js (!dot (!index ,(node/id 'password-field) 0) value))) #f)
+                   (check-equal? (inner-html-ref (node/id 'password-field-value)) expected))))])
         (check-equal? (js-ref (js (!dot (!index ,(node/id 'password-field) 0) size))) 20)
         (check-equal? (js-ref (js (!dot (!index ,(node/id 'password-field) 0) maxLength))) 10)
         (do-checks "Initial" #f "Initial")
@@ -46,11 +46,11 @@
                    (enter-text (node/id 'text-field) typed)
                    (click/wait (node/id 'submit-button)))
                  (check-equal? (js-ref (js (!dot (!index ,(node/id 'text-field) 0) value))) 
-                                 (or (and typed
-                                          (if (> (string-length typed) 10)
-                                              (string-take typed 10)
-                                              typed))
-                                     expected))
+                               (or (and typed
+                                        (if (> (string-length typed) 10)
+                                            (string-take typed 10)
+                                            typed))
+                                   expected))
                  (check-equal? (inner-html-ref (node/id 'text-field-value)) expected)))])
         (check-equal? (js-ref (js (!dot (!index ,(node/id 'text-field) 0) size))) 20)
         (check-equal? (js-ref (js (!dot (!index ,(node/id 'text-field) 0) maxLength))) 10)
@@ -101,8 +101,8 @@
                    (select (node/id 'combo-box) selected)
                    (click/wait (node/id 'submit-button)))
                  (check-equal? (js-ref (js ((function ()
-                                                        (var [elem (!index ,(node/id 'combo-box) 0)])
-                                                        (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text))))))
+                                              (var [elem (!index ,(node/id 'combo-box) 0)])
+                                              (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text))))))
                                expected-printed)
                  (check-equal? (inner-html-ref (node/id 'combo-box-value)) expected)))])
         (do-checks "Initial" #f "b" "Option 4")
@@ -143,20 +143,21 @@
     ; Fields -------------------------------------
     
     ; (listof form-element%)
-    (field [controls `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
-                       ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
-                       ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
-                       ,(new check-box% [id 'check-box] [value #t] [label "Label"])
-                       ,(new combo-box% [id 'combo-box] [value 'b] [options '((1  . "Option 1") 
-                                                                              (2  . "Option 2")
-                                                                              (a  . "Option 3")
-                                                                              (b  . "Option 4")
-                                                                              (#t . "Option 5")
-                                                                              (#f . "Option 6"))])
-                       ,(new file-field% [id 'file-field] [size 20])
-                       ,radio-group
-                       ,@radio-buttons
-                       ,(new submit-button% [id 'submit-button] [action (callback on-submit)] [label "Okay"]))]
+    (field controls
+      `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
+        ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
+        ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
+        ,(new check-box% [id 'check-box] [value #t] [label "Label"])
+        ,(new combo-box% [id 'combo-box] [value 'b] [options '((1  . "Option 1") 
+                                                               (2  . "Option 2")
+                                                               (a  . "Option 3")
+                                                               (b  . "Option 4")
+                                                               (#t . "Option 5")
+                                                               (#f . "Option 6"))])
+        ,(new file-field% [id 'file-field] [size 20])
+        ,radio-group
+        ,@radio-buttons
+        ,(new submit-button% [id 'submit-button] [action (callback on-submit)] [label "Okay"]))
       #:children #:accessor #:mutator)
     
     ; Constructor --------------------------------
