@@ -98,6 +98,7 @@
 ; (-> response) -> (request -> response)
 (define (make-smoke-controller start)
   (lambda (request)
+    (current-frame (push-frame))
     (start)))
 
 ;  (connection request -> void)
