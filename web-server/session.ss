@@ -35,34 +35,26 @@
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
 (define (start-session [forward? #t] [continue (lambda (session) session)])
-  ; immutable-string
-  (define session-id
-    (generate-session-id))
-  ; time-utc
-  (define now
-    (current-time time-utc))
-  ; session
-  (define session 
-    (make-session session-id now now (make-hasheq)))
-  ; cookie
-  (define cookie 
-    (cookie:add-path (set-cookie session-cookie-name session-id) "/"))
-  ; -> any
-  (define (continue-thunk)
-    (when forward?
-      (clear-continuation-table!))
-    (if (equal? session-id (request-session-id (current-request)))
-        (hash-set! sessions session-id session)
-        (error "session could not be established"))
-    (continue session))
-  ; any
-  (send/suspend/dispatch
-   (lambda (embed-url)
-     (make-redirect-response
-      (embed-url continue-thunk)
-      #:code    302
-      #:message "Establishing session"
-      #:headers (list* (make-header #"Set-Cookie" (string->bytes/utf-8 (print-cookie cookie))) no-cache-http-headers)))))
+  (let* ([session-id (generate-session-id)]   ; string
+         [now        (current-time time-utc)] ; time-utc
+         [session    (make-session session-id now now (make-hasheq))] ; session
+         [cookie     (cookie:add-path (set-cookie session-cookie-name session-id) "/")] ; cookie
+         ; -> any
+         [continue   (lambda ()
+                       (when forward?
+                         (clear-continuation-table!))
+                       (if (equal? session-id (debug* "request-session-id" request-session-id (current-request)))
+                           (hash-set! sessions session-id session)
+                           (error "session could not be established"))
+                       (continue session))])
+    ; any
+    (send/suspend/dispatch
+     (lambda (embed-url)
+       (make-redirect-response
+        (embed-url continue)
+        #:code    302
+        #:message "Establishing session"
+        #:headers (list* (make-header #"Set-Cookie" (string->bytes/utf-8 (print-cookie cookie))) no-cache-http-headers))))))
 
 ; (U session string) [boolean] -> void
 ;

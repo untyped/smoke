@@ -104,10 +104,17 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
-      (list* jquery-ui-script
-             jquery-ui-styles
-             smoke-styles
-             (inner null get-html-requirements)))
+      (let ([dev? (dev?)])
+        (list* (if dev?
+                   jquery-script/dev
+                   jquery-script/min)
+               smoke-script
+               (if dev?
+                   jquery-ui-script/dev
+                   jquery-ui-script/min)
+               jquery-ui-styles
+               smoke-styles
+               (inner null get-html-requirements))))
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])
@@ -186,8 +193,6 @@
            (xml ,(get-doctype)
                 (html (@ [xmlns "http://www.w3.org/1999/xhtml"] [lang ,(get-lang)])
                       (head (meta (@ [http-equiv "Content-Type"] [content ,(get-content-type)]))
-                            (script (@ [type "text/javascript"] [src "/scripts/jquery/jquery-1.3.2.min.js"]))
-                            (script (@ [type "text/javascript"] [src "/scripts/smoke/smoke.js"]))
                             ,(opt-xml (get-title)
                                (title ,(get-title)))
                             ,(render-head seed)
@@ -228,16 +233,15 @@
               (set-current-html-requirements! (append (get-current-html-requirements) new-html-requirements)))
             (unless (null? new-js-requirements)
               (set-current-js-requirements! (append (get-current-js-requirements) new-js-requirements)))
-            (parameterize ([render-pretty-javascript? #t])
-              (make-js-response
-               (js ((function ($)
-                      ,(opt-js (not (null? new-html-requirements))
-                         (!dot ($ (!dot Smoke documentHead))
-                               (append ,(xml->string (xml ,@(render-requirements new-html-requirements seed))))))
-                      ,@(render-requirements new-js-requirements seed)
-                      ,@(map (cut send <> get-on-refresh seed)
-                             (get-dirty-components)))
-                    jQuery))))))))
+            (make-js-response
+             (js ((function ($)
+                    ,(opt-js (not (null? new-html-requirements))
+                       (!dot ($ (!dot Smoke documentHead))
+                             (append ,(xml->string (xml ,@(render-requirements new-html-requirements seed))))))
+                    ,@(render-requirements new-js-requirements seed)
+                    ,@(map (cut send <> get-on-refresh seed)
+                           (get-dirty-components)))
+                  jQuery)))))))
     
     ; -> (embed-url -> response)
     ;

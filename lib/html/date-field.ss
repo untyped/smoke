@@ -48,12 +48,6 @@
     
     ; Methods ------------------------------------
     
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (if (get-date-picker-format)
-          (list* jquery-ui-script (inner null get-html-requirements))
-          (inner null get-html-requirements)))
-    
     ; -> string
     (define/public (get-date-format-example)
       (date->string (current-date) (get-date-format)))

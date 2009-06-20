@@ -15,6 +15,9 @@
 
 ; Configuration --------------------------------
 
+; (parameter boolean)
+(define dev? (make-parameter #t))
+
 ; path
 (define-runtime-path smoke-htdocs-path 
   "htdocs")
@@ -52,6 +55,7 @@
                        "web-server/servlet.ss"))
 
 (provide/contract
+ [dev?                                           (parameter/c boolean?)]
  [smoke-htdocs-path                              path?]
  [smoke-mime-types-path                          path?]
  [struct (exn:fail:smoke exn:fail)               ([message string?] [continuation-marks continuation-mark-set?])]

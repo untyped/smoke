@@ -106,12 +106,6 @@
                (and (eq? (send tab get-id) id) tab))
              (get-tabs)))
     
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (list* jquery-ui-script
-             jquery-ui-styles
-             (inner null get-html-requirements)))
-    
     ; seed -> xml
     (define/override (render seed)
       ; (listof tab%)

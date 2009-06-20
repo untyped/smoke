@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/mirrors:2)
+         "base.ss" ; not reprovided
          "seed.ss"
          "class/class.ss"
          "lib/page.ss"
@@ -88,4 +89,5 @@
                        "web-server/servlet.ss"
                        "web-server/session.ss"
                        "web-server/session-cell.ss"
-                       "web-server/smoke-lru.ss"))
+                       "web-server/smoke-lru.ss")
+         dev?)

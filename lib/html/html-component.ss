@@ -54,9 +54,9 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/public (get-html-requirements/fold)
-      (append (append-map (cut send <> get-html-requirements/fold)
-                          (get-child-components))
-              (get-html-requirements)))
+      (append (get-html-requirements)
+              (append-map (cut send <> get-html-requirements/fold)
+                          (get-child-components))))
     
     ; -> (listof (U js (seed -> js)))
     ;
