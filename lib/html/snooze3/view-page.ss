@@ -6,6 +6,7 @@
          "../disableable-element.ss"
          "../html-element.ss"
          "../html-page.ss"
+         "../notification.ss"
          "../submit-button.ss"
          "attribute-view.ss"
          "view-interface.ss"
@@ -129,9 +130,21 @@
       (xml ,(send view render seed)
            ,(send submit-button render seed)))
     
+    ; snooze-struct -> xml
+    (define/public (get-delete-notification struct)
+      (xml "Successfully deleted " ,(entity-pretty-name (snooze-struct-entity struct)) ": "
+           ,(format-snooze-struct struct) "."))
+    
     ; -> snooze-struct
     (define/public #:callback/return (on-delete)
-      (delete! (get-struct)))))
+      (let ([struct (get-struct)])
+        (call-with-transaction
+         #:metadata (list (format "Delete ~a" (format-snooze-struct struct)))
+         (lambda ()
+           (begin0
+             (delete! struct)
+             (clear-continuation-table!)
+             (notifications-add! (get-delete-notification struct)))))))))
 
 ; Helpers ----------------------------------------
 

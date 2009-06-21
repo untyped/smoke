@@ -97,8 +97,8 @@
                               (format "Created ~a" (format-snooze-struct struct))
                               (format "Updated ~a" (format-snooze-struct struct))))
          (lambda ()
-           (save! struct)
-           (clear-continuation-table!)))))))
+           (begin0 (save! struct)
+                   (clear-continuation-table!))))))))
 
 ; Provide statements -----------------------------
 
