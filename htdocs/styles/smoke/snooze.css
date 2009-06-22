@@ -77,6 +77,12 @@ img.check-error.icon {
     background: transparent url(/images/smoke/down-arrow.png) no-repeat right center;
 }
 
+.smoke-snooze-report td.empty-row {
+    padding: 1em 0em;
+    text-align: center;
+    vertical-align: middle;
+}
+
 /* Controls */
 
 .smoke-snooze-report .controls {

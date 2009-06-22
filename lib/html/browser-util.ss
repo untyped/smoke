@@ -86,6 +86,7 @@
 (define jquery-ui-script/dev
   (xml #;(script (@ [type "text/javascript"] [src "/scripts/jquery-ui/jquery-ui-1.7.2.custom.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.core.js"]))
+       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.accordion.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.datepicker.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.draggable.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.droppable.js"]))
