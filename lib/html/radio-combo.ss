@@ -79,7 +79,7 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (let ([id        (get-id)]
+      (let ([group-id  (get-id)]
             [raw-value (get-raw-value)]
             [options   (get-options)]
             [classes   (if (get-vertical?)
@@ -87,12 +87,12 @@
                            (cons 'radio-combo-horizontal (get-classes)))])
         (xml (div (@ ,(core-html-attributes seed #:classes classes))
                   ,@(for/list ([option (get-options)])
-                      (let* ([raw     (option->raw option)]
-                             [id      (format "~a-~a" id raw)]
-                             [checked (and (equal? raw raw-value) "checked")])
+                      (let* ([raw       (option->raw option)]
+                             [button-id (format "~a-~a" group-id raw)]
+                             [checked   (and (equal? raw raw-value) "checked")])
                         (xml (div (@ [class "radio-combo-item"])
-                                  (input (@ [type "radio"] [id ,id] [name ,(get-id)] [value ,raw] ,(opt-xml-attr checked))
-                                         (label (@ [for ,id]) ,(option->string option)))))))))))
+                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked))
+                                         (label (@ [for ,button-id]) ,(option->string option)))))))))))
     
     ; request -> void
     (define/augment (on-request request)
@@ -101,10 +101,18 @@
           (when binding (set-raw-value! binding)))))
     
     ; seed -> js
-    (define/augment (get-on-change seed)
-      (define id (get-id))
-      (js (!dot Smoke (setSubmitData ,id (!dot Smoke (findById ,id) value)))
-          ,(inner (js) get-on-change seed)))))
+    (define/augment (get-on-attach seed)
+      (define group-id (get-id))
+      (js ,@(for/list ([option (get-options)])
+              (let* ([raw       (option->raw option)]
+                     [button-id (format "~a-~a" group-id raw)]
+                     [sel       (string-append "#" button-id)])
+                (js (!dot ($ ,sel)
+                          (click (function ()
+                                   (!dot Smoke (setSubmitData
+                                                ,group-id
+                                                ,raw))))))))
+          ,(inner (js) get-on-attach seed)))))
 
 (define radio-combo%
   (class/cells vanilla-radio-combo% ()
