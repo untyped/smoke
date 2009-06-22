@@ -54,6 +54,13 @@
     ; (cell integer): [DJB] number of pages added to left and right in pager
     (init-cell pager-cell-count 4 #:accessor #:mutator)
     
+    ; boolean 
+    (init-cell show-controls? #t #:accessor #:mutator)
+    (init-cell show-position-top? #t #:accessor #:mutator)
+    (init-cell show-position-bottom? #f #:accessor #:mutator)
+    (init-cell show-pager-top? #t #:accessor #:mutator)
+    (init-cell show-pager-bottom? #t #:accessor #:mutator)
+    
     ; Classes ----------------------------------
     
     
@@ -251,9 +258,9 @@
         (get-visible-columns))
       ; xml
       (xml (div (@ ,@(core-html-attributes seed))
-                ,(render-controls seed start count total)
-                ,(render-position seed start count total)
-                ,(render-pager seed start count total)
+                ,(opt-xml (get-show-controls?) ,(render-controls seed start count total))
+                ,(opt-xml (get-show-position-top?) ,(render-position seed start count total))
+                ,(opt-xml (get-show-pager-top?) ,(render-pager seed start count total))
                 ; Table:
                 (table (@ [id ,(get-table-id)] [class "snooze-report-table ui-widget"])
                        ,(render-head seed cols)
@@ -262,7 +269,8 @@
                             (render-body seed cols g:item))
                        ,(render-foot seed cols))
                 ; Pager:
-                ,(render-pager seed start count total))))
+                ,(opt-xml (get-show-position-bottom?) ,(render-position seed start count total))
+                ,(opt-xml (get-show-pager-bottom?) ,(render-pager seed start count total)))))
     
     ; seed integer integer integer -> xml
     (define/public (render-controls seed start count total)

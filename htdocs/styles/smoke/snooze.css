@@ -157,7 +157,13 @@ img.check-error.icon {
     display: block;
     text-decoration: none;
     text-align: center;
+    cursor: pointer;
 }
+table.pager td.spacer span,
+table.pager td.last span {
+    cursor: auto;
+}
+
 
 .smoke-snooze-report table.pager a:hover {
     text-decoration: underline;
