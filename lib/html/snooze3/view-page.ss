@@ -80,7 +80,8 @@
     ; submit-button%
     (field submit-button
       (new submit-button%
-           [action (callback on-delete)])
+           [action (callback on-delete)]
+           [label  "Delete"])
       #:child)
     
     (super-new)
@@ -127,8 +128,16 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (xml ,(send view render seed)
+      (xml ,(render-confirmation-message seed)
+           ,(send view render seed)
            ,(send submit-button render seed)))
+    
+    ; seed -> xml
+    (define/public (render-confirmation-message seed)
+      (xml "You are about to delete the " ,(entity-name (get-entity)) " shown below. "
+           "There is no way of undoing this operation. "
+           "Click " ,(format "~s" (send submit-button get-label))" at the bottom of the page "
+           "if you wish to proceed."))
     
     ; snooze-struct -> xml
     (define/public (get-delete-notification struct)

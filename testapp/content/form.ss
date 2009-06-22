@@ -40,14 +40,20 @@
     (super-new [multi-column? #t])
     
     (define/override (get-options prefix)
-      (for/list ([number (in-naturals)]
-                 [letter (in-string "abcde")]
-                 [greek  (in-list (list "alpha" "beta" "gamma" "delta" "epsilon"))]
-                 [latin  (in-list (list "i" "ii" "iii" "iv" "v"))])
-        (list (format "Number ~a" number)
-              (format "Letter ~a" letter)
-              (format "Greek ~a" greek)
-              (format "Latin ~a" latin))))))
+      (filter (match-lambda
+                [(list a b c d)
+                 (or (regexp-match prefix a)
+                     (regexp-match prefix b)
+                     (regexp-match prefix c)
+                     (regexp-match prefix d))])
+              (for/list ([number (in-naturals)]
+                         [letter (in-string "abcde")]
+                         [greek  (in-list (list "alpha" "beta" "gamma" "delta" "epsilon"))]
+                         [latin  (in-list (list "i" "ii" "iii" "iv" "v"))])
+                (list (format "Number ~a" number)
+                      (format "Letter ~a" letter)
+                      (format "Greek ~a" greek)
+                      (format "Latin ~a" latin)))))))
 
 (define form-page
   (singleton/cells (refreshable-mixin html-page%) ()
