@@ -22,7 +22,7 @@
     
     ; (cell string)
     (init-cell date-format
-      "~Y-~m-~d ~H:~M"
+      "~d/~m/~Y ~H:~M"
       #:accessor #:mutator)
     
     ; (cell boolean)
@@ -38,13 +38,11 @@
     
     (init [classes     null]
           [max-length  (date-format->max-length date-format)]
-          [size        max-length]
-          [placeholder (get-date-format-example)])
+          [size        max-length])
     
     (super-new [classes     (list* 'smoke-date-field classes)]
                [size        size]
-               [max-length  max-length]
-               [placeholder placeholder])
+               [max-length  max-length])
     
     ; Methods ------------------------------------
     
