@@ -89,15 +89,15 @@
     
     ; Governs the decision to render as plain or foreign-key values (FINAL)
     ; seed attribute any -> xml
-    (define/public-final (render-value seed attr value)
+    (define/public-final (render-value seed struct attr value)
       (let ([attr-type (attribute-type attr)])
         (if (and (guid-type? attr-type) value)
             (render-value/foreign-key seed attr value)
-            (render-value/plain       seed attr value))))
+            (render-value/plain       seed struct attr value))))
     
     ; Plain attributes are simply turned into strings and rendered.
-    ; seed attribute any -> xml
-    (define/public (render-value/plain seed attr plain)
+    ; seed snooze-struct attribute any -> xml
+    (define/public (render-value/plain seed struct attr plain)
       (let ([attr-type (attribute-type attr)])
         (xml ,(cond [(not plain) ; default for empty values is the empty string, regardless of type
                      ""]

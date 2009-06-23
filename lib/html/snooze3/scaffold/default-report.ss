@@ -118,7 +118,7 @@
                                       #:report-columns  (make-columns)
                                       #:report-views    (make-views)
                                       #:report-filters  (make-filters)
-                                      #:render-value    (lambda (seed attr value) (render-value seed attr value))
+                                      #:render-value    (lambda (seed struct attr value) (render-value seed struct attr value))
                                       #:query           (make-query)
                                       #:column-renderer (lambda (seed col data) (render-column seed col data)))) 
            #:child #:accessor)
@@ -140,7 +140,7 @@
                                                                                       #:entity->url? entity->url?)]
                               #:report-views    [report-views   (default-views report-columns)]
                               #:report-filters  [report-filters (make-filters/attributes attributes)]
-                              #:render-value    [render-value   (lambda (seed attr val)
+                              #:render-value    [render-value   (lambda (seed struct attr val)
                                                                  (xml ,(format "~a" val)))]
                               #:query           [query          (default-query entity)]
                               #:column-renderer [column-render default-column-renderer])
@@ -200,7 +200,7 @@
     
     ; seed snooze-struct attribute -> xml
     (define/public (render-item/struct seed struct attribute)
-      (xml (td ,(render-value seed attribute (snooze-struct-ref struct attribute)))))
+      (xml (td ,(render-value seed struct attribute (snooze-struct-ref struct attribute)))))
     
     ; seed column any -> xml
     (define/public (render-item/custom seed col data)
