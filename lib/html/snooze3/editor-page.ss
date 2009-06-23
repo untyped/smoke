@@ -41,7 +41,7 @@
                     [entity  entity]
                     [editors editors]))
           (error "entity-editor-page constructor: insufficient arguments"))
-      #:child)
+      #:child #:accessor)
     
     ; submit-button%
     (field submit-button

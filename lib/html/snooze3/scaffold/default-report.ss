@@ -251,7 +251,7 @@
   (define-alias E entity)
   (let ([ATTR (sql:alias E attr)])
     (make-column (attribute-name attr)
-                 (format "~a" (attribute-pretty-name attr))
+                 (string-titlecase (attribute-pretty-name attr))
                  (list (sql:asc ATTR)))))
 
 ; entity (listof attribute) -> (listof column)
