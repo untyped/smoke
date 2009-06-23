@@ -11,21 +11,20 @@
 ; Interfaces -------------------------------------
 
 (define attribute-view<%>
-  (interface (view<%> labelled-element<%> check-label<%>)
+  (interface (view<%> labelled-element<%>)
     get-attributes ; -> (listof attribute)
     destructure!)) ; snooze-struct -> void
 
 ; Mixins -----------------------------------------
 
 (define attribute-view-mixin
-  (mixin/cells (html-element<%> labelled-element<%> check-label<%> view<%>) (attribute-view<%>)
+  (mixin/cells (html-element<%> labelled-element<%> view<%>) (attribute-view<%>)
     
     (inherit core-html-attributes
              get-component-id
              get-id
              set-id!
              render-label
-             render-check-label
              set-label!)
     
     ; Fields -------------------------------------
@@ -52,24 +51,13 @@
     
     ; Methods ------------------------------------
     
-    ; check-result -> boolean
-    (define/override (report-result? result)
-      (or (memq this (check-result-annotation result ann:form-elements))
-          (ormap (cut check-result-has-attribute? result <>)
-                 (get-attributes))))
-    
-    ; -> symbol
-    (define/public (get-wrapper-id)
-      (symbol-append (get-id) '-wrapper))
-    
     ; seed -> xml
     (define/override (render seed)
       (xml (span (@ ,(core-html-attributes seed))
                  ,(let ([val (get-value)])
                     (if (snooze-struct? val)
                         (xml-quote (format-snooze-struct val))
-                        (xml-quote val)))
-                 ,(render-check-label seed))))
+                        (xml-quote val))))))
     
     ; snooze-struct -> snooze-struct
     (define/public (destructure! struct)
