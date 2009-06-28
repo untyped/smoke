@@ -133,7 +133,7 @@
         (error "No current HTTP request to respond to."))
       ; boolean
       (let ([push-frame? (and (not (ajax-request? (current-request)))
-                              (not (eq? (request-method (current-request)) 'post)))])
+                              (not (post-request? (current-request))))])
         (when forward?
           (clear-continuation-table!))
         (parameterize ([current-page this])
@@ -161,7 +161,7 @@
           (if (equal? (ajax-request-page-id (current-request)) (get-component-id))
               (make-ajax-response-generator)
               (make-ajax-redirect-response-generator))
-          (if (eq? (request-method (current-request)) 'post)
+          (if (post-request? (current-request))
               (make-full-redirect-response-generator)
               (make-full-response-generator))))
     

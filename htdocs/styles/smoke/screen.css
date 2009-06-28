@@ -27,7 +27,7 @@ textarea.placeholder {
 /* radio-combo -------------------------------- */
 
 .smoke-radio-combo.radio-combo-horizontal { display: inline; }
-.smoke-radio-combo.radio-combo-horizontal .radio-combo-item { display: inline; padding-right: 1.5em; }
+.smoke-radio-combo.radio-combo-horizontal .radio-combo-item { display: inline; padding-right: 1em; }
 
 /* tooltip ------------------------------------ */
 
