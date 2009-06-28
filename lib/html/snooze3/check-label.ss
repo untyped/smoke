@@ -76,12 +76,13 @@
     
     ; Fields -------------------------------------
     
-    ; (cell (check-result -> boolean))
-    (init-cell [predicate (lambda (result) #t)]
-      #:accessor #:mutator)
+    ; (check-result -> boolean)
+    (init-field predicate (lambda (result) #t)
+      #:accessor)
     
-    (init-field [tooltip? #t]
-      #:accessor #:mutator)
+    ; boolean
+    (init-field tooltip? #t
+      #:accessor render-as-tooltip?)
     
     ; Methods ------------------------------------
     
@@ -92,7 +93,7 @@
     ; seed -> xml
     (define/override (render seed)
       (xml (span (@ ,(core-html-attributes seed))
-                 ,(render-check-label seed (get-tooltip?)))))))
+                 ,(render-check-label seed (render-as-tooltip?)))))))
 
 ; Provide statements -----------------------------
 

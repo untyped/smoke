@@ -2,9 +2,34 @@
 
 (require net/url
          scheme/contract
-         web-server/http/request-structs)
+         web-server/http/request-structs
+         (planet untyped/unlib:3/debug))
 
 ; Accessors --------------------------------------
+
+; request -> boolean
+(define (get-request? request)
+  (let ([method (request-method request)])
+    (or (and (symbol? method) (eq? method 'get))
+        (and (bytes? method) (equal? method #"GET")))))
+
+; request -> boolean
+(define (head-request? request)
+  (let ([method (request-method request)])
+    (or (and (symbol? method) (eq? method 'head))
+        (and (bytes? method) (equal? method #"HEAD")))))
+
+; request -> boolean
+(define (post-request? request)
+  (let ([method (request-method request)])
+    (or (and (symbol? method) (eq? method 'post))
+        (and (bytes? method) (equal? method #"POST")))))
+
+; request -> boolean
+(define (put-request? request)
+  (let ([method (request-method request)])
+    (or (and (symbol? method) (eq? method 'put))
+        (and (bytes? method) (equal? method #"PUT")))))
 
 ; request symbol -> (U string #f)
 (define (request-binding-ref request key)
@@ -16,18 +41,18 @@
 
 ; request symbol -> (U string #f)
 (define (request-get-binding-ref request key)
-  (and (eq? (request-method request) 'get)
+  (and (get-request? request)
        (request-binding-ref/internal request key)))
 
 ; request symbol -> (U string #f)
 (define (request-post-binding-ref request key)
-  (and (eq? (request-method request) 'post)
+  (and (post-request? request)
        (request-binding-ref/internal request key)))
 
 ; request symbol -> (U string #f)
 (define (request-upload-filename-ref request key)
   (define key-bytes (string->bytes/utf-8 (symbol->string key)))
-  (and (eq? (request-method request) 'post)
+  (and (post-request? request)
        (ormap (lambda (binding)
                 (and (equal? key-bytes (binding-id binding))
                      (if (binding:file? binding)
@@ -38,7 +63,7 @@
 ; request symbol -> (U bytes #f)
 (define (request-upload-content-ref request key)
   (define key-bytes (string->bytes/utf-8 (symbol->string key)))
-  (and (eq? (request-method request) 'post)
+  (and (post-request? request)
        (ormap (lambda (binding)
                 (and (equal? key-bytes (binding-id binding))
                      (if (binding:file? binding)
@@ -59,7 +84,7 @@
            null
            (request-bindings/raw request)))
   ; (listof ans)
-  (if (eq? (request-method request) 'post)
+  (if (post-request? request)
       (reverse (foldl (lambda (kvp accum)
                         (cons (fn (car kvp) (cdr kvp)) accum))
                       binding-values
@@ -82,9 +107,13 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [request-binding-ref         (-> request? symbol? (or/c string? false/c))]
- [request-get-binding-ref     (-> request? symbol? (or/c string? false/c))]
- [request-post-binding-ref    (-> request? symbol? (or/c string? false/c))]
- [request-upload-filename-ref (-> request? symbol? (or/c string? false/c))]
- [request-upload-content-ref  (-> request? symbol? (or/c bytes? false/c))]
+ [get-request?                (-> request? boolean?)]
+ [head-request?               (-> request? boolean?)]
+ [post-request?               (-> request? boolean?)]
+ [put-request?                (-> request? boolean?)]
+ [request-binding-ref         (-> request? symbol? (or/c string? #f))]
+ [request-get-binding-ref     (-> request? symbol? (or/c string? #f))]
+ [request-post-binding-ref    (-> request? symbol? (or/c string? #f))]
+ [request-upload-filename-ref (-> request? symbol? (or/c string? #f))]
+ [request-upload-content-ref  (-> request? symbol? (or/c bytes?  #f))]
  [request-binding-map         (-> request? (-> symbol? string? any) list?)])
