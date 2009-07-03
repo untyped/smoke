@@ -91,8 +91,8 @@
                              [button-id (format "~a-~a" group-id raw)]
                              [checked   (and (equal? raw raw-value) "checked")])
                         (xml (div (@ [class "radio-combo-item"])
-                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked))
-                                         (label (@ [for ,button-id]) ,(option->string option)))))))))))
+                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked)))
+                                  (label (@ [for ,button-id]) ,(option->string option))))))))))
     
     ; request -> void
     (define/augment (on-request request)
