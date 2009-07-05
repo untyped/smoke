@@ -29,9 +29,9 @@
 
 (define attribute-editor<%>
   (interface (editor<%> labelled-element<%> check-label<%>)
-    get-attributes ; -> (listof attribute)
-    restructure    ; snooze-struct -> snooze-struct
-    destructure!)) ; snooze-struct -> void
+    get-attributes          ; -> (listof attribute)
+    destructure!
+    restructure))
 
 ; Mixins -----------------------------------------
 
@@ -112,12 +112,7 @@
          (get-value)
          null)
        (super parse)))
-    
-    ; -> boolean
-    (define/override (editor-changed?)
-      (or (value-changed?)
-          (super editor-changed?)))
-    
+        
     ; seed -> js
     (define/override (get-on-render seed)
       (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-wrapper-id)))
@@ -133,7 +128,7 @@
 ; Classes ----------------------------------------
 
 (define simple-attribute-editor%
-  (class/cells (labelled-element-mixin (check-label-mixin (simple-editor-mixin html-element%))) (attribute-editor<%>)
+  (class/cells (labelled-element-mixin (check-label-mixin (simple-editor-mixin form-element%))) (attribute-editor<%>)
     
     (inherit core-html-attributes
              get-component-id
@@ -175,7 +170,7 @@
                  ,(inner (xml) render seed) " "
                  ,(opt-xml required? "(required) ")
                  ,(render-check-label seed))))
-    
+
     ; snooze-struct -> snooze-struct
     (define/public (destructure! struct)
       (error "simple-attribute-editor.destructure! must be overridden"))

@@ -7,6 +7,7 @@
          scheme/runtime-path
          srfi/26
          (planet untyped/dispatch:3)
+         (planet untyped/dispatch:3/ws/dispatch)
          (planet untyped/mirrors:2)
          "../dispatch.ss"
          "../smoke.ss"
@@ -22,6 +23,7 @@
                        scheme/pretty
                        srfi/26
                        (planet untyped/dispatch:3)
+                       (planet untyped/dispatch:3/ws/dispatch)
                        (planet untyped/mirrors:2)
                        "../dispatch.ss"
                        "../smoke.ss"

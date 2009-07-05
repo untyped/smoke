@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require "../../test-base.ss")
+(require "../../test-base.ss"
+         "../base.ss")
 
 ; Tests ------------------------------------------
 

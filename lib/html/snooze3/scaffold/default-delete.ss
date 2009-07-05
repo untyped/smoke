@@ -15,7 +15,7 @@
   (mixin/cells (html-element<%> crud-element<%> crudl-element<%> crudl-review+delete+list<%> crudl-editor<%> editor-controller<%> entity-editor<%>) 
     (crudl-review+delete<%> crudl-editor<%>)
     
-    (inherit get-struct
+    (inherit get-value
              render-struct)
     
     ; Fields -------------------------------------
@@ -28,7 +28,7 @@
     ; Methods ------------------------------------
     ; seed -> xml
     (define/augment (render seed)
-      (xml ,(render-struct seed (get-struct))
+      (xml ,(render-struct seed (get-value))
            ,(send delete-button render seed)))
     
     ; -> string
@@ -43,7 +43,7 @@
     ; -> struct
     (define/override (commit-changes)
       (call-with-transaction
-       (lambda () (delete! (get-struct))))
+       (lambda () (delete! (get-value))))
       (clear-continuation-table!))))
 
 

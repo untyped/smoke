@@ -4,6 +4,7 @@
          (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
+         "../controller.ss"
          "../editor.ss"
          "interfaces.ss")
 
@@ -83,10 +84,6 @@
 (define (default-review+delete+list-mixin)
   (mixin/cells (crudl-element<%>) (crudl-review+delete+list<%>)
     
-    ; crudl-operation/c snooze struct -> (U string #f)
-    (define/public (struct->crud-url crudl-operation struct)
-      #f)
-    
     ; Governs the decision to render as plain or foreign-key values (FINAL)
     ; seed attribute any -> xml
     (define/public-final (render-value seed struct attr value)
@@ -112,13 +109,11 @@
     ; Foreign-keys are resolved to a URL if possible, and linked; otherwise they are just displayed.
     ; seed attribute snooze-struct -> xml
     (define/public-final (render-value/foreign-key seed attr struct)
-      (if (not struct)
-          (xml "")
-          (let ([url           (struct->crud-url crudl:review struct)]
-                [struct-pretty (render-struct-pretty seed struct)])
-            (if url 
-                (xml (a (@ [href ,url]) ,struct-pretty))
-                (xml ,struct-pretty)))))
+      (opt-xml struct
+        ,(if (review-controller-set? struct) 
+             (xml (a (@ [href ,(review-controller-url struct)])
+                     ,(render-struct-pretty seed struct)))
+             (xml ,(render-struct-pretty seed struct)))))
     
     ; Foreign keys are displayed as the pretty string, which takes the default pretty formatter here.
     ; seed snooze-struct -> xml
@@ -132,7 +127,7 @@
   (mixin/cells (crudl-review+delete+list<%> crud-element<%>)
     (crudl-review+delete<%>)
     
-    (inherit get-struct
+    (inherit get-value
              get-attributes
              render-attributes
              render-attribute-label
@@ -140,7 +135,7 @@
     
     ; seed attribute any -> xml
     (define/override (render-attribute seed attr)
-      (let ([value (snooze-struct-ref (get-struct) attr)])
+      (let ([value (snooze-struct-ref (get-value) attr)])
         (xml (tr (th ,(render-attribute-label seed attr))
                  (td ,(render-value seed attr value))))))
     

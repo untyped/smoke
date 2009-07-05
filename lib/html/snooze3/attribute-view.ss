@@ -6,6 +6,7 @@
          "../html-element.ss"
          "../labelled-element.ss"
          "check-label.ss"
+         "controller.ss"
          "view-interface.ss")
 
 ; Interfaces -------------------------------------
@@ -24,6 +25,8 @@
              get-component-id
              get-id
              set-id!
+             get-value
+             set-value!
              render-label
              set-label!)
     
@@ -33,10 +36,7 @@
     
     ; (cell (listof attribute))
     (init-cell attributes null #:accessor)
-    
-    ; (cell any)
-    (init-cell value #f #:accessor #:mutator)
-    
+        
     (init [id    (if (pair? attributes)
                      (let ([attr (car attributes)])
                        (symbol-append (entity-name (attribute-entity attr)) '- (attribute-name attr)))
@@ -54,9 +54,12 @@
     ; seed -> xml
     (define/override (render seed)
       (xml (span (@ ,(core-html-attributes seed))
-                 ,(let ([val (get-value)])
+                 ,(let ([type       (attribute-type (car (get-attributes)))]
+                        [val        (get-value)])
                     (if (snooze-struct? val)
-                        (xml-quote (format-snooze-struct val))
+                        (if (review-controller-set? val)
+                            (xml (a (@ [href ,(review-controller-url val)]) ,(format-snooze-struct val)))
+                            (xml-quote (format-snooze-struct val)))
                         (xml-quote val))))))
     
     ; snooze-struct -> snooze-struct

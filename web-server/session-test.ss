@@ -2,6 +2,7 @@
 
 (require (planet untyped/mirrors:2)
          "../test-base.ss"
+         "../testapp/base.ss"
          "session.ss")
 
 ; Tests ------------------------------------------

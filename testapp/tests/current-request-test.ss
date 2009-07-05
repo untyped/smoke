@@ -1,7 +1,8 @@
 #lang scheme/base
 
-(require srfi/13/string
-         "../../test-base.ss")
+(require srfi/13
+         "../../test-base.ss"
+         "../base.ss")
 
 ; Tests ------------------------------------------
 

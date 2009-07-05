@@ -29,7 +29,11 @@
                     symbol-arg
                     string-arg
                     integer-arg
-                    real-arg)
+                    number-arg
+                    real-arg
+                    dispatch-rules
+                    dispatch-case
+                    dispatch-url)
          (planet untyped/mirrors:2)
          "current-request.ss"
          "request.ss"

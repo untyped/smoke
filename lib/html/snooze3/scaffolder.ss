@@ -14,24 +14,11 @@
 ; Constants --------------------------------------
 
 ; symbol ...
-(define crudl:create 'create)
-(define crudl:review 'review)
-(define crudl:update 'update)
-(define crudl:delete 'delete)
+#;(define crudl:create 'create)
+#;(define crudl:review 'review)
+#;(define crudl:update 'update)
+#;(define crudl:delete 'delete)
 (define crudl:list   'list)
-
-; Contracts --------------------------------------
-
-(define entity->url/c
-  (->* ((or/c 'create 'review 'update 'delete 'list)
-        entity?)
-       (snooze-struct?) 
-       (or/c string? #f)))
-
-(define struct->url/c
-  (-> (or/c 'create 'review 'update 'delete 'list) 
-      snooze-struct? 
-      (or/c string? #f)))
 
 ; Procedures -------------------------------------
 
@@ -51,29 +38,20 @@
 (define (attr->xml attr 
                    value 
                    [plain-attr->xml       default-plain-attr->xml] 
-                   [foreign-key-attr->xml default-foreign-key-attr->xml]
-                   #:struct->url [struct->url default-struct->url])
+                   [foreign-key-attr->xml default-foreign-key-attr->xml])
   (let ([attr-type (attribute-type attr)])
     (if (and (guid-type? attr-type) value)
-        (foreign-key-attr->xml attr value #:struct->url struct->url)
+        (foreign-key-attr->xml attr value)
         (plain-attr->xml attr value))))
 
 ; attribute (not snooze-struct) -> xml
 (define (default-plain-attr->xml attr value)
   (xml ,(format "~s" value)))
 
-; attribute snooze-struct [#:struct->url struct->url/c] -> xml
-(define (default-foreign-key-attr->xml attr value #:struct->url [struct->url default-struct->url])
-  (let ([url (struct->url crudl:review value)])
-    (opt-xml url (a (@ [href ,url]) ,(format-snooze-struct value)))))
-
-; (U 'create 'review 'update 'delete 'list) [(U struct #f) -> (U url #f)
-(define (default-entity->url crudl-type entity [struct #f])
-  #f)
-
-; (U 'create 'review 'update 'delete 'list) struct -> (U url #f)
-(define (default-struct->url crudl-type struct)
-  (default-entity->url crudl-type (snooze-struct-entity struct) struct))
+; attribute snooze-struct -> xml
+(define (default-foreign-key-attr->xml attr value)
+  (opt-xml (review-controller-set? value)
+    (a (@ [href ,(review-controller-url value)]) ,(format-snooze-struct value))))
 
 ; -> sql
 (define (default-report-query entity)
@@ -100,8 +78,8 @@
 ; The basis for scaffolding - pages must have a struct
 (define snooze-scaffolded-element<%>
   (interface ()
-    set-struct!  ; persistent-struct -> void 
-    get-struct)) ; -> persistent-struct
+    set-value!  ; persistent-struct -> void 
+    get-value)) ; -> persistent-struct
 
 ; Editors add a list of fields, and must also subtype snooze-editor<%>
 (define snooze-scaffolded-editor<%>
@@ -111,11 +89,11 @@
 ; The basis for list scaffolding - requires a list of structs
 (define snooze-scaffolded-list-element<%>
   (interface ()
-    set-structs!  ; (listof persistent-struct) -> void 
-    get-structs)) ; -> (listof persistent-struct)
+    set-values!  ; (listof persistent-struct) -> void 
+    get-values)) ; -> (listof persistent-struct)
 
 ; Mixins -----------------------------------------
-(define vanilla-element-mixin
+#;(define vanilla-element-mixin
   (mixin/cells (html-element<%>) (vanilla-element<%> html-element<%>)             
     ; xml
     (init-cell inner-xml #f #:accessor #:mutator)
@@ -131,18 +109,15 @@
 ;  [(attr -> (value -> xml))]
 ;  [#:attributes       (listof attribute)]
 ;  [#:attr-pretty-name (attribute -> string)]
-;  [#:struct->url      struct->url/c]
 ; -> 
 ;  (mixin html-element<%>)
-(define (entity->review-mixin entity 
+#;(define (entity->review-mixin entity 
                               [attr->review-renderer default-attr->review-renderer]
                               #:attributes       [attributes       (default-attributes entity)]
-                              #:attr-pretty-name [attr-pretty-name default-attr-pretty-name]
-                              #:struct->url      [struct->url      default-struct->url])
+                              #:attr-pretty-name [attr-pretty-name default-attr-pretty-name])
   (let ([renderer (entity->review-renderer entity attr->review-renderer
                                            #:attributes       attributes
-                                           #:attr-pretty-name attr-pretty-name
-                                           #:struct->url      struct->url)])
+                                           #:attr-pretty-name attr-pretty-name)])
     (mixin/cells (html-element<%>) (snooze-scaffolded-element<%>)
       
       ; Fields -----------------------------------
@@ -152,7 +127,7 @@
       ; Methods ------------------------------------ 
       ; seed -> xml
       (define/augment (render seed)
-        (renderer (get-struct))))))
+        (renderer (get-value))))))
 
 ; Generates a procedure that takes persistent-structs for a particular entity
 ; and returns an appropriate XML representation.
@@ -164,11 +139,10 @@
 ;  [#:attributes  (listof attribute)]
 ; -> 
 ;  (struct -> xml)
-(define (entity->review-renderer entity 
+#;(define (entity->review-renderer entity 
                                  [attr->review-renderer default-attr->review-renderer]
                                  #:attr-pretty-name       [attr-pretty-name       default-attr-pretty-name] 
                                  #:attributes             [attributes             (default-attributes entity)]
-                                 #:struct->url            [struct->url            default-struct->url]
                                  #:plain-attr->xml        [plain-attr->xml        default-plain-attr->xml]
                                  #:foreign-key-attr->xml  [foreign-key-attr->xml  default-foreign-key-attr->xml])
   (lambda (struct)
@@ -188,14 +162,13 @@
 (define (default-attr->review-renderer attr 
           [attr-pretty-name      default-attr-pretty-name]
           [plain-attr->xml       default-plain-attr->xml]
-          [foreign-key-attr->xml default-foreign-key-attr->xml]
-          #:struct->url [struct->url default-struct->url])
+          [foreign-key-attr->xml default-foreign-key-attr->xml])
   (let ([attr-type (attribute-type attr)])
     (lambda (value)
       (xml (tr (th (@ [class 'snooze-review-attr])
                    ,(attr-pretty-name attr))
                (td (@ [class 'snooze-review-value])
-                   ,(attr->xml attr value plain-attr->xml foreign-key-attr->xml #:struct->url struct->url)))))))
+                   ,(attr->xml attr value plain-attr->xml foreign-key-attr->xml)))))))
 
 
 ; Editors ----------------------------------------
@@ -244,7 +217,7 @@
       ; Methods ----------------------------------
       
       ; snooze-struct -> void
-      (define/public (set-struct! struct)
+      (define/public (set-value! struct)
         (web-cell-set! struct-cell struct)
         (for ([val   (in-list (struct-ref* struct))]
               [field (in-list fields)])
@@ -270,16 +243,16 @@
         (web-cell-set! 
          struct-cell 
          (apply snooze-struct-set 
-                (list* (get-struct)
+                (list* (get-value)
                        (for/fold ([args null])
                          ([attr  (in-list attributes)]
                           [field (in-list fields)])
                          (list* attr (send field get-value) args)))))
-        (check-proc (get-struct))) ; apply the validation procedure
+        (check-proc (get-value))) ; apply the validation procedure
       
       ; -> struct
       (define/override (commit-changes)
-        (let* ([struct (get-struct)]
+        (let* ([struct (get-value)]
                [entity (snooze-struct-entity struct)])
           (call-with-transaction
            ;(if (snooze-struct-saved? struct)
@@ -347,11 +320,9 @@
 ;  (mixin html-element<%>)
 (define (entity->list-mixin entity 
                             [attr->review-renderer default-attr->list-renderer]
-                            #:attributes  [attributes  (default-attributes entity)]
-                            #:struct->url [struct->url default-struct->url])
+                            #:attributes  [attributes  (default-attributes entity)])
   (let ([renderer (entity->list-renderer entity attr->review-renderer 
-                                         #:attributes attributes
-                                         #:struct->url struct->url)])
+                                         #:attributes attributes)])
     (mixin/cells (html-element<%>) (snooze-scaffolded-list-element<%>)
       
       ; Fields -----------------------------------
@@ -361,7 +332,7 @@
       ; Methods ------------------------------------ 
       ; seed -> xml
       (define/augment (render seed)
-        (renderer (get-structs))))))
+        (renderer (get-values))))))
 
 ;  entity
 ;  [(attr -> (value -> xml))]
@@ -371,24 +342,23 @@
 (define (entity->list-renderer entity 
                                [attr->list-renderer default-attr->list-renderer]
                                #:attributes         [attributes       (default-attributes entity)]
-                               #:attr-pretty-name   [attr-pretty-name default-attr-pretty-name]
-                               #:struct->url        [struct->url      default-struct->url])
+                               #:attr-pretty-name   [attr-pretty-name default-attr-pretty-name])
   (lambda (structs)
     (xml (table (@ [class 'snooze-list])
                 (thead (tr ,@(for/list ([attr-name (in-list (map attr-pretty-name attributes))])
                                (xml (th ,attr-name)))))
                 (tbody ,@(for/list ([struct (in-list structs)])
-                           (struct->list-xml struct attr->list-renderer attributes #:struct->url struct->url)))))))
+                           (struct->list-xml struct attr->list-renderer attributes)))))))
 
 ; snooze-struct (attr -> (value -> xml)) -> xml
-(define (struct->list-xml struct attr->renderer attributes #:struct->url [struct->url      default-struct->url])
+(define (struct->list-xml struct attr->renderer attributes)
   (xml (tr ,@(for/list ([attr (in-list attributes)])
                ((attr->renderer attr) (snooze-struct-ref struct attr))))))
 
 ; attr -> (value -> xml)
-(define (default-attr->list-renderer attr #:struct->url [struct->url default-struct->url])
+(define (default-attr->list-renderer attr)
   (lambda (value)
-    (xml (td ,(attr->xml attr value #:struct->url struct->url)))))
+    (xml (td ,(attr->xml attr value)))))
 
 
 ; Snooze report ----------------------------------
@@ -406,8 +376,6 @@
                               #:attr-pretty-name       [attr-pretty-name      default-attr-pretty-name]
                               #:entity->attrs          [entity->attrs         default-attributes]
                               #:query                  [query                 (default-report-query entity)]
-                              #:entity->url            [entity->url           default-entity->url]
-                              #:struct->url            [struct->url           default-struct->url]
                               #:plain-attr->xml        [plain-attr->xml       default-plain-attr->xml]
                               #:foreign-key-attr->xml  [foreign-key-attr->xml default-foreign-key-attr->xml])
   (mixin/cells (html-element<%>) (html-element<%>)
@@ -419,8 +387,6 @@
            (entity->report snooze entity attr->report-renderer 
                            #:entity->attrs         entity->attrs
                            #:query                 query
-                           #:entity->url           entity->url
-                           #:struct->url           struct->url
                            #:plain-attr->xml       plain-attr->xml
                            #:foreign-key-attr->xml foreign-key-attr->xml) 
            #:child)
@@ -440,16 +406,14 @@
                         #:attr-pretty-name       [attr-pretty-name       default-attr-pretty-name]
                         #:entity->attrs          [entity->attrs          default-attributes]
                         #:query                  [query                  (default-report-query entity)]
-                        #:entity->url            [entity->url            default-entity->url]
-                        #:struct->url            [struct->url            default-struct->url]
                         #:plain-attr->xml        [plain-attr->xml        default-plain-attr->xml]
                         #:foreign-key-attr->xml  [foreign-key-attr->xml  default-foreign-key-attr->xml])
   (define-alias E entity)
   (let* ([attributes     (entity->attrs entity)]
          [report-columns (assemble-list
-                          [(entity->url crudl:review entity) (make-column 'view-col "")]
-                          [(entity->url crudl:update entity) (make-column 'edit-col "")]
-                          [(entity->url crudl:delete entity) (make-column 'delete-col "")]
+                          [(review-controller-set? entity) (make-column 'view-col "")]
+                          [(update-controller-set? entity) (make-column 'edit-col "")]
+                          [(delete-controller-set? entity) (make-column 'delete-col "")]
                           [#t                   ,@(for/list ([attr (in-list attributes)])
                                                     (let ([ATTR (sql:alias E attr)])
                                                       (make-column (attribute-name attr)
@@ -496,28 +460,26 @@
         (xml (tr ,@(for/list ([col (in-list cols)])
                      (xml (td ,(let ([col-id (send col get-id)])
                                  (cond [(eq? col-id 'view-col)
-                                        (xml (a (@ [href ,(struct->url crudl:review a-struct)]) "View"))]
+                                        (xml (a (@ [href ,(review-controller-url a-struct)]) "View"))]
                                        [(eq? col-id 'edit-col)
-                                        (xml (a (@ [href ,(struct->url crudl:update a-struct)]) "Edit"))]
+                                        (xml (a (@ [href ,(update-controller-url a-struct)]) "Edit"))]
                                        [(eq? col-id 'delete-col)
-                                        (xml (a (@ [href ,(struct->url crudl:delete a-struct)]) "Delete"))]
+                                        (xml (a (@ [href ,(delete-controller-url a-struct)]) "Delete"))]
                                        [else
                                         (let ([attribute (entity-attribute entity col-id)])
                                           ((attr->report-renderer attribute 
                                                                   #:plain-attr->xml       plain-attr->xml 
-                                                                  #:foreign-key-attr->xml foreign-key-attr->xml
-                                                                  #:struct->url           struct->url)
+                                                                  #:foreign-key-attr->xml foreign-key-attr->xml)
                                            a-struct))])))))))))))
 
 
 ; attr -> (value -> xml)
 (define (default-attr->report-renderer attr 
           #:plain-attr->xml       [plain-attr->xml       default-plain-attr->xml]
-          #:foreign-key-attr->xml [foreign-key-attr->xml default-foreign-key-attr->xml]
-          #:struct->url           [struct->url           default-struct->url])
+          #:foreign-key-attr->xml [foreign-key-attr->xml default-foreign-key-attr->xml])
   (lambda (struct)
     (let ([value (snooze-struct-ref struct attr)])
-      (attr->xml attr value plain-attr->xml foreign-key-attr->xml #:struct->url struct->url))))
+      (attr->xml attr value plain-attr->xml foreign-key-attr->xml))))
 
 
 

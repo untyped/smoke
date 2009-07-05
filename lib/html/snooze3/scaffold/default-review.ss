@@ -12,11 +12,11 @@
   (mixin/cells (crudl-review+delete<%>) 
     (crudl-review+delete<%>)
     
-    (inherit get-struct render-struct)
+    (inherit get-value render-struct)
     
     ; seed -> xml
     (define/augment (render seed)
-      (render-struct seed (get-struct)))))
+      (render-struct seed (get-value)))))
 
 ; DJG : There's also an is-a?/c
 

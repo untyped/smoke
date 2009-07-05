@@ -13,8 +13,8 @@
   (call-with-connection
    (lambda ()
      (let ([entity (send editor-page get-entity)])
-       (let loop ([struct ((entity-defaults-constructor entity))])
-         (send editor-page set-struct! struct)
+       (let loop ([val ((entity-defaults-constructor entity))])
+         (send editor-page set-value! val)
          (loop (send editor-page respond)))))))
 
 ; Components -------------------------------------

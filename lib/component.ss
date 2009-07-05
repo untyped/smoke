@@ -51,7 +51,7 @@
       (inner (void) on-request request)
       (for-each (cut send <> on-request request)
                 (get-child-components)))
-      
+    
     ; Rendering ----------------------------------
     
     ; seed -> content
@@ -116,29 +116,32 @@
     
     ; Printing -----------------------------------
     
-    ; -> (U symbol #f)
-    (define (get-class-name)
-      (define-values (class object-skipped?)
-        (object-info this))
-      (define-values (class-name field-count field-name-list field-accessor field-mutator super-class class-skipped?) 
-        (if object-skipped?
-            (list #f #f #f #f #f #f #t)
-            (class-info class)))
-      class-name)
-    
     ; output-port -> void
     (define/public (custom-write out)
-      (custom-print out #t (get-class-name)))
+      (custom-print out write (get-class-name this)))
     
     ; output-port -> void
     (define/public (custom-display out)
-      (custom-print out #f (get-class-name)))
+      (custom-print out display (get-class-name this)))
     
-    ; output-port boolean (U symbol #f) -> void
-    (define/public (custom-print out write? class-name)
-      (fprintf out "#(~a ~a)" (or class-name 'unknown-component (get-component-id))))))
+    ; output-port (any output-post -> void) (U symbol #f) -> void
+    (define/public (custom-print out print class-name)
+      (print (vector (or class-name 'unknown-component)
+                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                       (get-component-id)))
+             out))))
 
 ; Procedures -------------------------------------
+
+; -> (U symbol #f)
+(define (get-class-name obj)
+  (define-values (class object-skipped?)
+    (object-info obj))
+  (define-values (class-name field-count field-name-list field-accessor field-mutator super-class class-skipped?) 
+    (if object-skipped?
+        (list #f #f #f #f #f #f #t)
+        (class-info class)))
+  class-name)
 
 ; any -> boolean
 (define (component? item)

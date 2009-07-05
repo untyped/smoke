@@ -2,7 +2,6 @@
 
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
-         "../html-element.ss"
          "../notification.ss"
          "check-label.ss"
          "editor-interface.ss"
@@ -12,27 +11,24 @@
 
 ; interface
 (define editor-controller<%>
-  (interface (editor<%>)
+  (interface ()
+    get-editor       ; -> editor<%>
+    set-editor!      ; editor<%> -> void
     on-update        ; -> any
     commit-changes)) ; -> any
 
 ; Mixins -----------------------------------------
 
 (define editor-controller-mixin
-  (mixin/cells (html-element<%> editor<%>) (editor-controller<%>)
+  (mixin/cells () (editor-controller<%>)
     
-    (inherit parse
-             validate
-             editor-changed?
-             set-check-results!)
+    ; Fields -------------------------------------
+    
+    ; (cell editor<%>)
+    (init-cell editor #:accessor #:mutator)
     
     ; Methods ------------------------------------
-    
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (list* snooze-styles
-             (inner null get-html-requirements)))
-    
+        
     ; -> xml
     (define/public (get-warning-notification)
       (xml "The data you submitted has raised warnings. "
@@ -47,14 +43,14 @@
     
     (define/public (get-commit-notification)
       (xml "Your changes have been saved successfully."))
-        
+    
     ; -> any
     (define/public #:callback/return (on-update)
-      (process-parse-results (parse)))
+      (process-parse-results (send (get-editor) parse)))
     
     ; (listof check-result) -> any
     (define/private (process-parse-results results)
-      (set-check-results! results)
+      (send (get-editor) set-check-results! results)
       (cond [(ormap check-warning? results) (print-check-fatals results #:id (debug-id this))
                                             (error (format "parse! method produced check-warnings:~n~s"
                                                            (with-pretty-indent "  " (pretty-format results))))
@@ -63,21 +59,21 @@
                                             (send (current-page) respond)]
             [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
-            [else                           (process-validate-results (validate))]))
+            [else                           (process-validate-results (send (get-editor) validate))]))
     
     ; (listof check-result) -> any
     (define/private (process-validate-results results)
-      (set-check-results! results)
+      (send (get-editor) set-check-results! results)
       (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
             [(ormap check-failure? results) (notifications-add! (get-failure-notification))
                                             (send (current-page) respond)]
-            [(ormap check-warning? results) (if (editor-changed?)
+            [(ormap check-warning? results) (if (send (get-editor) value-changed?)
                                                 (begin  (notifications-add! (get-warning-notification))
                                                         (send (current-page) respond))
-                                                (begin0 (commit-changes)
+                                                (begin0 (send (get-editor) commit-changes)
                                                         (notifications-add! (get-commit-notification))))]
-            [else                           (begin0 (commit-changes)
+            [else                           (begin0 (send (get-editor) commit-changes)
                                                     (notifications-add! (get-commit-notification)))]))
     
     ; -> any

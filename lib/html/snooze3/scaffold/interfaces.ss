@@ -30,8 +30,8 @@
   (interface ()
     render-attribute  ; seed attribute -> xml          ; render the label (and the value)
     render-attributes ; seed (listof attribute) -> xml ; render the labels (and the values)
-    set-struct!       ; snooze-struct -> void
-    get-struct))      ; -> snooze-struct
+    set-value!        ; snooze-struct -> void
+    get-value))       ; -> snooze-struct
 
 ; DJG : Roll this into snooze-editor<%>?
 
@@ -45,7 +45,6 @@
 ;  - render an attribute, as plain or foreign-key variants
 (define crudl-review+delete+list<%>
   (interface (crudl-element<%>)
-    struct->crud-url         ; snooze-struct -> string
     render-value             ; seed snooze-struct attr -> xml. FINAL!
     render-value/plain       ; seed attr any -> xml
     render-value/foreign-key ; seed attr snooze-struct -> xml
@@ -67,14 +66,13 @@
 
 ; list elements deal with a list of structs
 (define crudl-list<%>
-  (interface (crudl-review+delete+list<%>)
-    entity->crudl-url?)) ; crudl-operation entity -> boolean
+  (interface (crudl-review+delete+list<%>)))
 
 ; list elements deal with a list of structs
 (define crudl-static-list<%>
   (interface (crudl-list<%>)
-    set-structs!  ; (listof snooze-struct) -> void
-    get-structs)) ; -> (listof snooze-structs)
+    set-values!  ; (listof snooze-struct) -> void
+    get-values)) ; -> (listof snooze-structs)
 
 ; DJG : make-query is already sort-of defined in snooze-report<%> (in that it's possible to override the parts of the queries).
 ; DJG : a good method here would be get-entity-alias.

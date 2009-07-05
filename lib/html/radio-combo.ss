@@ -83,7 +83,7 @@
             [raw-value (get-raw-value)]
             [options   (get-options)]
             [classes   (if (get-vertical?)
-                           (cons 'radio-combo-vertical (get-classes))
+                           (cons 'radio-combo-vertical   (get-classes))
                            (cons 'radio-combo-horizontal (get-classes)))])
         (xml (div (@ ,(core-html-attributes seed #:classes classes))
                   ,@(for/list ([option (get-options)])

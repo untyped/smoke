@@ -9,7 +9,9 @@
 
 (define view<%>
   (interface (checkable<%>)
-    get-views)) ; -> (listof view<%>)
+    get-views ; -> (listof view<%>)
+    get-value
+    set-value!))
 
 ; Mixins -----------------------------------------
 
@@ -22,6 +24,9 @@
     
     ; (listof view<%>)
     (init-field views null #:accessor #:children)
+    
+    ; (cell any)
+    (init-cell value #f #:accessor #:mutator)
         
     ; Methods ------------------------------------
     

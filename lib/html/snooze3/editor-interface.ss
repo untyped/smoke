@@ -2,6 +2,7 @@
 
 (require (planet untyped/snooze:3)
          "../../../lib-base.ss"
+         "../form-element.ss"
          "../html-component.ss"
          "../html-element.ss"
          "../labelled-element.ss"
@@ -13,14 +14,15 @@
 (define editor<%>
   (interface (checkable<%>)
     get-editors          ; -> (listof editor<%>)
+    get-value            ; -> any
+    set-value!           ; any -> void
     parse                ; -> (listof check-result)
-    validate             ; -> (listof check-result)
-    editor-changed?))    ; -> boolean
+    validate))           ; -> (listof check-result)
 
 ; Mixins -----------------------------------------
 
 (define simple-editor-mixin
-  (mixin/cells (html-component<%>) (editor<%>)
+  (mixin/cells (form-element<%>) (editor<%>)
     
     ; Fields -------------------------------------
     
@@ -28,7 +30,7 @@
     
     ; (listof editor<%>)
     (init-field editors null #:accessor #:children)
-        
+    
     ; Methods ------------------------------------
     
     ; (listof check-result) -> void
@@ -42,17 +44,20 @@
     
     ; -> (listof check-result)
     (define/public (validate)
-      (apply check-problems (map (cut send <> validate)
-                                   (get-editors))))
+      (apply check-problems
+             (map (cut send <> validate)
+                  (get-editors))))
     
     ; -> boolean
-    (define/public (editor-changed?)
-      (ormap (cut send <> editor-changed?) (get-editors)))))
+    (define/override (value-changed?)
+      (or (super value-changed?)
+          (ormap (cut send <> value-changed?)
+                 (get-editors))))))
 
 ; Classes ----------------------------------------
 
 (define simple-editor%
-  (simple-editor-mixin html-element%))
+  (simple-editor-mixin form-element%))
 
 ; Provide statements -----------------------------
 

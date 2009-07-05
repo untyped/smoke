@@ -8,6 +8,7 @@
          (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
+         "../controller.ss"
          "../report.ss"
          "default-abstract.ss"
          "interfaces.ss")
@@ -53,8 +54,7 @@
     
     ; -> (listof column)
     (define/public (make-columns)
-      (make-columns/defaults (get-entity) (get-attributes) 
-                             #:entity->url? (lambda (type entity) (entity->crudl-url? type entity))))
+      (make-columns/defaults (get-entity) (get-attributes)))
     
     ; -> (listof filter)
     (define/public (make-filters)
@@ -63,11 +63,7 @@
     ; -> (listof view)
     (define/public (make-views)
       (default-views (make-columns)))
-    
-    ; crudl-operation entity -> boolean
-    (define/public (entity->crudl-url? type entity)
-      (error "entity->crudl-url? must be overridden"))
-    
+        
     ; seed solumn any -> xml
     (define/public (render-column seed column data)
       (error (format "Unrecognised column: ~a" column)))))
@@ -99,8 +95,6 @@
              get-attributes
              get-attribute-pretty-name
              render-value
-             entity->crudl-url?
-             struct->crud-url
              make-columns
              make-views
              make-filters
@@ -113,8 +107,6 @@
     (field report
            (new (default-crudl-report (get-entity) report-class%
                                       #:attributes      (get-attributes)
-                                      #:entity->url?    (lambda (type entity) (entity->crudl-url? type entity))
-                                      #:struct->url     (lambda (type struct) (struct->crud-url type struct))
                                       #:report-columns  (make-columns)
                                       #:report-views    (make-views)
                                       #:report-filters  (make-filters)
@@ -133,11 +125,7 @@
 (define (default-crudl-report entity 
                               [report-class% (default-snooze-report-crudl-mixin snooze-report%)]
                               #:attributes      [attributes     (default-attributes entity)]
-                              #:entity->url?    [entity->url?   (lambda (crudl:op entity) #f)]
-                              #:struct->url     [struct->url    (lambda (crudl:op struct) #f)]
-                              #:report-columns  [report-columns (make-columns/defaults entity
-                                                                                      attributes 
-                                                                                      #:entity->url? entity->url?)]
+                              #:report-columns  [report-columns (make-columns/defaults entity attributes)]
                               #:report-views    [report-views   (default-views report-columns)]
                               #:report-filters  [report-filters (make-filters/attributes attributes)]
                               #:render-value    [render-value   (lambda (seed struct attr val)
@@ -190,12 +178,9 @@
     
     ; seed symbol snooze-struct -> xml
     (define/public (render-item/crud seed col-id struct)
-      (cond [(eq? col-id column-id:review)
-             (render-review-td seed (struct->url crudl:review struct))]
-            [(eq? col-id column-id:update)
-             (render-update-td seed (struct->url crudl:update struct))]
-            [(eq? col-id column-id:delete)
-             (render-delete-td seed (struct->url crudl:delete struct))]
+      (cond [(eq? col-id column-id:review) (render-review-td seed (review-controller-url struct))]
+            [(eq? col-id column-id:update) (render-update-td seed (update-controller-url struct))]
+            [(eq? col-id column-id:delete) (render-delete-td seed (delete-controller-url struct))]
             [else (error "Unrecognised column")]))
     
     ; seed snooze-struct attribute -> xml
@@ -226,25 +211,13 @@
 (define (default-struct-ref* struct)
   (cddr (snooze-struct-ref* struct)))
 
-; crudl-operation entity -> boolean
-(define (default-entity->url? crudl-op entity)
-  #f)
-
-; crudl-operation struct -> (U string #f)
-(define (default-struct->url crudl-op struct)
-  #f)
-
-;  [#:review-column? boolean]
-;  [#:update-column? boolean]
-;  [#:delete-column? boolean]
+;  entity
 ; -> 
 ;  (listof column)
-(define (make-columns/crud #:review-column? [review-column? #f]
-                           #:update-column? [update-column? #f]
-                           #:delete-column? [delete-column? #f])
-  (assemble-list [review-column? (make-column column-id:review "")]
-                 [update-column? (make-column column-id:update "")]
-                 [delete-column? (make-column column-id:delete "")]))
+(define (make-columns/crud entity)
+  (assemble-list [(review-controller-set? entity) (make-column column-id:review "")]
+                 [(update-controller-set? entity) (make-column column-id:update "")]
+                 [(delete-controller-set? entity) (make-column column-id:delete "")]))
 
 ; entity attribute -> column
 (define (make-column/attribute entity attr)
@@ -259,11 +232,9 @@
   (for/list ([attr (in-list attributes)])
     (make-column/attribute entity attr)))
 
-; entity attributes #:entity->url? [(crudl:operation entity -> boolean)] -> (listof column)
-(define (make-columns/defaults entity attributes #:entity->url? [entity->url? (lambda (type entity) #f)])
-  (append (make-columns/crud #:review-column? (entity->url? crudl:review entity)
-                             #:update-column? (entity->url? crudl:update entity)
-                             #:delete-column? (entity->url? crudl:delete entity))
+; entity attributes -> (listof column)
+(define (make-columns/defaults entity attributes)
+  (append (make-columns/crud entity)
           (make-columns/attributes entity attributes)))
 
 ; attribute -> filter

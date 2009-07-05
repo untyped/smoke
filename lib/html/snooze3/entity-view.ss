@@ -34,9 +34,6 @@
     (init [views (or (and attributes (map default-attribute-view attributes))
                      (error "entity-view constructor: insufficient arguments"))])
     
-    ; (cell (U snooze-struct #f))
-    (cell struct #f #:accessor)
-        
     (init [classes null])
     
     (super-new [classes (list* 'smoke-entity-view 'ui-widget classes)] [views views])
@@ -52,12 +49,12 @@
                                (td ,(send view render seed))))))))
     
     ; snooze-struct -> void
-    (define/public (set-struct! struct)
-      (unless (snooze-struct? struct)
-        (raise-type-error 'entity-view.set-struct! "snooze-struct" struct))
-      (web-cell-set! struct-cell struct)
+    (define/override (set-value! val)
+      (unless (snooze-struct? val)
+        (raise-type-error 'entity-view.set-value! "snooze-struct" val))
+      (super set-value! val)
       (for ([view (in-list (get-views))])
-        (send view destructure! struct)))))
+        (send view destructure! val)))))
 
 (define entity-view%
   (entity-view-mixin (simple-view-mixin html-element%)))

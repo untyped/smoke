@@ -29,11 +29,11 @@
     
     ; -> any
     (define/public (get-value)
-      (error "get-value must be overridden."))
+      (error "form-element.get-value must be overridden."))
     
     ; any -> void
     (define/public (set-value! val)
-      (error "set-value! must be overridden."))
+      (error "form-element.set-value! must be overridden."))
     
     ; -> boolean
     (define/public (value-valid?)
@@ -70,15 +70,17 @@
     
     ; Printing -----------------------------------
     
-    ; output-port boolean (U symbol #f) -> void
-    (define/override (custom-print out write? class-name)
-      (fprintf out
-               (if write? "#(~a ~a ~a ~s)" "#(~a ~a ~a ~a)")
-               (or class-name 'unknown-form-element)
-               (get-component-id)
-               (get-id)
-               (with-handlers ([exn:smoke:form? (lambda _ (format "bad value: ~a" (get-value-error)))])
-                 (get-value))))))
+    ; output-port (any output-port -> void) (U symbol #f) -> void
+    (define/override (custom-print out print class-name)
+      (print (vector (or class-name 'unknown-form-element)
+                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                       (get-component-id))
+                     (with-handlers ([exn? (lambda (exn) '<no-id>)])
+                       (get-id))
+                     (with-handlers ([exn:fail?       (lambda (exn) '<no-value>)]
+                                     [exn:smoke:form? (lambda (exn) (list 'bad-value (get-value-error)))])
+                       (get-value)))
+             out))))
 
 (define form-element%
   (class/cells (form-element-mixin disableable-element%) ()))

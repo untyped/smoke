@@ -1,7 +1,7 @@
 #lang scheme/base
 
 (require (for-syntax scheme/base
-                     scheme/class
+                     "../../class/class.ss"
                      srfi/26
                      (planet untyped/unlib:3/syntax))
          "../../lib-base.ss"

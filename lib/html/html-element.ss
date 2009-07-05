@@ -39,11 +39,11 @@
     ; Methods ------------------------------------
     
     (init-events get-id)
-      
+    
     ; seed
     ; [#:id      (U symbol #f)]
     ; [#:classes (listof (U string symbol))]
-    ; [#:style   (U string #f)] 
+    ; [#:style   (U string #f)] 
     ; [#:tooltip (U string #f)]
     ; ->
     ; (listof attribute)
@@ -76,12 +76,14 @@
     
     ; Printing -----------------------------------
     
-    ; output-port boolean (U symbol #f) -> void
-    (define/override (custom-print out write? class-name)
-      (fprintf out "#(~a ~a ~a)"
-               (or class-name 'unknown-html-element)
-               (get-component-id)
-               (get-id)))))
+    ; output-port (any output-port -> void) (U symbol #f) -> void
+    (define/override (custom-print out print class-name)
+      (print (vector (or class-name 'unknown-html-element)
+                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                       (get-component-id))
+                     (with-handlers ([exn? (lambda (exn) '<no-id>)])
+                       (get-id)))
+             out))))
 
 (define html-element%
   (class/cells (html-element-mixin html-component%) ()

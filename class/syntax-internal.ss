@@ -1,9 +1,12 @@
 #lang scheme/base
 
 (require (for-template scheme/base
-                       "../base.ss")
-         (planet untyped/unlib:3/syntax)
-         "../base.ss")
+                       scheme/class
+                       "../web-server/web-cell.ss")
+         scheme/contract
+         scheme/match
+         srfi/26
+         (planet untyped/unlib:3/syntax))
 
 ; Seed structure ---------------------------------
 

@@ -11,7 +11,7 @@
 ; Procedures -------------------------------------
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-review-element entity
+#;(define (scaffold-review-element entity
                                  #:crudl-mixin  [crudl-mixin  (default-crudl-mixin entity)]
                                  #:crud-mixin   [crud-mixin   (default-crud-mixin)]
                                  #:rdl-mixin    [rdl-mixin    (default-review+delete+list-mixin)]
@@ -21,7 +21,7 @@
     (review-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element)))))))
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-delete-element entity
+#;(define (scaffold-delete-element entity
                                  #:crudl-mixin  [crudl-mixin  (default-crudl-mixin entity)]
                                  #:crud-mixin   [crud-mixin   (default-crud-mixin)]
                                  #:editor-mixin [editor-mixin (default-crudl-editor-mixin)]
@@ -32,7 +32,7 @@
     (delete-mixin (editor-mixin (rd-mixin (rdl-mixin (crud-mixin (crudl-mixin element))))))))
 
 ; entity -> (mixinof html-element<%> -> crudl-review+delete<%>)
-(define (scaffold-list-element entity
+#;(define (scaffold-list-element entity
                                #:crudl-mixin      [crudl-mixin      (default-crudl-mixin entity)]
                                #:rdl-mixin        [rdl-mixin        (default-review+delete+list-mixin)]
                                #:list-mixin       [list-mixin       (default-list-mixin)])
@@ -55,15 +55,3 @@
 (provide (all-defined-out)
          (all-from-out "scaffold/default-mixins.ss")
          (all-from-out "scaffold/interfaces.ss"))
-
-; DJG : Object/class contracts are in the works. Leave this kind of thing for now.
-
-;(provide/contract
-; [scaffold-review-element (->* (entity?)
-;                               (#:crudl-mixin   crudl-mixin/c
-;                                                #:crud-mixin   crud-mixin/c
-;                                                #:rdl-mixin    review+delete+list-mixin/c
-;                                                #:rd-mixin     review+delete-mixin/c
-;                                                #:review-mixin review+delete-mixin/c)
-;                               (-> (implementation?/c html-element<%>)
-;                                   (implementation?/c crudl-review+delete<%>)))])

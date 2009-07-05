@@ -2,7 +2,6 @@
 
 (require (for-syntax scheme/base 
                      (planet untyped/unlib:3/syntax)
-                     "../base.ss"
                      "syntax-internal.ss")
          scheme/class)
 
@@ -45,7 +44,6 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out scheme/class)
-         class/cells
+(provide class/cells
          mixin/cells
          singleton/cells)
