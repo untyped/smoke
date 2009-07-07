@@ -89,18 +89,18 @@
     ; filter string -> natural
     (define/override (query-num-items filter pattern)
       (let-sql ([entity (get-entity)])
-        (select-one #:what  (count entity.guid)
-                    #:from  entity
-                    #:where ,(make-where filter pattern))))
+        (find-one (sql (select #:what  (count entity.guid)
+                               #:from  entity
+                               #:where ,(make-where filter pattern))))))
     
     ; filter string column (U 'asc 'desc) natural natural -> (gen-> result)
     (define/override (query-items filter pattern col dir start count)
       (let-sql ([entity (get-entity)])
-        (g:select #:from   entity
-                  #:where  ,(make-where filter pattern) 
-                  #:order  ,(get-sort-order col dir)
-                  #:offset ,start
-                  #:limit  ,count)))
+        (g:find (sql (select #:from   entity
+                             #:where  ,(make-where filter pattern) 
+                             #:order  ,(get-sort-order col dir)
+                             #:offset ,start
+                             #:limit  ,count)))))
     
     ; filter pattern
     (define/public (make-where filter pattern)
@@ -141,11 +141,15 @@
                ,(render-update-td seed struct)
                ,(render-delete-td seed struct)
                ,@(for/list ([col (in-list cols)])
-                   (if (is-a? col attribute-report-column%)
-                       (let ([attr (send col get-attribute)])
-                         (render-value-td seed attr (snooze-struct-ref struct attr)))
-                       (error "entity-report.render-item: could not render column" col))))))
+                   (render-column seed col struct)))))
     
+    ; seed column snooze-struct -> xml
+    (define/public (render-column seed col struct)
+      (if (is-a? col attribute-report-column%)
+          (let ([attr (send col get-attribute)])
+            (render-value-td seed attr (snooze-struct-ref struct attr)))
+          (error "entity-report.render-column: could not render column" col)))
+
     ; seed -> xml
     (define/public (render-review-th seed)
       (opt-xml (and (show-review-column?) (review-controller-set? (get-entity)))
@@ -202,3 +206,7 @@
 ; Provide statements -----------------------------
 
 (provide entity-report%)
+
+(provide/contract
+ [default-attribute-column  (-> attribute? (is-a?/c attribute-report-column%))]
+ [attribute-column-defaults (parameter/c (-> attribute? (is-a?/c attribute-report-column%)))])

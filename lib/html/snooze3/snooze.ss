@@ -14,5 +14,4 @@
                        "editor.ss"
                        "page-internal.ss"
                        "report.ss"
-                       "scroll-report.ss"
                        "view.ss"))
