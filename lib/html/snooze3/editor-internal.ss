@@ -14,8 +14,6 @@
 (define editor<%>
   (interface (checkable<%>)
     get-editors          ; -> (listof editor<%>)
-    get-value            ; -> any
-    set-value!           ; any -> void
     parse                ; -> (listof check-result)
     validate))           ; -> (listof check-result)
 
