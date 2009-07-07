@@ -20,7 +20,7 @@
 ; Mixins -----------------------------------------
 
 (define simple-editor-mixin
-  (mixin/cells (form-element<%>) (editor<%>)
+  (mixin/cells (html-element<%>) (editor<%>)
     
     ; Fields -------------------------------------
     
