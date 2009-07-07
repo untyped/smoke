@@ -122,6 +122,15 @@
             (sql #t))))
     
     ; seed (listof column) -> xml
+    (define/override (render-empty-body seed cols)
+      (xml (tbody (tr (td (@ [colspan ,(+ (if (and (show-review-column?) (review-controller-set? (get-entity))) 1 0)
+                                          (if (and (show-update-column?) (update-controller-set? (get-entity))) 1 0)
+                                          (if (and (show-delete-column?) (delete-controller-set? (get-entity))) 1 0)
+                                          (length cols))]
+                             [class "empty-row"])
+                          "There are no items to display in this list.")))))
+    
+    ; seed (listof column) -> xml
     (define/override (render-head seed cols)
       ; column
       (define current-col (get-sort-col))

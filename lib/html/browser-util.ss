@@ -77,7 +77,7 @@
 
 ; (parameter string)
 (define current-jquery-ui-stylesheet
-  (make-parameter "/styles/jquery-ui/cupertino/jquery-ui-1.7.2.custom.css"))
+  (make-parameter "/styles/jquery-ui/ui-lightness/jquery-ui-1.7.2.custom.css"))
 
 (define jquery-ui-script/min
   (xml (script (@ [type "text/javascript"]
