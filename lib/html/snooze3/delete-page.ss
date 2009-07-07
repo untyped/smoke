@@ -9,66 +9,11 @@
          "../notification.ss"
          "../submit-button.ss"
          "attribute-view.ss"
-         "view-interface.ss"
-         "entity-view.ss")
+         "entity-view.ss"
+         "page-internal.ss"
+         "view-internal.ss")
 
 ; Mixins -----------------------------------------
-
-(define entity-review-page-mixin
-  (mixin/cells (html-element<%> html-page<%>) ()
-    
-    (inherit get-id)
-    
-    ; Fields ----------------------------
-    
-    (super-new)
-    
-    ; entity
-    (init [entity #f])
-    
-    ; (listof attribute)
-    (init [attributes (and entity (entity-data-attributes entity))])
-    
-    ; (listof attribute-view<%>)
-    (init [views (and attributes (map default-attribute-view attributes))])
-    
-    ; entity-view%
-    (init-field view
-      (or (and entity
-               views
-               (new entity-view%
-                    [id     (symbol-append (get-id) '-view)]
-                    [entity entity]
-                    [views  views]))
-          (string-append "entity-view-page constructor: insufficient arguments"))
-      #:child)
-    
-    ; Methods ---------------------------
-    
-    ; -> entity
-    (define/public (get-entity)
-      (send view get-entity))
-    
-    ; -> (U snooze-struct #f)
-    (define/public (get-value)
-      (send view get-value))
-    
-    ; snooze-struct -> void
-    (define/public (set-value! struct)
-      (send view set-value! struct))
-    
-    ; -> string
-    (define/override (get-title)
-      (let* ([title  (super get-title)]
-             [entity (get-entity)]
-             [struct (get-value)])
-        (cond [title title]
-              [struct (format "~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
-              [else   (entity-pretty-name entity)])))
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (send view render seed))))
 
 (define entity-delete-page-mixin
   (mixin/cells (html-element<%> html-page<%>) ()
@@ -155,14 +100,15 @@
              (clear-continuation-table!)
              (notifications-add! (get-delete-notification struct)))))))))
 
-; Helpers ----------------------------------------
+; Procedures -------------------------------------
 
-; component<%> -> symbol
-(define (debug-id obj)
-  (with-handlers ([exn? (lambda _ (send obj get-component-id))])
-    (send obj get-id)))
+; entity [(subclassof html-page%)] -> html-page%
+(define (scaffold-delete-page entity [page% (default-scaffolded-page-superclass)])
+  (new (entity-delete-page-mixin (render-augride-mixin page%)) [entity entity]))
 
 ; Provide statements -----------------------------
 
-(provide entity-review-page-mixin
-         entity-delete-page-mixin)
+(provide entity-delete-page-mixin)
+
+(provide/contract
+ [scaffold-delete-page (->* (entity?) ((subclass?/c html-page%)) (is-a?/c html-page%))])

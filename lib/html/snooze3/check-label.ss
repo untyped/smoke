@@ -6,7 +6,7 @@
          "../browser-util.ss"
          "../html-element.ss"
          "checkable.ss"
-         "editor-interface.ss"
+         "editor-internal.ss"
          "util.ss")
 
 ; Interfaces -------------------------------------

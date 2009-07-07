@@ -2,7 +2,7 @@
 
 (require "attribute-editor.ss"
          "editor-controller.ss"
-         "editor-interface.ss"
+         "editor-internal.ss"
          "editor-page.ss"
          "entity-editor.ss")
 
@@ -10,6 +10,6 @@
 
 (provide (all-from-out "attribute-editor.ss"
                        "editor-controller.ss"
-                       "editor-interface.ss"
+                       "editor-internal.ss"
                        "editor-page.ss"
                        "entity-editor.ss"))

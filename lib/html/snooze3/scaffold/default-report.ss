@@ -8,7 +8,7 @@
          (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
-         "../controller.ss"
+         "../controller-internal.ss"
          "../report.ss"
          "default-abstract.ss"
          "interfaces.ss")
@@ -45,8 +45,8 @@
       (lambda (where-clause #:order  [order-clause null]
                             #:offset [offset       #f]
                             #:limit  [limit        #f])
-        (let-alias ([E (get-entity)])
-          (sql (select #:from   E
+        (let-sql ([entity (get-entity)])
+          (sql (select #:from   entity
                        #:where  ,where-clause
                        #:order  ,order-clause
                        #:offset ,offset

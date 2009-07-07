@@ -24,7 +24,7 @@
          "../time-field.ss"
          "attribute-editor-internal.ss"
          "check-label.ss"
-         "editor-interface.ss"
+         "editor-internal.ss"
          "foreign-key-editor.ss")
 
 

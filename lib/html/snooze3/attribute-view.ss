@@ -6,8 +6,8 @@
          "../html-element.ss"
          "../labelled-element.ss"
          "check-label.ss"
-         "controller.ss"
-         "view-interface.ss")
+         "controller-internal.ss"
+         "view-internal.ss")
 
 ; Interfaces -------------------------------------
 

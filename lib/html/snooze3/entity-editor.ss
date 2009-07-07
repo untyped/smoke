@@ -6,7 +6,7 @@
          "../html-element.ss"
          "attribute-editor.ss"
          "check-label.ss"
-         "editor-interface.ss")
+         "editor-internal.ss")
 
 ; Interfaces -------------------------------------
 

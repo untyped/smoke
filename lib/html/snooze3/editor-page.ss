@@ -10,8 +10,9 @@
          "../submit-button.ss"
          "attribute-editor.ss"
          "editor-controller.ss"
-         "editor-interface.ss"
+         "editor-internal.ss"
          "entity-editor.ss"
+         "page-internal.ss"
          "util.ss")
 
 ; Mixins -----------------------------------------
@@ -99,7 +100,20 @@
             ,(send submit-button render seed))))
    editor-controller-mixin))
 
+; Procedures -------------------------------------
+
+; entity [(subclassof html-page%)] -> html-page%
+(define (scaffold-create-page entity [page% (default-scaffolded-page-superclass)])
+  (new (entity-editor-page-mixin (render-augride-mixin page%)) [entity entity]))
+
+; entity [(subclassof html-page%)] -> html-page%
+(define (scaffold-update-page entity [page% (default-scaffolded-page-superclass)])
+  (new (entity-editor-page-mixin (render-augride-mixin page%)) [entity entity]))
+
 ; Provide statements -----------------------------
 
-(provide entity-editor%
-         entity-editor-page-mixin)
+(provide entity-editor-page-mixin)
+
+(provide/contract
+ [scaffold-create-page (->* (entity?) ((subclass?/c html-page%)) (is-a?/c html-page%))]
+ [scaffold-update-page (->* (entity?) ((subclass?/c html-page%)) (is-a?/c html-page%))])

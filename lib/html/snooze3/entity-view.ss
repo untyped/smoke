@@ -6,7 +6,7 @@
          "../html-element.ss"
          "attribute-view.ss"
          "check-label.ss"
-         "view-interface.ss")
+         "view-internal.ss")
 
 ; Interfaces -------------------------------------
 

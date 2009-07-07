@@ -1,13 +1,15 @@
 #lang scheme/base
 
 (require "attribute-view.ss"
-         "view-interface.ss"
-         "view-page.ss"
-         "entity-view.ss")
+         "delete-page.ss"
+         "entity-view.ss"
+         "view-internal.ss"
+         "review-page.ss")
 
 ; Provide statements -----------------------------
 
 (provide (all-from-out "attribute-view.ss"
-                       "view-interface.ss"
-                       "view-page.ss"
-                       "entity-view.ss"))
+                       "delete-page.ss"
+                       "entity-view.ss"
+                       "view-internal.ss"
+                       "review-page.ss"))

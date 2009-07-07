@@ -7,7 +7,7 @@
          "../combo-box.ss"
          "attribute-editor-internal.ss"
          "check-label.ss"
-         "editor-interface.ss")
+         "editor-internal.ss")
 
 ; Classes ----------------------------------------
 

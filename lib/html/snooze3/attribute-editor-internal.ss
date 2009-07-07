@@ -23,7 +23,7 @@
          "../tiny-mce.ss"
          "../time-field.ss"
          "check-label.ss"
-         "editor-interface.ss")
+         "editor-internal.ss")
 
 ; Interfaces -------------------------------------
 

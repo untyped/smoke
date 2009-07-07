@@ -4,7 +4,7 @@
          "../../../lib-base.ss"
          "../notification.ss"
          "check-label.ss"
-         "editor-interface.ss"
+         "editor-internal.ss"
          "entity-editor.ss")
 
 ; Interfaces -------------------------------------

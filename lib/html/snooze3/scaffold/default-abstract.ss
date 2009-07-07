@@ -4,7 +4,7 @@
          (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
-         "../controller.ss"
+         "../controller-internal.ss"
          "../editor.ss"
          "interfaces.ss")
 
