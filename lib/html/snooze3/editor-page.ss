@@ -88,7 +88,7 @@
        (let* ([title  (super get-title)]
               [entity (get-entity)]
               [struct (get-initial-value)])
-         (cond [title title]
+         (cond #;[title title]
                [(and struct (snooze-struct-saved? struct))
                 (format "Edit ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
                [struct (format "New ~a" (entity-pretty-name entity))]

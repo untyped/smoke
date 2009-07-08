@@ -14,22 +14,55 @@
 (define editor<%>
   (interface (checkable<%>)
     get-editors          ; -> (listof editor<%>)
+    value-changed?       ; -> boolean
     parse                ; -> (listof check-result)
     validate))           ; -> (listof check-result)
 
 ; Mixins -----------------------------------------
 
-(define simple-editor-mixin
+(define simple-editor-mixin/html-element
   (mixin/cells (html-element<%>) (editor<%>)
     
-    ; Fields -------------------------------------
+    ; Fields ------------------------------
     
     (super-new)
     
     ; (listof editor<%>)
     (init-field editors null #:accessor #:children)
     
-    ; Methods ------------------------------------
+    ; Methods -----------------------------
+    
+    ; (listof check-result) -> void
+    (define/public (set-check-results! results)
+      (for-each (cut send <> set-check-results! results)
+                (get-editors)))
+    
+    ; -> (listof check-result)
+    (define/public (parse)
+      (apply check-problems (map (cut send <> parse) (get-editors))))
+    
+    ; -> (listof check-result)
+    (define/public (validate)
+      (apply check-problems
+             (map (cut send <> validate)
+                  (get-editors))))
+    
+    ; -> boolean
+    (define/public (value-changed?)
+      (or (ormap (cut send <> value-changed?)
+                 (get-editors))))))
+
+(define simple-editor-mixin/form-element
+  (mixin/cells (form-element<%>) (editor<%>)
+    
+    ; Fields ------------------------------
+    
+    (super-new)
+    
+    ; (listof editor<%>)
+    (init-field editors null #:accessor #:children)
+    
+    ; Methods -----------------------------
     
     ; (listof check-result) -> void
     (define/public (set-check-results! results)
@@ -52,10 +85,16 @@
           (ormap (cut send <> value-changed?)
                  (get-editors))))))
 
+; html-element<%> -> editor<%>
+(define (simple-editor-mixin class)
+  (if (implementation? class form-element<%>)
+      (simple-editor-mixin/form-element class)
+      (simple-editor-mixin/html-element class)))
+
 ; Classes ----------------------------------------
 
 (define simple-editor%
-  (simple-editor-mixin form-element%))
+  (simple-editor-mixin html-element%))
 
 ; Provide statements -----------------------------
 

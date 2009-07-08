@@ -67,7 +67,7 @@
       (let* ([title  (super get-title)]
              [entity (get-entity)]
              [struct (get-value)])
-        (cond [title title]
+        (cond #;[title title]
               [struct (format "Delete ~a: ~a" (entity-pretty-name entity) (format-snooze-struct struct))]
               [else   (format "Delete ~a" (entity-pretty-name entity))])))
     

@@ -47,7 +47,7 @@
     (inherit get-sort-col
              get-sort-dir
              get-sort-order
-             get-visible-columns)
+             get-visible-columns) 
     
     ; Fields -------------------------------------
     
