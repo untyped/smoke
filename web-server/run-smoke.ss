@@ -212,14 +212,14 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [serve/smoke           (->* ((-> (or/c response/full? response/incremental?)))
+ [serve/smoke           (->* ((-> any/c))
                              (#:manager any/c
                                         #:port              natural-number/c
-                                        #:listen-ip         (or/c string? false/c)
+                                        #:listen-ip         (or/c string? #f)
                                         #:htdocs-paths      (listof path?)
                                         #:mime-types-path   path?
                                         #:launch-browser?   boolean?
-                                        #:404-handler       (-> request? (or/c response/full? response/incremental?))
+                                        #:404-handler       (-> request? any)
                                         #:servlet-namespace list?)
                              void?)]
  [serve/smoke/delirium  (->* ((-> (or/c response/full? response/incremental?)) any/c)
@@ -227,9 +227,9 @@
                                         #:run-tests?      boolean?
                                         #:run-tests       (-> any/c any)
                                         #:port            natural-number/c
-                                        #:listen-ip       (or/c string? false/c)
+                                        #:listen-ip       (or/c string? #f)
                                         #:htdocs-paths    (listof path?)
                                         #:mime-types-path path?
                                         #:launch-browser? boolean?
-                                        #:404-handler     (-> request? (or/c response/full? response/incremental?)))
+                                        #:404-handler     (-> request? any))
                              void?)])
