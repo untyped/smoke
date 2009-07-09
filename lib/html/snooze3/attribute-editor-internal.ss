@@ -185,7 +185,7 @@
 (define (attributes->id attributes)
   (and (pair? attributes)
        (let ([attr (car attributes)])
-         (gensym/interned (symbol-append (entity-name (attribute-entity attr)) '- (attribute-name attr))))))
+         (gensym/interned (html-id-encode (format "~a-~a" (entity-name (attribute-entity attr)) (attribute-name attr)))))))
 
 ; (listof attribute) -> (U xml #f)
 (define (attributes->label attributes)

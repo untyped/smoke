@@ -94,8 +94,8 @@
 (define attribute-editor-defaults
   (make-parameter
    (lambda (attr)
-     (let* ([entity    (attribute-entity attr)]
-            [type      (attribute-type attr)])
+     (let* ([entity (attribute-entity attr)]
+            [type   (attribute-type   attr)])
        (match type
          [(struct guid-type (_ entity)) (new foreign-key-editor% [attributes (list attr)] [entity entity])]
          [(? boolean-type?)             (new check-box-editor%   [attributes (list attr)] [show-label? #f])]

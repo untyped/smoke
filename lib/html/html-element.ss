@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require srfi/13/string
+(require srfi/13
+         (planet untyped/unlib:3/for)
          "../../lib-base.ss"
          "html-component.ss"
          "html-element-internal.ss")
@@ -91,6 +92,29 @@
     (define/augride (render seed)
       (xml))))
 
+; Procedures -------------------------------------
+
+; (U string symbol) -> boolean
+(define (html-id? str+sym)
+  (let ([str (if (string? str+sym) str+sym (symbol->string str+sym))])
+    (and (regexp-match #rx"^[a-zA-Z][a-zA-Z0-9_:.-]*$" str) #t)))
+
+; (U string symbol) -> symbol
+(define (html-id-encode str+sym)
+  (let* ([str     (if (string? str+sym) str+sym (symbol->string str+sym))]
+         [encoded (for/fold/reverse
+                   ([accum null])
+                   ([char (in-string str)])
+                   (if (or (char-alphabetic? char)
+                           (char-numeric?    char)
+                           (memq char (list #\- #\_ #\: #\.)))
+                       (cons char accum)
+                       `(,@(reverse (string->list (string-upcase (number->string (char->integer char) 16)))) #\_ ,@accum)))])
+    (string->symbol
+     (apply string (if (char-alphabetic? (car encoded))
+                       encoded
+                       (list* #\i #\d encoded))))))
+
 ; Helpers ----------------------------------------
 
 ; (listof (U symbol string)) -> string
@@ -107,3 +131,7 @@
 (provide html-element<%>
          html-element-mixin
          html-element%)
+    
+(provide/contract
+ [html-id?       (-> (or/c string? symbol?) boolean?)]
+ [html-id-encode (-> (or/c string? symbol?) symbol?)])
