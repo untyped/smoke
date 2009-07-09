@@ -1,9 +1,10 @@
 #lang scheme/base
 
 (require "../../lib-base.ss"
+         "placeholder.ss"
          "text-input.ss")
 
-(define text-area%
+(define simple-text-area%
   (class/cells text-input% ()
     
     (inherit get-id
@@ -47,6 +48,10 @@
           (when binding 
             (set-raw! binding)))))))
 
+; a text-area with a mixin
+(define text-area%
+  (class/cells (placeholder-mixin simple-text-area%) ()))
+
 ; Provide statements -----------------------------
 
-(provide text-area%)
+(provide simple-text-area% text-area%)

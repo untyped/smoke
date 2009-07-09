@@ -52,7 +52,7 @@
 ; Classes ----------------------------------------
 
 (define tiny-mce%
-  (class/cells text-area% ()
+  (class/cells simple-text-area% ()
     
     (inherit get-id)
     

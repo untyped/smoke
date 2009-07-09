@@ -5,8 +5,13 @@
          "../../lib-base.ss"
          "form-element.ss")
 
+(define text-input<%>
+  (interface (form-element<%>)
+    get-raw
+    set-raw!))
+
 (define text-input%
-  (class/cells form-element% ()
+  (class/cells form-element% (text-input<%>)
     
     (inherit get-id
              get-enabled?)
@@ -79,4 +84,4 @@
 
 ; Provide statements -----------------------------
 
-(provide text-input%)
+(provide text-input<%> text-input%)
