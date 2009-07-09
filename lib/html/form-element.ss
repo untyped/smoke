@@ -25,6 +25,13 @@
              get-style
              get-tooltip)
     
+    ; Constructor --------------------------------
+    
+    ; (listof (U symbol string))
+    (init [classes null])
+    
+    (super-new [classes (cons 'ui-widget classes)])
+    
     ; Public methods -----------------------------
     
     ; -> any
@@ -52,21 +59,21 @@
       (error "value-changed? must be overridden."))
     
     ; seed -> (listof attribute)
-    ; Does NOT output the value.
+    ; Does NOT output the value of the form element.
     (define/override (core-html-attributes 
                       seed
                       #:id      [id      (get-id)]
                       #:classes [classes (get-classes)]
+                      #:name    [name    id]
                       #:style   [style   (get-style)]
                       #:tooltip [title   (get-tooltip)])
-      (define id       (get-id))
       (unless id (error (format "ID not set in form-element: ~a" this)))
       (append (super core-html-attributes seed
                      #:id      id
                      #:classes classes
                      #:style   style
                      #:tooltip title)              
-              (xml-attrs [name ,id])))
+              (opt-xml-attr name)))
     
     ; Printing -----------------------------------
     

@@ -6,31 +6,33 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (scroll request)
-  (send scroll-page respond))
+#;(define-controller scroll
+    init-smoke-pipeline
+    (lambda ()
+      (send scroll-page respond)))
 
 ; Components -------------------------------------
 
-(define scroll-page
-  (singleton/cells html-page% ()
-    
-    ; Fields -------------------------------------
-    
-    ; text-area%
-    (field report
-      (new scroll-report%
-           [id    'report]
-           [style "width: 100%; height: 600px"])
-      #:child #:accessor #:mutator)
-    
-    ; Constructor --------------------------------
-    
-    (super-new [component-id 'scroll-page] 
-               [title "Scroll report test"])
-    
-    ; Methods ------------------------------------
-    
-    ; seed -> xml
-    (define/augment (render seed)
-      (printf "Rendering page~n")
-      (send report render seed))))
+#;(define scroll-page
+    (singleton/cells html-page% ()
+      
+      ; Fields -------------------------------------
+      
+      ; text-area%
+      (field report
+        (new scroll-report%
+             [id    'report]
+             [style "width: 100%; height: 600px"])
+        #:child #:accessor #:mutator)
+      
+      ; Constructor --------------------------------
+      
+      (super-new [component-id 'scroll-page] 
+                 [title "Scroll report test"])
+      
+      ; Methods ------------------------------------
+      
+      ; seed -> xml
+      (define/augment (render seed)
+        (printf "Rendering page~n")
+        (send report render seed))))

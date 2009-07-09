@@ -3,7 +3,6 @@
 (require (planet untyped/unlib:3/require))
 
 (require scheme/cmdline
-         "../web-server/dispatch3-wrapper.ss"
          "content-base.ss"
          (directory-in "content"))
 

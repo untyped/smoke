@@ -161,11 +161,11 @@
     
     ; string -> (U boolean symbol number)
     (define/override (raw->option raw)
-      (cond [(not raw)              #f]
-            [(equal? raw "--yes--") #t]
-            [(equal? raw "--no--")  #f]
+      (cond [(not raw)               #f]
+            [(equal? raw "--yes--")  #t]
+            [(equal? raw "--no--")   #f]
             [(string->number raw) => (lambda (num) num)]
-            [else (string->symbol raw)]))
+            [else                    (string->symbol raw)]))
     
     ; (U boolean symbol number) ->  string
     (define/override (option->string option)

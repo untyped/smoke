@@ -9,13 +9,15 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (editor request)
-  (call-with-connection
-   (lambda ()
-     (let ([entity (send editor-page get-entity)])
-       (let loop ([val ((entity-defaults-constructor entity))])
-         (send editor-page set-value! val)
-         (loop (send editor-page respond)))))))
+(define-controller editor
+  init-smoke-pipeline
+  (lambda ()
+    (call-with-connection
+     (lambda ()
+       (let ([entity (send editor-page get-entity)])
+         (let loop ([val ((entity-defaults-constructor entity))])
+           (send editor-page set-value! val)
+           (loop (send editor-page respond))))))))
 
 ; Components -------------------------------------
 

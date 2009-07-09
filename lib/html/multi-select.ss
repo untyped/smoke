@@ -26,6 +26,11 @@
     
     ; Constructor --------------------------------
     
+    ; (listof (U symbol string))
+    (init [classes null])
+    
+    (super-new [classes (cons 'ui-widget classes)])
+    
     ; Methods ------------------------------------
     
     ; -> boolean

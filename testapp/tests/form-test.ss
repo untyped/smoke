@@ -48,9 +48,9 @@
       (check-equal? (title-ref) "Form elements"))
     
     ; Have to do password field first as submitting the page clears its value:
-    
+
     (test-suite "password-field"
-    
+      
       (test-case "initial value"
         (check-field-attr 'password-field 'size 20)
         (check-field-attr 'password-field 'maxLength 10)
@@ -86,7 +86,7 @@
         (enter-text (node/id 'password-field) "Done")))
     
     (test-suite "text-field"
-    
+      
       (test-case "initial value"
         (check-field-attr 'text-field 'size 20)
         (check-field-attr 'text-field 'maxLength 10)
@@ -134,7 +134,7 @@
         (enter-text (node/id 'lowercase-text-field) "Done")))
     
     (test-suite "text-area"
-    
+      
       (test-case "initial value"
         (check-field-attr 'text-area 'cols 20)
         (check-field-attr 'text-area 'rows 10)
@@ -182,12 +182,12 @@
         (enter-text (node/id 'lowercase-text-area) "Done")))
     
     (test-suite "tiny-mce"
-    
-      (test-case "initial value"
-        (check-field-attr 'text-area 'cols 20)
-        (check-field-attr 'text-area 'rows 10)
-        (check-field-value 'text-area "<p>Initial</p>")
-        (check-printed-value 'text-area "<p>Initial</p>"))
+      
+      ;(test-case "initial value"
+      ;  (check-field-attr 'text-area 'cols 20)
+      ;  (check-field-attr 'text-area 'rows 10)
+      ;  (check-field-value 'text-area "<p>Initial</p>")
+      ;  (check-printed-value 'text-area "<p>Initial</p>"))
       
       (test-case "full refresh"
         (printf "These tests have not been automated yet (might need an exec-javascript Delirium command).")
@@ -199,7 +199,7 @@
         (read-line)))
     
     (test-suite "check-box"
-    
+      
       (test-case "initial value"
         (check-field-attr 'check-box 'checked #t)
         (check-printed-value 'check-box #t))
@@ -225,7 +225,7 @@
         (check-printed-value 'check-box #t)))
     
     (test-suite "combo-box"
-
+      
       (test-case "initial value"
         (check-field-value 'combo-box "1")
         (check-combo-value 'combo-box "Option 1")
@@ -258,35 +258,56 @@
         (check-field-value 'combo-box "--yes--")
         (check-combo-value 'combo-box "Option 5")
         (check-printed-value 'combo-box #t)))
-    
-    (test-suite "radio-combo"
 
-      (test-case "initial value"
-        (check-field-value 'radio-combo-h "1")
-        (check-printed-value 'radio-combo-h 1))
+    (test-suite "radio-combo"
       
-      (test-case "full"
-        (select (node/id 'radio-combo-h) "b")
-        (click/wait (node/id 'submit-button))
-        (check-field-value 'radio-combo-h "b")
-        (check-printed-value 'radio-combo-h "b"))
+      (test-suite "horizontal"
+        
+        (test-case "initial value"
+          (check-field-attr 'radio-combo-h-1 'checked #t)
+          (check-field-attr 'radio-combo-h-a 'checked #f)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-h 1))
+        
+        (test-case "full"
+          (click (node/id 'radio-combo-h-a))
+          (click/wait (node/id 'submit-button))
+          (check-field-attr 'radio-combo-h-1 'checked #f)
+          (check-field-attr 'radio-combo-h-a 'checked #t)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-h 'a))
+        
+        (test-case "ajax"
+          (click (node/id 'radio-combo-h---yes--))
+          (click/wait (node/id 'ajax-submit-button))
+          (check-field-attr 'radio-combo-h-1 'checked #f)
+          (check-field-attr 'radio-combo-h-a 'checked #f)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #t)
+          (check-printed-value 'radio-combo-h #t)))
       
-      (test-case "ajax"
-        (select (node/id 'radio-combo-h) "1")
-        (click/wait (node/id 'ajax-submit-button))
-        (check-field-value 'radio-combo-h "1")
-        (check-printed-value 'radio-combo-h 1))
-      
-      (test-case "symbol"
-        (select (node/id 'radio-combo-h) "b")
-        (click/wait (node/id 'ajax-submit-button))
-        (check-field-value 'radio-combo-h "b")
-        (check-printed-value 'radio-combo-h 'b))
-      
-      (test-case "boolean"
-        (select (node/id 'radio-combo-h) "--yes--")
-        (click/wait (node/id 'ajax-submit-button))
-        (check-field-value 'radio-combo-h "--yes--")))
+      (test-suite "vertical"
+        
+        (test-case "initial value"
+          (check-field-attr 'radio-combo-v-1 'checked #t)
+          (check-field-attr 'radio-combo-v-a 'checked #f)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-v 1))
+        
+        (test-case "full"
+          (click (node/id 'radio-combo-v-a))
+          (click/wait (node/id 'submit-button))
+          (check-field-attr 'radio-combo-v-1 'checked #f)
+          (check-field-attr 'radio-combo-v-a 'checked #t)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-v 'a))
+        
+        (test-case "ajax"
+          (click (node/id 'radio-combo-v---yes--))
+          (click/wait (node/id 'ajax-submit-button))
+          (check-field-attr 'radio-combo-v-1 'checked #f)
+          (check-field-attr 'radio-combo-v-a 'checked #f)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #t)
+          (check-printed-value 'radio-combo-v #t))))
     
     (test-suite "radio-button"
       

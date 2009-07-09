@@ -12,24 +12,30 @@
       (open/wait "/tab")
       (check-equal? (title-ref) "Tab pane"))
     
-    (test-case "initial tabs"
+    (test-case "all tests"
+      ; These tests check whether tabs are present in the HTML.
+      ; However, the tab now works in a different way.
+      ; Elements are always present, but they are set to "hidden" using hideable-element (or something like that).
+      ; Update the tests to check the classes/content of the elements rather than their existence.
+      (fail "TODO: tests out of date (see comments for details)"))
+    
+    #;(test-case "initial tabs"
       (for ([id (in-list '(tab-pane
                            tab1 editor
                            tab2 inline-preview
+                           tab3 demand-preview
                            tab4 nested-tab-pane
-                           tab41 nested-inline-preview))])
+                           tab41 nested-inline-preview
+                           tab42 nested-demand-preview))])
         (with-check-info (['id id])
-          (check-true (node-exists? (node/id id)))))
-      (for ([id (in-list '(tab3 demand-preview tab42 nested-demand-preview))])
-        (with-check-info (['id id])
-          (check-false (node-exists? (node/id id))))))
+          (check-true (node-exists? (node/id id))))))
     
-    (test-case "initial content"
+    #;(test-case "initial content"
       (check-equal? (js-ref (js (!dot ($ "#editor") (val)))) "Content")
       (check-equal? (inner-html-ref (node/id 'inline-preview)) "Content")
       (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "Content"))
         
-    (test-case "enter new content"
+    #;(test-case "enter new content"
       (enter-text (node/id 'editor) "New content")
       (reload/wait)
       (read-line)
@@ -37,7 +43,7 @@
       (check-equal? (inner-html-ref (node/id 'inline-preview)) "New content")
       (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "New content"))
     
-    (test-case "select tabs"
+    #;(test-case "select tabs"
       (click/wait (node/jquery "#tab-pane ul li:eq(2)"))
       (check-true (node-exists? (node/id 'tab3)))
       (check-true (node-exists? (node/id 'demand-preview)))

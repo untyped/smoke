@@ -5,8 +5,10 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (refresh-counter request)
-  (send refresh-counter-page respond))
+(define-controller refresh-counter
+  init-smoke-pipeline
+  (lambda ()
+    (send refresh-counter-page respond)))
 
 ; Components -------------------------------------
 
@@ -31,7 +33,7 @@
       (xml (p "Counter: " (span (@ [id 'counter]) ,(get-counter)))
            (p (a (@ [id "ajax"] [onclick ,(embed/ajax seed (callback on-refresh))]) "[Add1]"))
            ,(inner (xml) render seed)))
-      
+    
     ; -> void
     (define/public #:callback (on-refresh)
       (void))

@@ -7,14 +7,18 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (form request)
-  (send form-page respond))
+(define-controller form
+  init-smoke-pipeline
+  (lambda ()
+    (send form-page respond)))
 
 ; -> response
-(define-controller (form/hidden request)
-  (for ([control (send form-page get-controls)])
-    (send control set-visible?! #f))
-  (send form-page respond))
+(define-controller form/hidden
+  init-smoke-pipeline
+  (lambda ()
+    (for ([control (send form-page get-controls)])
+      (send control set-visible?! #f))
+    (send form-page respond)))
 
 ; Components -------------------------------------
 

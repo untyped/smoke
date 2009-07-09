@@ -15,9 +15,11 @@
 
 (print-struct #t)
 
+(dev? #f)
+
 (serve/smoke/delirium
  (lambda ()
    (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
-   (testapp-dispatch (current-request)))
+   (dispatch (current-request) test-site))
  all-smoke-tests
  #:htdocs-paths (list testapp-htdocs-path))

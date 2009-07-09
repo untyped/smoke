@@ -105,7 +105,7 @@
     (init [classes null])
     
     (when group (set-group! group))
-    (super-new [classes (cons 'smoke-radio-button classes)])
+    (super-new [classes (list* 'smoke-radio-button 'ui-widget classes)])
     
     ; Public methods ---------------------------
     
@@ -130,13 +130,20 @@
       (define value    (get-id))
       (define checked? (equal? (get-value) (send group get-value)))
       (define enabled? (get-enabled?))
-      (xml (input (@ ,@(core-html-attributes seed)
-                     [type  "radio"]
-                     [name  ,name]
-                     [value ,value]
-                     ,@(if checked? (xml-attrs [checked "checked"]) null)
-                     ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
-           ,(render-label seed)))
+      (xml (span (@ ,@(core-html-attributes seed #:id (symbol-append id '-wrapper)))
+                 (input (@ ,@(core-html-attributes seed)
+                           [type  "radio"]
+                           [name  ,name]
+                           [value ,value]
+                           ,@(if checked? (xml-attrs [checked "checked"]) null)
+                           ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
+                 ,(render-label seed))))
+    
+    ; seed -> js
+    (define/override (get-on-render seed)
+      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(symbol-append (get-id) '-wrapper)))
+                                  "replace"
+                                  ,(xml->string (render seed))))))
     
     ; seed -> js
     (define/augment (get-on-click seed)
