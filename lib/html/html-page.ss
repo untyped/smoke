@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require (only-in srfi/1 
+(require (for-syntax scheme/base)
+         (only-in srfi/1 
                   delete
                   delete-duplicates)
          (only-in (planet schematics/schemeunit:2/text-ui)
@@ -21,6 +22,16 @@
     get-doctype      ; -> xml
     get-lang         ; -> string
     get-title))      ; -> frame
+
+(define-syntax (with-response-timer stx)
+  (syntax-case stx ()
+    [(_ msg expr ...)
+     #'(let* ([time1 (current-inexact-milliseconds)]
+              [ans   ((lambda ()
+                        expr ...))]
+              [time2 (current-inexact-milliseconds)])
+         (debug msg (- time2 time1))
+         ans)]))
 
 ; Mixins -----------------------------------------
 
@@ -170,48 +181,50 @@
     ; Makes a response-generator that creates a complete XHTML response for this page.
     (define/public (make-full-response-generator)
       (lambda (embed-url)
-        ; seed
-        (define seed (make-seed this embed-url))
-        (set-callback-codes! (make-callback-codes seed))
-        ; Store the initial requirements for the page:
-        (set-current-html-requirements! (delete-duplicates (get-html-requirements/fold)))
-        (set-current-js-requirements! (delete-duplicates (get-js-requirements/fold)))
-        ; Call render before get-on-attach for consistency with AJAX responses:
-        (let ([code      (get-http-code)]
-              [message   (get-http-status)]
-              [seconds   (get-http-timestamp)]
-              [headers   (get-http-headers)]
-              [mime-type (get-content-type)]
-              [content   (render seed)])
-          ; response
-          (make-xml-response
-           #:code      code
-           #:message   message
-           #:seconds   seconds
-           #:headers   headers
-           #:mime-type mime-type
-           (xml ,(get-doctype)
-                (html (@ [xmlns "http://www.w3.org/1999/xhtml"] [lang ,(get-lang)])
-                      (head (meta (@ [http-equiv "Content-Type"] [content ,(get-content-type)]))
-                            ,(opt-xml (get-title)
-                               (title ,(get-title)))
-                            ,(render-head seed)
-                            ,@(render-requirements (get-current-html-requirements) seed)
-                            (script (@ [type "text/javascript"])
-                                    (!raw "\n// <![CDATA[\n")
-                                    (!raw ,(js ((function ($)
-                                                  (!dot ($ document)
-                                                        (ready (function ()
-                                                                 (!dot Smoke (initialize ,(get-component-id)
-                                                                                         ,(get-form-id)
-                                                                                         (function ()
-                                                                                           ; Init scripts:
-                                                                                           ,@(render-requirements (get-current-js-requirements) seed)
-                                                                                           ; Attach scripts:
-                                                                                           ,(get-on-attach seed))))))))
-                                                jQuery)))
-                                    (!raw "\n// ]]>\n")))
-                      (body (@ ,@(core-html-attributes seed)) ,content)))))))
+        (with-response-timer
+         "Full response"
+         ; seed
+         (define seed (make-seed this embed-url))
+         (set-callback-codes! (make-callback-codes seed))
+         ; Store the initial requirements for the page:
+         (set-current-html-requirements! (delete-duplicates (get-html-requirements/fold)))
+         (set-current-js-requirements! (delete-duplicates (get-js-requirements/fold)))
+         ; Call render before get-on-attach for consistency with AJAX responses:
+         (let ([code      (get-http-code)]
+               [message   (get-http-status)]
+               [seconds   (get-http-timestamp)]
+               [headers   (get-http-headers)]
+               [mime-type (get-content-type)]
+               [content   (render seed)])
+           ; response
+           (make-xml-response
+            #:code      code
+            #:message   message
+            #:seconds   seconds
+            #:headers   headers
+            #:mime-type mime-type
+            (xml ,(get-doctype)
+                 (html (@ [xmlns "http://www.w3.org/1999/xhtml"] [lang ,(get-lang)])
+                       (head (meta (@ [http-equiv "Content-Type"] [content ,(get-content-type)]))
+                             ,(opt-xml (get-title)
+                                (title ,(get-title)))
+                             ,(render-head seed)
+                             ,@(render-requirements (get-current-html-requirements) seed)
+                             (script (@ [type "text/javascript"])
+                                     (!raw "\n// <![CDATA[\n")
+                                     (!raw ,(js ((function ($)
+                                                   (!dot ($ document)
+                                                         (ready (function ()
+                                                                  (!dot Smoke (initialize ,(get-component-id)
+                                                                                          ,(get-form-id)
+                                                                                          (function ()
+                                                                                            ; Init scripts:
+                                                                                            ,@(render-requirements (get-current-js-requirements) seed)
+                                                                                            ; Attach scripts:
+                                                                                            ,(get-on-attach seed))))))))
+                                                 jQuery)))
+                                     (!raw "\n// ]]>\n")))
+                       (body (@ ,@(core-html-attributes seed)) ,content))))))))
     
     ; -> (embed-url -> response)
     ;
@@ -219,29 +232,31 @@
     ; refreshes appropriate parts of this page.
     (define/public (make-ajax-response-generator)
       (lambda (embed-url)
-        ; seed
-        (define seed (make-seed this embed-url))
-        ; response
-        (with-handlers ([exn? (lambda (exn)
-                                (display-exn exn)
-                                (make-js-response 
-                                 #:code 500 #:message "Internal Error"
-                                 (js ((!dot console log) "An error has occurred. Talk to your system administrator."))))])
-          (let ([new-html-requirements (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
-                [new-js-requirements   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
-            (unless (null? new-html-requirements)
-              (set-current-html-requirements! (append (get-current-html-requirements) new-html-requirements)))
-            (unless (null? new-js-requirements)
-              (set-current-js-requirements! (append (get-current-js-requirements) new-js-requirements)))
-            (make-js-response
-             (js ((function ($)
-                    ,(opt-js (not (null? new-html-requirements))
-                       (!dot ($ (!dot Smoke documentHead))
-                             (append ,(xml->string (xml ,@(render-requirements new-html-requirements seed))))))
-                    ,@(render-requirements new-js-requirements seed)
-                    ,@(map (cut send <> get-on-refresh seed)
-                           (get-dirty-components)))
-                  jQuery)))))))
+        (with-response-timer
+         "AJAX response"
+         ; seed
+         (define seed (make-seed this embed-url))
+         ; response
+         (with-handlers ([exn? (lambda (exn)
+                                 (display-exn exn)
+                                 (make-js-response 
+                                  #:code 500 #:message "Internal Error"
+                                  (js ((!dot console log) "An error has occurred. Talk to your system administrator."))))])
+           (let ([new-html-requirements (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
+                 [new-js-requirements   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
+             (unless (null? new-html-requirements)
+               (set-current-html-requirements! (append (get-current-html-requirements) new-html-requirements)))
+             (unless (null? new-js-requirements)
+               (set-current-js-requirements! (append (get-current-js-requirements) new-js-requirements)))
+             (make-js-response
+              (js ((function ($)
+                     ,(opt-js (not (null? new-html-requirements))
+                        (!dot ($ (!dot Smoke documentHead))
+                              (append ,(xml->string (xml ,@(render-requirements new-html-requirements seed))))))
+                     ,@(render-requirements new-js-requirements seed)
+                     ,@(map (cut send <> get-on-refresh seed)
+                            (get-dirty-components)))
+                   jQuery))))))))
     
     ; -> (embed-url -> response)
     ;
@@ -250,15 +265,17 @@
     ; aren't lost if they hit Reload.
     (define/public (make-full-redirect-response-generator)
       (lambda (embed-url)
-        ; seed
-        (define seed (make-seed this embed-url))
-        (make-html-response
-         #:code      301 
-         #:message   "Moved Permanently"
-         #:mime-type #"text/html"
-         #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/thunk seed (cut respond))))
-                           no-cache-http-headers)
-         (xml))))
+        (with-response-timer
+         "Full redirect response"
+         ; seed
+         (define seed (make-seed this embed-url))
+         (make-html-response
+          #:code      301 
+          #:message   "Moved Permanently"
+          #:mime-type #"text/html"
+          #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/thunk seed (cut respond))))
+                            no-cache-http-headers)
+          (xml)))))
     
     ; -> (embed-url -> response)
     ;
@@ -270,12 +287,14 @@
     ; is squeezed into the AJAX frame right before the response is sent.
     (define/public (make-ajax-redirect-response-generator)
       (lambda (embed-url)
-        ; seed
-        (define seed (make-seed this embed-url))
-        ; response
-        (make-js-response 
-         (js (= (!dot window location)
-                ,(embed/thunk seed (cut respond)))))))
+        (with-response-timer
+         "AJAX redirect response"
+         ; seed
+         (define seed (make-seed this embed-url))
+         ; response
+         (make-js-response 
+          (js (= (!dot window location)
+                 ,(embed/thunk seed (cut respond))))))))
     
     ; seed -> xml
     (define/public (render-head seed)
