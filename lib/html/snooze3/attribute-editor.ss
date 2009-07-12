@@ -148,6 +148,7 @@
          file-editor%
          integer-editor%
          password-editor%
+         radio-combo-editor%
          regexp-editor%
          set-selector-editor%
          set-selector-autocomplete-editor%
