@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require srfi/19
+(require (only-in srfi/13 string-pad)
+         srfi/19
          (planet untyped/unlib:3/time)
          (only-in (planet untyped/unlib:3/list) list-ref?)
          "../../lib-base.ss"
