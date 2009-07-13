@@ -1,56 +1,22 @@
 /* Check results ------------------------------ */
 
-ul.check-results {
-    margin: 0px;
-    padding: 0px;
-    list-style-type: none;
-}
+ul.check-results { margin: 0px; padding: 0px; list-style-type: none; }
+ul.check-results li { padding: 1px 0px 1px 17px; background-repeat: no-repeat; background-position: 0 3px; }
 
-ul.check-results li {
-    padding: 1px 0px 1px 17px;
-    background-repeat: no-repeat;
-    background-position: 0 3px;
-}
+ul.check-results li.check-success { background-image: url(/images/smoke/success.png); }
 
-ul.check-results li.check-success {
-    background-image: url(/images/smoke/success.png);
-}
+ul.check-results li.check-warning { background-image: url(/images/smoke/warning.png); }
+ul.check-results li.check-failure { background-image: url(/images/smoke/failure.png); }
+ul.check-results li.check-error { background-image: url(/images/smoke/error.png); }
 
-ul.check-results li.check-warning {
-    background-image: url(/images/smoke/warning.png);
-}
+img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-error.icon { position: relative; top: 2px; }
 
-ul.check-results li.check-failure {
-    background-image: url(/images/smoke/failure.png);
-}
-
-ul.check-results li.check-error {
-    background-image: url(/images/smoke/error.png);
-}
-
-img.check-success.icon,
-img.check-warning.icon,
-img.check-failure.icon,
-img.check-error.icon {
-    position: relative;
-    top: 2px;
-}
-
-.success {
-    border: none;
-    background: transparent;
-}
+.success { border: none; background: transparent; }
 
 /* snooze-report% ----------------------------- */
 
-.smoke-snooze-report table {
-    border-collapse: collapse;
-    margin: 3px 0px;
-}
-
-.smoke-snooze-report th {
-  padding: 0px;
-}
+.smoke-snooze-report table { border-collapse: collapse; margin: 3px 0px; }
+.smoke-snooze-report th { padding: 0px; }
 
 .smoke-snooze-report th a,
 .smoke-snooze-report th span.not-sortable {
@@ -62,11 +28,10 @@ img.check-error.icon {
     background: transparent;
 }
 
-.smoke-snooze-report th a.sort {
+.smoke-snooze-report th.sort a {
     display: block;
     background: transparent;
     cursor: pointer;
-    padding-right: 16px;
 }
 
 .smoke-snooze-report th a.sort.asc {
