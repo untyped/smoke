@@ -1,9 +1,6 @@
 /* text-field --------------------------------- */
 
-input.placeholder,
-textarea.placeholder {
-    color: #aaa;
-}
+input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 
 /* vertical tab-pane -------------------------- */
 

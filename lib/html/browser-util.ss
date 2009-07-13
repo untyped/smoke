@@ -62,10 +62,6 @@
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/firebug/firebug-lite.js"]))))
 
-(define tiny-mce-script
-  (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/tiny_mce/tiny_mce.js"]))))
-
 (define default-tiny-mce-options-script
   (xml (script (@ [type "text/javascript"])
                (!raw "\n// <![CDATA[\n")
@@ -130,7 +126,6 @@
  [show-hide-script                xml?]
  [excanvas-script                 xml?]
  [firebug-script                  xml?]
- [tiny-mce-script                 xml?]
  [current-jquery-ui-stylesheet    (parameter/c string?)]
  [jquery-ui-script/min            xml?]
  [jquery-ui-script/dev            xml?]

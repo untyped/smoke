@@ -54,28 +54,14 @@ if (!window.console.log) {
     Smoke.currentPage = currentPage;
     Smoke.documentHead = $("head").get(0);
     Smoke.documentBody = $("body").get(0);
-    $("#" + formID).bind("submit", function (evt) {
-      Smoke.triggerSubmitEvent(true);
-    });
     initComponents();
     Smoke.triggerUpdateEvent(true);
   };
   
   // Submit and update events ====================
   
-  // string object -> event
-  Smoke.makeSmokeEvent = function (evtType, evtBase) {
-    return $.extend(evtBase, {
-				 	type            : evtType,
-				 	target          : document,
-				 	preventDefault  : function () {},
-				 	stopPropagation : function () {},
-				 	timeStamp       : new Date()
-				});
-  };
-    
   // boolean -> boolean
-  Smoke.triggerSubmitEvent = function () {
+  Smoke.triggerSubmitEvent = function (fullRefresh) {
     return $(document).trigger("smoke-page-submit", arguments);
   };
   

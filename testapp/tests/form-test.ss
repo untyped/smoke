@@ -131,7 +131,23 @@
         (enter-text (node/id 'lowercase-text-field) "   ABC   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'lowercase-text-field "abc")
-        (enter-text (node/id 'lowercase-text-field) "Done")))
+        (enter-text (node/id 'lowercase-text-field) "Done"))
+      
+      (test-case "placeholder"
+        (for ([button-id (in-list '(submit-button ajax-submit-button))])
+          (with-check-info (['button-id button-id])
+            (check-field-value 'placeholder-text-field "holder")
+            (check-printed-value 'placeholder-text-field #f)
+            (focus (node/id 'placeholder-text-field))
+            (enter-text (node/id 'placeholder-text-field) "holder")
+            (blur (node/id 'placeholder-text-field))
+            (click/wait (node/id button-id))
+            (check-field-value 'placeholder-text-field "holder")
+            (check-printed-value 'placeholder-text-field "holder")
+            (focus (node/id 'placeholder-text-field))
+            (enter-text (node/id 'placeholder-text-field) "")
+            (blur (node/id 'placeholder-text-field))
+            (click/wait (node/id button-id))))))
     
     (test-suite "text-area"
       
@@ -179,7 +195,23 @@
         (enter-text (node/id 'lowercase-text-area) "   ABC   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'lowercase-text-area "abc")
-        (enter-text (node/id 'lowercase-text-area) "Done")))
+        (enter-text (node/id 'lowercase-text-area) "Done"))
+      
+      (test-case "placeholder"
+        (for ([button-id (in-list '(submit-button ajax-submit-button))])
+          (with-check-info (['button-id button-id])
+            (check-field-value 'placeholder-text-area "holder")
+            (check-printed-value 'placeholder-text-area #f)
+            (focus (node/id 'placeholder-text-area))
+            (enter-text (node/id 'placeholder-text-area) "holder")
+            (blur (node/id 'placeholder-text-area))
+            (click/wait (node/id button-id))
+            (check-field-value 'placeholder-text-area "holder")
+            (check-printed-value 'placeholder-text-area "holder")
+            (focus (node/id 'placeholder-text-area))
+            (enter-text (node/id 'placeholder-text-area) "")
+            (blur (node/id 'placeholder-text-area))
+            (click/wait (node/id button-id))))))
     
     (test-suite "tiny-mce"
       

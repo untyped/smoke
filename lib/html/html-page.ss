@@ -40,7 +40,6 @@
     
     (inherit core-html-attributes
              get-all-components
-             get-on-attach
              get-child-components
              get-component-id
              get-content-type
@@ -317,10 +316,22 @@
                  ,(inner (xml "Page under construction.") render seed))))
     
     ; seed -> js
+    (define/augment (get-on-attach seed)
+      (js (!dot ($ ,(format "#~a" (get-form-id)))
+                (bind "submit" (function (evt)
+                                 (!dot Smoke (triggerSubmitEvent #t)))))
+          ,(inner (js) get-on-attach)))
+    
+    ; seed -> js
     (define/override (get-on-render seed)
       (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
                                   "children"
-                                  ,(xml->string (render seed))))))))
+                                  ,(xml->string (render seed))))))
+    
+    ; seed -> js
+    (define/augment (get-on-detach seed)
+      (js (!dot ($ ,(format "#~a" (get-form-id))) (unbind))
+          ,(inner (js) get-on-detach)))))
 
 
 (define render-augride-mixin 

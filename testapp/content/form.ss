@@ -72,6 +72,7 @@
         ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
         ,(new text-field% [id 'uppercase-text-field] [value "Initial"] [size 20] [max-length 10] [case-conversion 'uppercase])
         ,(new text-field% [id 'lowercase-text-field] [value "Initial"] [size 20] [max-length 10] [case-conversion 'lowercase])
+        ,(new text-field% [id 'placeholder-text-field] [size 20] [max-length 10] [placeholder "holder"])
         ,(new test-autocomplete-field%
               [id         'autocomplete-field]
               [value      "Initial"]
@@ -85,6 +86,7 @@
         ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
         ,(new text-area% [id 'uppercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'uppercase])
         ,(new text-area% [id 'lowercase-text-area] [value "Initial"] [rows 10] [cols 20] [case-conversion 'lowercase])
+        ,(new text-area% [id 'placeholder-text-area] [rows 10] [cols 20] [placeholder "holder"])
         ,(new tiny-mce% [id 'tiny-mce1] [value "Initial"] [rows 10] [cols 20])
         ;,(new tiny-mce% [id 'tiny-mce2] [value "Initial"] [rows 10] [cols 20])
         ,(new check-box% [id 'check-box] [value #t] [label "Label"])

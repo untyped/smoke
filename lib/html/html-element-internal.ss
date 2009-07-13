@@ -46,9 +46,7 @@
                      (select        select)
                      (change        change)
                      (reset         reset)
-                     (submit        submit)
-                     (page-submit   smoke-page-submit)
-                     (page-update   smoke-page-update))])
+                     (submit        submit))])
     (values (map car  all-names)
             (map cadr all-names))))
 

@@ -15,7 +15,7 @@
 
 (print-struct #t)
 
-(dev? #f)
+(dev? #t)
 
 (serve/smoke/delirium
  (lambda ()
