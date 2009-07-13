@@ -35,7 +35,7 @@
                     [(cons integer? integer) val]
                     [_                       (raise-type-error 'set-value! "(U (cons hour minute) #f)" val)])])
         (super set-value! (and time (format "~a:~a"
-                                            (car time) 
+                                            (string-pad (number->string (car time)) 2 #\0)
                                             (string-pad (number->string (cdr time)) 2 #\0))))))))
 
 ; Provide statements -----------------------------
