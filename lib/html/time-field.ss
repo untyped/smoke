@@ -11,7 +11,8 @@
     
     (super-new [regexp        "^[0-9]{1,2}:[0-9]{2}$"]
                [format-string "HH:MM"]
-               [max-length    5])
+               [max-length    5]
+               [size          5])
     
     ; Public methods -----------------------------
     
