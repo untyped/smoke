@@ -76,12 +76,12 @@ if (!window.console.log) {
     
   // boolean -> boolean
   Smoke.triggerSubmitEvent = function () {
-    return $("*").add([document, window]).trigger("smoke-page-submit", arguments);
+    return $(document).trigger("smoke-page-submit", arguments);
   };
   
   // boolean -> boolean
   Smoke.triggerUpdateEvent = function (fullRefresh) {
-    return $("*").add([document, window]).trigger("smoke-page-update", arguments);
+    return $(document).trigger("smoke-page-update", arguments);
   };
   
   // Logging messages ============================
