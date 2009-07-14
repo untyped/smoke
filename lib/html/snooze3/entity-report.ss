@@ -162,17 +162,17 @@
     ; seed -> xml
     (define/public (render-review-th seed)
       (opt-xml (and (show-review-column?) (review-controller-set? (get-entity)))
-        (th)))
+        (th (& nbsp))))
     
     ; seed -> xml
     (define/public (render-update-th seed)
       (opt-xml (and (show-update-column?) (update-controller-set? (get-entity)))
-        (th)))
+        (th (& nbsp))))
     
     ; seed -> xml
     (define/public (render-delete-th seed)
       (opt-xml (and (show-delete-column?) (delete-controller-set? (get-entity)))
-        (th)))
+        (th (& nbsp))))
     
     ; seed string -> xml
     (define/public (render-review-td seed struct)

@@ -36,33 +36,34 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 
 /* snooze-report% ----------------------------- */
 
-.smoke-snooze-report table { border-collapse: collapse; margin: 3px 0px; }
-.smoke-snooze-report th { padding: 0px; }
+.snooze-report-table { border-collapse: collapse; margin: 3px 0px; }
+.snooze-report-table tr { background: #fff; border: 1px solid #ccc; }
+.snooze-report-table th { padding: 0px; }
 
-.smoke-snooze-report th a,
-.smoke-snooze-report th span.not-sortable,
-.smoke-snooze-report td { padding: 4px 5px; }
+.snooze-report-table th a,
+.snooze-report-table th span.not-sortable,
+.snooze-report-table td { padding: 4px 5px; }
 
-.smoke-snooze-report th span.not-sortable {
+.snooze-report-table th span.not-sortable {
     display: block;
     background: transparent;
 }
 
-.smoke-snooze-report th.sort a {
+.snooze-report-table th.sort a {
     display: block;
     background: transparent;
     cursor: pointer;
 }
 
-.smoke-snooze-report th a.sort.asc {
+.snooze-report-table th a.sort.asc {
     background: transparent url(/images/smoke/up-arrow.png) no-repeat right center;
 }
 
-.smoke-snooze-report th a.sort.desc {
+.snooze-report-table th a.sort.desc {
     background: transparent url(/images/smoke/down-arrow.png) no-repeat right center;
 }
 
-.smoke-snooze-report td.empty-row {
+.snooze-report-table td.empty-row {
     padding: 1em 0em;
     text-align: center;
     vertical-align: middle;

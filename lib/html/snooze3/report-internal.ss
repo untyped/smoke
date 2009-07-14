@@ -417,13 +417,15 @@
     
     ; seed (listof column) -> xml
     (define/public (render-empty-body seed cols)
-      (xml (tbody (tr (td (@ [colspan ,(length cols)]
+      (xml (tbody (@ [class "ui-widget-content"])
+                  (tr (td (@ [colspan ,(length cols)]
                              [class "empty-row"])
                           "There are no items to display in this list.")))))
     
     ; seed (listof column) (gen-> item) -> xml
     (define/public (render-body seed cols g:item)
-      (xml (tbody ,@(g:collect (g:map (cut render-item seed cols <>) g:item)))))
+      (xml (tbody (@ [class "ui-widget-content"])
+                  ,@(g:collect (g:map (cut render-item seed cols <>) g:item)))))
     
     ; seed (listof column) item -> xml
     (define/public (render-item seed cols item)
@@ -513,9 +515,7 @@
                                         (hover (function (event ui)
                                                  (!dot ($ this) (addClass "ui-state-hover")))
                                                (function (event ui)
-                                                 (!dot ($ this) (removeClass "ui-state-hover")))))
-                                  (!dot ($ ,(format "#~a .snooze-report-table tbody > tr" (get-id)))
-                                        (addClass "ui-widget-content"))))))
+                                                 (!dot ($ this) (removeClass "ui-state-hover")))))))))
              (get-visible-columns))))
     
     ; seed -> js
