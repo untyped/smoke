@@ -320,7 +320,7 @@
       (js (!dot ($ ,(format "#~a" (get-form-id)))
                 (bind "submit" (function (evt)
                                  (!dot Smoke (triggerSubmitEvent #t)))))
-          ,(inner (js) get-on-attach)))
+          ,(inner (js) get-on-attach seed)))
     
     ; seed -> js
     (define/override (get-on-render seed)
@@ -331,7 +331,7 @@
     ; seed -> js
     (define/augment (get-on-detach seed)
       (js (!dot ($ ,(format "#~a" (get-form-id))) (unbind))
-          ,(inner (js) get-on-detach)))))
+          ,(inner (js) get-on-detach seed)))))
 
 
 (define render-augride-mixin 
