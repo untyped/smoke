@@ -27,8 +27,7 @@
   (syntax-case stx ()
     [(_ msg expr ...)
      #'(let* ([time1 (current-inexact-milliseconds)]
-              [ans   ((lambda ()
-                        expr ...))]
+              [ans   ((lambda () expr ...))]
               [time2 (current-inexact-milliseconds)])
          (debug msg (- time2 time1))
          ans)]))

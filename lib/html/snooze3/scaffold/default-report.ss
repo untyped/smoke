@@ -266,19 +266,5 @@
                    #:offset ,offset
                    #:limit  ,limit)))))
 
-
-
-
-
-; string [boolean] -> string
-(define (pattern->regexp pattern [anywhere? #f])
-  (apply string-append (cons (if anywhere? "^.*" "^")
-                             (string-fold-right (lambda (chr accum)
-                                                  (cond [(eq? chr #\*) (cons ".*" accum)]
-                                                        [(eq? chr #\?) (cons "." accum)]
-                                                        [else          (cons (regexp-quote (string chr)) accum)]))
-                                                null
-                                                pattern))))
-
 ; Provides ---------------------------------------
 (provide (all-defined-out))

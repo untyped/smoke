@@ -50,45 +50,9 @@ img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-erro
 
 /* Controls */
 
-.smoke-snooze-report .controls {
-    position: relative;
-    display: block;
-}
-
-.smoke-snooze-report .controls table {
-    margin: 0px;
-    padding: 0px;
-    border: none;
-    background: none;
-}
-
-.smoke-snooze-report .controls td,
-.smoke-snooze-report .controls td {
-    margin: 0px 5px;
-    padding: 1px;
-    border: none;
-    background: none;
-}
-
-.smoke-snooze-report .controls .left-controls {
-    float: left;
-    margin: 5px;
-}
-
-.smoke-snooze-report .controls .right-controls {
-    float: right;
-    text-align: right;
-    margin: 5px;
-}
-
-.smoke-snooze-report .controls .bottom-controls {
-    text-align: center;
-}
-
-.smoke-snooze-report .controls .show-hide-contents {
-    border: 1px solid #aaa;
-    background: #f7f7f7;
-}
+.smoke-snooze-report .controls { position: relative; display: block; }
+.smoke-snooze-report .controls .view  { float: left; }
+.smoke-snooze-report .controls .links { float: right; }
 
 /* Position */
 
