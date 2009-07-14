@@ -7,11 +7,32 @@ ul.check-results li.check-success { background-image: url(/images/smoke/success.
 
 ul.check-results li.check-warning { background-image: url(/images/smoke/warning.png); }
 ul.check-results li.check-failure { background-image: url(/images/smoke/failure.png); }
-ul.check-results li.check-error { background-image: url(/images/smoke/error.png); }
+ul.check-results li.check-error   { background-image: url(/images/smoke/error.png);   }
 
-img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-error.icon { position: relative; top: 2px; }
+img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.check-error.icon { position: relative; top: 2px; }
 
 .success { border: none; background: transparent; }
+
+/* editors ------------------------------------ */
+
+.smoke-entity-editor th,
+.smoke-entity-editor td { vertical-align: top; padding: .5em; }
+
+.smoke-entity-editor .attribute-label { text-align: right; }
+
+.smoke-entity-editor input,
+.smoke-entity-editor textarea,
+.smoke-entity-editor select { vertical-align: top; }
+
+/* views -------------------------------------- */
+
+.smoke-entity-view .attribute-label { 
+  text-align: right;
+  vertical-align: top;
+  white-space: nowrap;
+  width: 20em;
+  padding: 0.5ex 1em 0.5ex 0;
+}
 
 /* snooze-report% ----------------------------- */
 
@@ -19,9 +40,8 @@ img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-erro
 .smoke-snooze-report th { padding: 0px; }
 
 .smoke-snooze-report th a,
-.smoke-snooze-report th span.not-sortable {
-  padding: 4px 5px;
-}
+.smoke-snooze-report th span.not-sortable,
+.smoke-snooze-report td { padding: 4px 5px; }
 
 .smoke-snooze-report th span.not-sortable {
     display: block;
@@ -51,8 +71,9 @@ img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-erro
 /* Controls */
 
 .smoke-snooze-report .controls { position: relative; display: block; }
+.smoke-snooze-report .controls .filter  { text-align: center; }
 .smoke-snooze-report .controls .view  { float: left; }
-.smoke-snooze-report .controls .links { float: right; }
+.smoke-snooze-report .controls .links { float: right; list-style-type: none; }
 
 /* Position */
 
@@ -87,7 +108,7 @@ img.check-success.icon, img.check-warning.icon, .check-failure.icon, .check-erro
 .smoke-snooze-report table.pager td a {
     border: 0px solid none;
     margin: 0px;
-    padding: 0px;
+    padding: 4px 5px;
     text-align: center;
     display: block;
     text-decoration: none;

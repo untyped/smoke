@@ -276,6 +276,13 @@
     (define/public (render-controls seed start count total)
       (xml (div (@ [id    ,(format "~a-controls" (get-id))]
                    [class "controls ui-helper-clearfix"])
+                ; Remaining controls are not always visible:
+                ,(opt-xml (> (length (get-views)) 1)
+                   ; View control:
+                   (div (@ [class "view"])
+                        "View: " ,(send view-field render seed)))
+                ; extra link controls:
+                ,(render-control-links seed start count total)
                 ; Filter is always visible:
                 ,(if (> (length (get-filters)) 1)
                      (xml (div (@ [class "filter"])
@@ -284,14 +291,7 @@
                                ,(send filter-field render seed)
                                " for "
                                ,(send pattern-field render seed)))
-                     (xml "Filter for " ,(send pattern-field render seed)))
-                ; Remaining controls are not always visible:
-                ,(opt-xml (> (length (get-views)) 1)
-                   ; View control:
-                   (div (@ [class "view"])
-                        "View: " ,(send view-field render seed)))
-                ; extra link controls:
-                ,(render-control-links seed start count total))))
+                     (xml "Filter for " ,(send pattern-field render seed))))))
     
     ; seed integer integer integer -> xml
     (define/public (render-control-links seed start count total)
