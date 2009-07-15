@@ -71,10 +71,10 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 
 /* Controls */
 
-.smoke-snooze-report .controls { position: relative; display: block; }
+.smoke-snooze-report .controls { position: relative; display: block; margin-bottom: 2ex; }
 .smoke-snooze-report .controls .filter  { text-align: center; }
 .smoke-snooze-report .controls .view  { float: left; }
-.smoke-snooze-report .controls .links { float: right; list-style-type: none; }
+.smoke-snooze-report .controls .links { float: right; list-style-type: none; margin: .1em 0px; padding: 0px; }
 
 /* Position */
 

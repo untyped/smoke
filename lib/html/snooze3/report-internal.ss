@@ -36,7 +36,7 @@
     
     ; text-field%
     (field pattern-field
-      (new text-field% [on-change (callback on-pattern-change)])
+      (new text-field% [on-change (callback on-pattern-change)] [size 30] [placeholder "Type and press Enter to search"])
       #:child #:accessor)
     
     ; (cell (U snooze-report-column% #f))
@@ -80,16 +80,6 @@
     (send filter-field set-value! filter)
     
     ; Miscellaneous ------------------------------
-    
-    ; -> (listof html-component%)
-    (define/override (get-child-components)
-      `(,pattern-field
-        ,@(if (> (length (get-views)) 1) 
-              (list view-field)
-              null)
-        ,@(if (> (length (get-filters)) 1) 
-              (list filter-field)
-              null)))
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
@@ -274,24 +264,21 @@
     
     ; seed integer integer integer -> xml
     (define/public (render-controls seed start count total)
+      (let ([show-view-field?   (> (length (get-views)) 1)]
+            [show-filter-field? (> (length (get-filters)) 1)])
+        (send view-field   set-visible?! show-view-field?)
+        (send filter-field set-visible?! show-filter-field?))
       (xml (div (@ [id    ,(format "~a-controls" (get-id))]
                    [class "controls ui-helper-clearfix"])
-                ; Remaining controls are not always visible:
-                ,(opt-xml (> (length (get-views)) 1)
-                   ; View control:
-                   (div (@ [class "view"])
-                        "View: " ,(send view-field render seed)))
+                (div (@ [class "view"])
+                     ,(send view-field render seed))
                 ; extra link controls:
-                ,(render-control-links seed start count total)
+                (div (@ [class "links"])
+                     ,(render-control-links seed start count total))
                 ; Filter is always visible:
-                ,(if (> (length (get-filters)) 1)
-                     (xml (div (@ [class "filter"])
-                               "Filter: "
-                               ; Filter combo:
-                               ,(send filter-field render seed)
-                               " for "
-                               ,(send pattern-field render seed)))
-                     (xml "Filter for " ,(send pattern-field render seed))))))
+                (div (@ [class "filter"])
+                     ,(send filter-field render seed) " "
+                     ,(send pattern-field render seed)))))
     
     ; seed integer integer integer -> xml
     (define/public (render-control-links seed start count total)

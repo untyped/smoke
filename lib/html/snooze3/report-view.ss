@@ -41,7 +41,7 @@
     
     ; view -> string
     (define/override (option->string view)
-      (view-name view))))
+      (format "Show ~a" (view-name view)))))
 
 ; Provide statements -----------------------------
 

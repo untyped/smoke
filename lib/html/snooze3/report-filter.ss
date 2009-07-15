@@ -39,7 +39,7 @@
     
     ; filter -> string
     (define/override (option->string filter)
-      (filter-name filter))))
+      (format "Search ~a" (filter-name filter)))))
 
 ; Provide statements -----------------------------
 
