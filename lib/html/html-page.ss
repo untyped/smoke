@@ -86,6 +86,9 @@
     
     ; (listof symbol)
     (init [classes null])
+
+    ; boolean
+    (init-field custom-notification-position? #f #:accessor)
     
     (super-new [classes (cons 'smoke-html-page classes)] [content-type content-type])
     
@@ -311,7 +314,8 @@
                     [enctype        "multipart/form-data"]
                     [accept-charset "utf-8"]
                     [action         "javascript:void(0)"])
-                 ,(send notification-pane render seed)
+                 ,(opt-xml (not custom-notification-position?)
+                    ,(send notification-pane render seed))
                  ,(inner (xml "Page under construction.") render seed))))
     
     ; seed -> js
