@@ -74,7 +74,7 @@
 (define page-html-requirement
   (xml (script (@ [type "text/javascript"])
                (!raw "\n// <![CDATA[\n")
-               (!raw ,(js (!dot console (log "page html"))
+               (!raw ,(js (!dot Smoke (log "page html"))
                           (= (!dot window htmlReqsLoaded)
                              (? (=== (!dot window htmlReqsLoaded) undefined)
                                 1
@@ -83,7 +83,7 @@
 
 ; js
 (define page-js-requirement
-  (js (!dot console (log "page js"))
+  (js (!dot Smoke (log "page js"))
       (= (!dot window jsReqsLoaded)
          (? (=== (!dot window jsReqsLoaded) undefined)
             1
@@ -93,7 +93,7 @@
 (define child-html-requirement
   (xml (script (@ [type "text/javascript"])
                (!raw "\n// <![CDATA[\n")
-               (!raw ,(js (!dot console (log "child html"))
+               (!raw ,(js (!dot Smoke (log "child html"))
                           (= (!dot window htmlReqsLoaded)
                              (? (=== (!dot window htmlReqsLoaded) undefined)
                                 1
@@ -102,7 +102,7 @@
 
 ; js
 (define child-js-requirement
-  (js (!dot console (log "child js"))
+  (js (!dot Smoke (log "child js"))
       (= (!dot window jsReqsLoaded)
          (? (=== (!dot window jsReqsLoaded) undefined)
             1

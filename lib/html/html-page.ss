@@ -245,7 +245,7 @@
                                    (make-js-response 
                                     #:code 500
                                     #:message "Internal Error"
-                                    (js ((!dot console log) "An error has occurred. Talk to your system administrator."))))])
+                                    (js (!dot Smoke (log "An error has occurred. Talk to your system administrator.")))))])
              (let ([new-html-requirements (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
                    [new-js-requirements   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
                (unless (null? new-html-requirements)
