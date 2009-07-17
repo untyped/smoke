@@ -55,6 +55,8 @@
 (define simple-editor-mixin/form-element
   (mixin/cells (form-element<%>) (editor<%>)
     
+    (inherit get-value)
+    
     ; Fields ------------------------------
     
     (super-new)
@@ -71,13 +73,16 @@
     
     ; -> (listof check-result)
     (define/public (parse)
-      (apply check-problems (map (cut send <> parse) (get-editors))))
+      (apply check-problems
+             (check/annotate ([ann:form-elements (list this)])
+               (with-handlers ([exn:smoke:form? (lambda (exn) (check-fail (exn-message exn)))])
+                 (get-value)
+                 (check-pass)))
+             (map (cut send <> parse) (get-editors))))
     
     ; -> (listof check-result)
     (define/public (validate)
-      (apply check-problems
-             (map (cut send <> validate)
-                  (get-editors))))
+      (apply check-problems (map (cut send <> validate) (get-editors))))
     
     ; -> boolean
     (define/override (value-changed?)

@@ -84,9 +84,11 @@
                        (get-component-id))
                      (with-handlers ([exn? (lambda (exn) '<no-id>)])
                        (get-id))
-                     (with-handlers ([exn:fail?       (lambda (exn) '<no-value>)]
-                                     [exn:smoke:form? (lambda (exn) (list 'bad-value (get-value-error)))])
-                       (get-value)))
+                     (with-handlers ([exn? (lambda (exn) '<no-value>)])
+                       (let ([err (get-value-error)])
+                         (if err
+                             (list 'bad-value err)
+                             (get-value)))))
              out))))
 
 (define form-element%

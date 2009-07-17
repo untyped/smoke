@@ -22,17 +22,17 @@
     
     ; (cell string)
     (init-cell date-format
-               "~d/~m/~Y ~H:~M"
-               #:accessor #:mutator)
+      "~d/~m/~Y ~H:~M"
+      #:accessor #:mutator)
     
     ; (cell boolean)
     (init-cell show-date-label? #f
-               #:accessor #:mutator)
+      #:accessor #:mutator)
     
     ; (cell (U string #f))
     (init-cell date-picker-format
-               (date-format->jquery-ui-date-format date-format)
-               #:accessor #:mutator)
+      (date-format->jquery-ui-date-format date-format)
+      #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -60,8 +60,8 @@
             [fmt (get-date-format)])
         (with-handlers ([exn:fail? (lambda (exn)
                                      (raise-exn exn:smoke:form 
-                                                (format "value must be in the format: ~a" (get-date-format-example))
-                                                this))])
+                                       (format "Value must be in the format: ~a" (get-date-format-example))
+                                       this))])
           (and val (string->date val fmt)))))
     
     ; -> (U time-utc #f)
@@ -93,22 +93,22 @@
     (define/augment (get-on-attach seed)
       (let ([fmt (get-date-picker-format)])
         (js ,(opt-js fmt
-                     (!dot ($ ,(format "#~a" (get-id)))
-                           (datepicker (!object [dateFormat      ,fmt]
-                                                [showOn          "button"]
-                                                [buttonImage     "/images/jquery-ui/calendar.gif"]
-                                                [buttonImageOnly #t])))
-                     ,(opt-js (not (get-enabled?))
-                              (!dot ($ ,(format "#~a" (get-id)))
-                                    (datepicker "disable"))))
+               (!dot ($ ,(format "#~a" (get-id)))
+                     (datepicker (!object [dateFormat      ,fmt]
+                                          [showOn          "button"]
+                                          [buttonImage     "/images/jquery-ui/calendar.gif"]
+                                          [buttonImageOnly #t])))
+               ,(opt-js (not (get-enabled?))
+                  (!dot ($ ,(format "#~a" (get-id)))
+                        (datepicker "disable"))))
             ,(inner (js) get-on-attach seed))))
     
     ; seed -> js
     (define/augment (get-on-detach seed)
       (let ([fmt (get-date-picker-format)])
         (js ,(opt-js fmt
-                     (!dot ($ ,(format "#~a" (get-id)))
-                           (datepicker "destroy")))
+               (!dot ($ ,(format "#~a" (get-id)))
+                     (datepicker "destroy")))
             ,(inner (js) get-on-detach seed))))))
 
 ; Helpers ----------------------------------------

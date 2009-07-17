@@ -92,4 +92,5 @@
                        "web-server/session.ss"
                        "web-server/session-cell.ss"
                        "web-server/smoke-lru.ss")
-         dev?)
+         dev?
+         (struct-out exn:smoke:form))

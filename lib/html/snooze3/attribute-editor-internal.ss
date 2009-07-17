@@ -103,15 +103,14 @@
     
     ; -> (listof check-result)
     (define/override (parse)
-      (check-problems
-       (with-handlers ([exn:smoke:form?
-                        (lambda (exn)
-                          (check/annotate ([ann:form-elements (list this)]
-                                           [ann:attrs         (get-attributes)])
-                            (check-fail (exn-message exn))))])
-         (get-value)
-         null)
-       (super parse)))
+      (check/annotate ([ann:form-elements (list this)]
+                       [ann:attrs         (get-attributes)])
+        (check-until-problems
+         (cut super parse)
+         (cut with-handlers ([exn:smoke:form? (lambda (exn) (check-fail (exn-message exn)))])
+              (if (and required? (not (get-value)))
+                  (check-fail "Value is required.")
+                  (check-pass))))))
         
     ; seed -> js
     (define/override (get-on-render seed)
