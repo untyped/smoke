@@ -16,7 +16,7 @@
 (define date-field%
   (class/cells text-field% (date-field<%>)    
     
-    (inherit get-id)
+    (inherit get-enabled? get-id)
     
     ; Fields -------------------------------------    
     
@@ -98,6 +98,9 @@
                                           [showOn          "button"]
                                           [buttonImage     "/images/jquery-ui/calendar.gif"]
                                           [buttonImageOnly #t]))))
+            ,(opt-js (not (get-enabled?))
+                     (!dot ($ ,(format "#~a" (get-id)))
+                           (datepicker "disable")))
             ,(inner (js) get-on-attach seed))))
     
     ; seed -> js
