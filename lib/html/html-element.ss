@@ -70,6 +70,24 @@
           (xml (span (@ [id ,(get-id)] [class 'ui-helper-hidden])))))
     
     ; seed -> js
+    ;
+    ; Returns a block of Javascript to refresh this component and its entire subtree.
+    ;
+    ; The default implementation collects:
+    ;   - detach scripts from all subtree components *in the previous web frame*;
+    ;   - a render script that refreshes the XML content of the subtree;
+    ;   - attach scripts from all subtree components *in the current web frame*.
+    (define/override (get-on-refresh seed)
+      (let ([id (send this get-component-id)])
+        (js (try ,(call-with-frame (frame-parent (current-frame))
+                    (cut get-on-detach seed))
+                 (catch exn (!dot Smoke (badDetach exn ,id))))
+            (try ,(get-on-render seed)
+                 (catch exn (!dot Smoke (badRender exn ,id))))
+            (try ,(get-on-attach seed)
+                 (catch exn (!dot Smoke (badAttach exn ,id)))))))
+    
+    ; seed -> js
     (define/override (get-on-render seed)
       (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
                                   "replace"
@@ -131,7 +149,7 @@
 (provide html-element<%>
          html-element-mixin
          html-element%)
-    
+
 (provide/contract
  [html-id?       (-> (or/c string? symbol?) boolean?)]
  [html-id-encode (-> (or/c string? symbol?) symbol?)])

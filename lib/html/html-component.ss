@@ -85,11 +85,11 @@
       (define id (send this get-component-id))
       (js (try ,(call-with-frame (frame-parent (current-frame))
                   (cut get-on-detach seed))
-               (catch exn (!dot Smoke (badDetach id exn))))
+               (catch exn (!dot Smoke (badDetach exn))))
           (try ,(get-on-render seed)
-               (catch exn (!dot Smoke (badRender id exn))))
+               (catch exn (!dot Smoke (badRender exn))))
           (try ,(get-on-attach seed)
-               (catch exn (!dot Smoke (badAttach id exn))))))
+               (catch exn (!dot Smoke (badAttach exn))))))
     
     ; seed -> js
     ;

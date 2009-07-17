@@ -72,19 +72,19 @@ if (!window.console.log) {
   
   // Logging messages ============================
   
-  // string event -> void  
-  Smoke.badAttach = function (id, evt) {
-    Smoke.log("Failed to attach", id, evt);
+  // exception [string] -> void  
+  Smoke.badAttach = function (exn, id) {
+    Smoke.log("Failed to attach", exn, id || "no id provided");
   };
   
-  // string event -> void  
-  Smoke.badRender = function (id, evt) {
-    Smoke.log("Failed to render", id, evt);
+  // exception [string] -> void  
+  Smoke.badRender = function (exn, id) {
+    Smoke.log("Failed to render", exn, id || "no id provided");
   };
 
-  // string event -> void  
-  Smoke.badDetach = function (id, evt) {
-    Smoke.log("Failed to detach", id, evt);
+  // exception [string] -> void  
+  Smoke.badDetach = function (exn, id) {
+    Smoke.log("Failed to detach", exn, id || "no id provided");
   };
   
   // Submit data =================================
