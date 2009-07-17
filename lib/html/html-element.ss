@@ -80,7 +80,7 @@
     ;   - a render script that refreshes the XML content of the subtree;
     ;   - attach scripts from all subtree components *in the current web frame*.
     (define/override (get-on-refresh seed)
-      (let ([id (send this get-component-id)])
+      (let ([id (get-id)])
         (js (try ,(call-with-frame (frame-parent (current-frame))
                     (cut get-on-detach seed))
                  (catch exn (!dot Smoke (badDetach exn ,id))))
@@ -91,9 +91,10 @@
     
     ; seed -> js
     (define/override (get-on-render seed)
-      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
-                                  "replace"
-                                  ,(xml->string (render seed))))))
+      (let ([id (get-id)])
+        (js (!dot Smoke (insertHTML (!dot Smoke (findById ,id))
+                                    "replace"
+                                    ,(xml->string (render seed)))))
     
     ; Printing -----------------------------------
     
