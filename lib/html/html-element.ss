@@ -11,7 +11,9 @@
 (define html-element-mixin
   (mixin/events (html-component<%>) (html-element<%>)
     
-    (inherit get-component-id)
+    (inherit get-component-id
+             get-on-detach
+             get-on-attach)
     
     ; Fields -------------------------------------
     
