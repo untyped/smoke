@@ -102,11 +102,11 @@
         [attrs (raise-type-error 'attribute-editor.restructure "(list attribute attribute ...)" attrs)]))
     
     ; -> (listof check-result)
-    (define/override (parse)
+    (define/override (validate)
       (check/annotate ([ann:form-elements (list this)]
                        [ann:attrs         (get-attributes)])
         (check-until-problems
-         (cut super parse)
+         (cut super validate)
          (cut with-handlers ([exn:smoke:form? (lambda (exn) (check-fail (exn-message exn)))])
               (if (and required? (not (get-value)))
                   (check-fail "Value is required.")
