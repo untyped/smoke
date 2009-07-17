@@ -94,7 +94,7 @@
       (let ([id (get-id)])
         (js (!dot Smoke (insertHTML (!dot Smoke (findById ,id))
                                     "replace"
-                                    ,(xml->string (render seed)))))
+                                    ,(xml->string (render seed)))))))
     
     ; Printing -----------------------------------
     
