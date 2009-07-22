@@ -68,7 +68,7 @@
     (init-field columns
       (or (and attributes (map default-attribute-column attributes))
           (error "entity-report constructor: insufficient arguments"))
-      #:accessor #:children)
+      #:accessor)
     
     ; (cell (listof view)
     (init-field views 
