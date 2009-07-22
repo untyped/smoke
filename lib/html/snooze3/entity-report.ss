@@ -214,7 +214,8 @@
 
 ; Provide statements -----------------------------
 
-(provide entity-report%)
+(provide entity-report%
+         attribute-report-column%)
 
 (provide/contract
  [default-attribute-column  (-> attribute? (is-a?/c attribute-report-column%))]

@@ -73,11 +73,11 @@
     
     ; (U view #f)
     ; (U filter #f)
-    (init [view (car (get-views))])
-    (init [filter (car (get-filters))])
+    (init [view   (car (get-views))])
+    (init [filter (if (null? (get-filters)) #f (car (get-filters)))])
     
-    (send view-field set-value! view)
-    (send filter-field set-value! filter)
+    (when view   (send view-field set-value! view))
+    (when filter (send filter-field set-value! filter))
     
     ; Miscellaneous ------------------------------
     
@@ -86,13 +86,6 @@
       (list* snooze-styles
              show-hide-script
              (inner null get-html-requirements)))
-    
-    ; -> boolean
-    (define/override (dirty?)
-      (or (super dirty?)
-          (send view-field dirty?)
-          (send filter-field dirty?)
-          (send pattern-field dirty?)))
     
     ; symbol -> void
     (define/override (set-id! id)
@@ -124,7 +117,7 @@
       ; Retrieve the items that are in the viewport:
       (define col     (get-sort-col))
       (define dir     (get-sort-dir))
-      (define g:item (query-items filter pattern col dir start count))
+      (define g:item  (query-items filter pattern col dir start count))
       ; Return the results:
       (values start count total g:item))
     
@@ -226,7 +219,9 @@
     
     ; -> filter
     (define/public (get-current-filter)
-      (send filter-field get-value))
+      (if (null? (get-filters))
+          #f
+          (send filter-field get-value)))
     
     ; -> void
     (define/public #:callback (on-filter-change)
@@ -264,10 +259,12 @@
     
     ; seed integer integer integer -> xml
     (define/public (render-controls seed start count total)
-      (let ([show-view-field?   (> (length (get-views)) 1)]
-            [show-filter-field? (> (length (get-filters)) 1)])
-        (send view-field   set-visible?! show-view-field?)
-        (send filter-field set-visible?! show-filter-field?))
+      (let ([show-view-field?    (> (length (get-views)) 1)]
+            [show-pattern-field? (> (length (get-filters)) 0)]
+            [show-filter-field?  (> (length (get-filters)) 1)])
+        (send view-field    set-visible?! show-view-field?)
+        (send pattern-field set-visible?! show-pattern-field?)
+        (send filter-field  set-visible?! show-filter-field?))
       (xml (div (@ [id    ,(format "~a-controls" (get-id))]
                    [class "controls ui-helper-clearfix"])
                 (div (@ [class "view"])
