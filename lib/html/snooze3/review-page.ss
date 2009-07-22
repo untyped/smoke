@@ -13,10 +13,18 @@
          "page-internal.ss"
          "view-internal.ss")
 
+; Interfaces -------------------------------------
+
+(define entity-review-page<%>
+  (interface ()
+    get-entity
+    get-value
+    set-value!))
+
 ; Mixins -----------------------------------------
 
 (define entity-review-page-mixin
-  (mixin/cells (html-element<%> html-page<%>) ()
+  (mixin/cells (html-element<%> html-page<%>) (entity-review-page<%>)
     
     (inherit get-id)
     
@@ -79,7 +87,8 @@
 
 ; Provide statements -----------------------------
 
-(provide entity-review-page-mixin)
+(provide entity-review-page<%>
+         entity-review-page-mixin)
 
 (provide/contract
  [scaffold-review-page (->* (entity?) ((subclass?/c html-page%)) (is-a?/c html-page%))])

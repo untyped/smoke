@@ -13,10 +13,18 @@
          "page-internal.ss"
          "view-internal.ss")
 
+; Interfaces -------------------------------------
+
+(define entity-delete-page<%>
+  (interface ()
+    get-entity
+    get-value
+    set-value!))
+
 ; Mixins -----------------------------------------
 
 (define entity-delete-page-mixin
-  (mixin/cells (html-element<%> html-page<%>) ()
+  (mixin/cells (html-element<%> html-page<%>) (entity-delete-page<%>)
     
     (inherit get-id)
     
@@ -108,7 +116,8 @@
 
 ; Provide statements -----------------------------
 
-(provide entity-delete-page-mixin)
+(provide entity-delete-page<%>
+         entity-delete-page-mixin)
 
 (provide/contract
  [scaffold-delete-page (->* (entity?) ((subclass?/c html-page%)) (is-a?/c html-page%))])
