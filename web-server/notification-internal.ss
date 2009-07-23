@@ -1,7 +1,9 @@
 #lang scheme/base
 
-(require (planet untyped/unlib:3/symbol)
-         "../../lib-base.ss")
+(require scheme/contract
+         scheme/match
+         (planet untyped/mirrors:2/xml/xml)
+         (planet untyped/unlib:3/symbol))
 
 ; Notification structure -------------------------
 

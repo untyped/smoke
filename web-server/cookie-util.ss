@@ -27,12 +27,7 @@
 (define session-cookie-name
   (make-cookie-name "SmokeSession"))
 
-; string
-(define expiry-cookie-name
-  (make-cookie-name "SmokeExpiry"))
-
 ; Provide statements -----------------------------
 
 (provide/contract
- [session-cookie-name string?]
- [expiry-cookie-name  string?])
+ [session-cookie-name string?])

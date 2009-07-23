@@ -6,8 +6,11 @@
          (planet untyped/mirrors:2)
          "../base.ss"
          "continuation-url.ss"
+         "expired-continuation.ss"
          "lru.ss"
-         "servlet.ss")
+         "notification.ss"
+         "servlet.ss"
+         "session-cell.ss")
 
 ; [natural] -> manager
 (define (make-default-smoke-manager #:memory-threshold [threshold (* 128 1024 1024)])
@@ -20,11 +23,19 @@
            [manager    (create-LRU-manager
                         ; Called when an instance has expired:
                         (lambda (request)
-                          (make-redirect-response 
-                           (url->initial-url (request-uri request))
-                           #:code    301
-                           #:message "Moved permanently"
-                           #:headers (list (make-header #"X-Smoke-Expired-Instance" #"true"))))
+                          (expired-continuation-type-set!
+                           (cond [(ajax-request? request) (expired-continuation-types ajax)]
+                                 [(post-request? request) (expired-continuation-types post)]
+                                 [else                    (expired-continuation-types get)]))
+                          (if (ajax-request? request)
+                              (make-js-response 
+                               #:code    200
+                               #:message "Expired continuation (AJAX response)"
+                               (js (= (!dot window location) ,(url->initial-url (request-uri request)))))
+                              (make-redirect-response 
+                               (url->initial-url (request-uri request))
+                               #:code    301
+                               #:message "Expired continuation")))
                         ; The condition below is checked every 5 seconds:
                         5
                         ; One 'life point' is deducted every minute:
@@ -58,4 +69,4 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [make-default-smoke-manager (->* () (#:memory-threshold natural-number/c) manager?)])
+ [make-default-smoke-manager  (->* () (#:memory-threshold natural-number/c) manager?)])

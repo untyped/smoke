@@ -105,12 +105,7 @@
     
     ; -> (listof header)
     (define/override (get-http-headers)
-      (assemble-list
-       [#t ,@no-cache-http-headers]
-       [(expiry-cookie-ref (current-request))
-        (begin (notifications-add! (xml "You have been redirected from an expired web address. "
-                                        "If you were editing data on the last page you visited, some changes may have been lost.") #t)
-               (make-cancel-expiry-header (current-request)))]))
+      no-cache-http-headers)
     
     ; Response generation ------------------------
     
@@ -141,17 +136,28 @@
                               (let ([out (open-output-bytes)])
                                 (write (frame-serialize (current-frame)) out)
                                 (bytes-length (get-output-bytes out))))))
+      
       (unless (current-request)
         (error "No current HTTP request to respond to."))
+      
+      (when (expired-continuation-type)
+        (notifications-add-sticky! (expired-continuation-xml (expired-continuation-type)))
+        (expired-continuation-type-reset!))
+      
       ; boolean
       (let ([push-frame? (and (not (ajax-request? (current-request)))
                               (not (post-request? (current-request))))])
-        (when forward?
-          (clear-continuation-table!))
+        (when forward? (clear-continuation-table!))
         (parameterize ([current-page this])
           (when push-frame?
             (resume-from-here))
           (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
+    
+    ; expired-continuation-type -> xml
+    (define/public (expired-continuation-xml type)
+      (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
+           "If you were part way through making changes to data on the web site, "
+           "you should check to make sure your data has been saved correctly."))
     
     ; -> (embed-url -> response)
     ;

@@ -33,13 +33,13 @@
     (define/public (get-warning-notification)
       (xml "The data you submitted has raised warnings. "
            "Hover over the " ,warning-icon " icons below to see the warning messages. "
-           "Click \"OK\" again if you are satisfied that the data is correct."))
+           "Submit your changes again if you are satisfied that the data is correct."))
     
     ; -> xml
     (define/public (get-failure-notification)
       (xml "The data you submitted contains mistakes. "
            "Hover over the " ,failure-icon " icons below to see the error messages. "
-           "Correct the mistakes and click \"OK\" again to submit your changes."))
+           "Correct the mistakes and submit your changes again."))
     
     (define/public (get-commit-notification)
       (xml "Your changes have been saved successfully."))
