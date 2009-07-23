@@ -156,8 +156,7 @@
     ; expired-continuation-type -> xml
     (define/public (expired-continuation-xml type)
       (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
-           "If you were part way through making changes to data on the web site, "
-           "you should check to make sure your data has been saved correctly."))
+           "If you were in the process of making changes, please check to make sure they have been saved correctly."))
     
     ; -> (embed-url -> response)
     ;
