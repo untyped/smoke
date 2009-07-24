@@ -20,14 +20,14 @@
     
     ; -> (U (cons integer integer) #f)
     (define/override (get-value)
-      (let*/debug ([val       (get-raw)]
-                   [time-vals (and val (regexp-match #px"^([0-9]{1,2}):([0-9]{2})$" val))]
-                   [hour      (and time-vals (list-ref? time-vals 1) (list-ref time-vals 1))]
-                   [mins      (and time-vals (list-ref? time-vals 2) (list-ref time-vals 2))])
-                  
-                  (if (and val (or (not hour) (not mins)))
-                      (raise-exn exn:smoke:form (format "time value must be in the format: HH:MM") this)
-                      (cons (string->number hour) (string->number mins)))))
+      (let* ([val       (get-raw)]
+             [time-vals (and val (regexp-match #px"^([0-9]{1,2}):([0-9]{2})$" val))]
+             [hour      (and time-vals (list-ref? time-vals 1) (list-ref time-vals 1))]
+             [mins      (and time-vals (list-ref? time-vals 2) (list-ref time-vals 2))])
+        
+        (if (and val (or (not hour) (not mins)))
+            (raise-exn exn:smoke:form (format "time value must be in the format: HH:MM") this)
+            (cons (string->number hour) (string->number mins)))))
     
     ; (U (cons integer integer) #f) -> void
     (define/override (set-value! val)
