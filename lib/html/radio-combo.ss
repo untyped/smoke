@@ -88,14 +88,15 @@
             [options   (get-options)]
             [classes   (if (get-vertical?)
                            (cons 'radio-combo-vertical   (get-classes))
-                           (cons 'radio-combo-horizontal (get-classes)))])
+                           (cons 'radio-combo-horizontal (get-classes)))]
+            [disabled  (and (not (get-enabled?)) "disabled")])
         (xml (div (@ ,(core-html-attributes seed #:classes classes))
                   ,@(for/list ([option (get-options)])
                       (let* ([raw       (option->raw option)]
                              [button-id (format "~a-~a" group-id raw)]
                              [checked   (and (equal? raw raw-value) "checked")])
                         (xml (div (@ [class "radio-combo-item"])
-                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked)))
+                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked) ,(opt-xml-attr disabled)))
                                   (label (@ [for ,button-id]) ,(option->xml option))))))))))
     
     ; request -> void
