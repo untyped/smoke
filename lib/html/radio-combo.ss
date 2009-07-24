@@ -77,6 +77,10 @@
     (define/public (option->string option)
       (error "option->string must be overridden."))
     
+    ; any -> string
+    (define/public (option->xml option)
+      (error "option->xml must be overridden."))
+    
     ; seed -> xml
     (define/override (render seed)
       (let ([group-id  (get-id)]
@@ -92,7 +96,7 @@
                              [checked   (and (equal? raw raw-value) "checked")])
                         (xml (div (@ [class "radio-combo-item"])
                                   (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked)))
-                                  (label (@ [for ,button-id]) ,(option->string option))))))))))
+                                  (label (@ [for ,button-id]) ,(option->xml option))))))))))
     
     ; request -> void
     (define/augment (on-request request)
@@ -122,7 +126,7 @@
     
     ; Fields -------------------------------------
     
-    ; (cell (alistof (U boolean symbol number) string))
+    ; (cell (alistof (U boolean symbol number) (U string xml)))
     (init-cell options null)
     
     ; Constructor --------------------------------
@@ -157,7 +161,7 @@
         [(? symbol? sym)   (symbol->string sym)]
         [(? boolean? bool) (if bool "--yes--" "--no--")]
         [other (raise-exn exn:fail:contract
-                 (format "Bad option key: expected (U boolean number symbol), received ~s" other))]))
+                          (format "Bad option key: expected (U boolean number symbol), received ~s" other))]))
     
     ; string -> (U boolean symbol number)
     (define/override (raw->option raw)
@@ -169,8 +173,17 @@
     
     ; (U boolean symbol number) ->  string
     (define/override (option->string option)
-      (or (assoc-value/default option (web-cell-ref options-cell) #f)
-          (error (format "Not a valid option: ~s ~s" (web-cell-ref options-cell) option))))))
+      (let ([option-string (assoc-value/default option (web-cell-ref options-cell) #f)])
+        (cond [(string? option-string) option-string]
+              [(xml? option-string)    (xml->string option-string)]
+              [else (error (format "Not a valid option: ~s ~s" (web-cell-ref options-cell) option))])))
+    
+    ; (U boolean symbol number) ->  xml
+    (define/override (option->xml option)
+      (let ([option-xml (assoc-value/default option (web-cell-ref options-cell) #f)])
+        (cond [(string? option-xml) (xml ,option-xml)]
+              [(xml? option-xml)    option-xml]
+              [else (error (format "Not a valid option: ~s ~s" (web-cell-ref options-cell) option))])))))
 
 ; Provide statements -----------------------------
 
