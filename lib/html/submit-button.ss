@@ -2,13 +2,14 @@
 
 (require (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
+         "disableable-element.ss"
          "html-component.ss"
          "html-element.ss")
 
 ; Classes ----------------------------------------
 
 (define submit-button%
-  (class/cells html-element% ()
+  (class/cells (disableable-element-mixin html-element%) ()
     
     (inherit core-html-attributes
              get-id)
