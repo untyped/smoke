@@ -81,6 +81,13 @@
     
     ; Miscellaneous ------------------------------
     
+    ; -> boolean 
+    (define/override (dirty?) 
+      (or (super dirty?) 
+          (send view-field dirty?) 
+          (send filter-field dirty?) 
+          (send pattern-field dirty?))) 
+    
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
       (list* snooze-styles
