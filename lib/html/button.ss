@@ -21,7 +21,7 @@
     
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-button classes)])
+    (super-new [classes (list* 'smoke-button 'ui-widget classes)])
     
     ; Public methods ---------------------------
     
