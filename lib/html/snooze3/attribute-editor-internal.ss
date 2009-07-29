@@ -1,7 +1,6 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
-         (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/symbol)
          "../../../lib-base.ss"
          "../autocomplete-field.ss"

@@ -11,20 +11,20 @@
     (post-subject post)))
 
 (define-enum short-enum
-  ([a "first option"]
-   [b "second option"]
-   [c "third option"]
-   [d "fourth option"]))
+  ([a _ "first option"]
+   [b _ "second option"]
+   [c _ "third option"]
+   [d _ "fourth option"]))
 
 (define-enum long-enum
-  ([a "first option"]
-   [b "second option"]
-   [c "third option"]
-   [d "fourth option"]
-   [e "fifth option"]
-   [f "getting boring"]
-   [g "really boring"]
-   [h "are we done yet"]))
+  ([a _ "first option"]
+   [b _ "second option"]
+   [c _ "third option"]
+   [d _ "fourth option"]
+   [e _ "fifth option"]
+   [f _ "getting boring"]
+   [g _ "really boring"]
+   [h _ "are we done yet"]))
 
 (define-entity kitchen-sink
   ([a-boolean                 boolean]
