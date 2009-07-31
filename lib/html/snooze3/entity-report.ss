@@ -5,6 +5,7 @@
 (require (only-in srfi/13 string-fold-right)
          (planet untyped/snooze:3)
          (planet untyped/unlib:3/for)
+         (planet untyped/unlib:3/string)
          (planet untyped/unlib:3/symbol)
          "controller-internal.ss"
          "report-column.ss"
@@ -22,7 +23,7 @@
                         (format "~a-~a"
                                 (entity-name (attribute-entity attribute))
                                 (attribute-name attribute)))]
-          [string-name (string-titlecase (attribute-pretty-name attribute))]
+          [string-name (string-sentencecase (attribute-pretty-name attribute))]
           [order       (list (sql:order (sql:alias (entity-default-alias (attribute-entity attribute))
                                                    attribute)
                                         'asc))])

@@ -3,8 +3,9 @@
 (require srfi/13
          srfi/19
          (only-in (planet untyped/unlib:3/list) assemble-list)
-         (planet untyped/unlib:3/time)
          (planet untyped/unlib:3/debug)
+         (planet untyped/unlib:3/string)
+         (planet untyped/unlib:3/time)
          (planet untyped/snooze:3)
          "../../../../lib-base.ss"
          "../../html-element.ss"
@@ -224,7 +225,7 @@
   (define-alias E entity)
   (let ([ATTR (sql:alias E attr)])
     (make-column (attribute-name attr)
-                 (string-titlecase (attribute-pretty-name attr))
+                 (string-sentencecase (attribute-pretty-name attr))
                  (list (sql:asc ATTR)))))
 
 ; entity (listof attribute) -> (listof column)

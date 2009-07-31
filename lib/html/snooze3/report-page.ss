@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
+         (planet untyped/unlib:3/string)
          "../../../lib-base.ss"
          "../html-element.ss"
          "../html-page.ss"
@@ -45,7 +46,7 @@
     ; -> string
     (define/override (get-title)
       (or (super get-title)
-          (string-titlecase (entity-pretty-name-plural (get-entity)))))
+          (string-sentencecase (entity-pretty-name-plural (get-entity)))))
     
     ; seed -> xml
     (define/override (render seed)

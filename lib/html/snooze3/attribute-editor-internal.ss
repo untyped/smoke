@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
+         (planet untyped/unlib:3/string)
          (planet untyped/unlib:3/symbol)
          "../../../lib-base.ss"
          "../autocomplete-field.ss"
@@ -149,7 +150,7 @@
     (init [id    (or (attributes->id attributes) (get-component-id))]
           [label (if (pair? attributes)
                      (let ([attr (car attributes)])
-                       (xml-quote (string-titlecase (attribute-pretty-name attr))))
+                       (xml-quote (string-sentencecase (attribute-pretty-name attr))))
                      (xml-quote id))])
     
     (super-new [id id] [label label])
@@ -189,7 +190,7 @@
 (define (attributes->label attributes)
   (and (pair? attributes)
        (let ([attr (car attributes)])
-         (xml-quote (string-titlecase (attribute-pretty-name attr))))))
+         (xml-quote (string-sentencecase (attribute-pretty-name attr))))))
 
 ; Provide statements -----------------------------
 

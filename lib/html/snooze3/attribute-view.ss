@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/snooze:3)
+         (planet untyped/unlib:3/string)
          (planet untyped/unlib:3/symbol)
          "../../../lib-base.ss"
          "../html-element.ss"
@@ -43,7 +44,7 @@
                      (get-component-id))]
           [label (if (pair? attributes)
                      (let ([attr (car attributes)])
-                       (xml-quote (string-titlecase (attribute-pretty-name attr))))
+                       (xml-quote (string-sentencecase (attribute-pretty-name attr))))
                      (xml-quote id))])
     
     (set-id!   id)
