@@ -19,9 +19,11 @@
 
 (define html-page<%>
   (interface (page<%>)
-    get-doctype      ; -> xml
-    get-lang         ; -> string
-    get-title))      ; -> frame
+    get-doctype        ; -> xml
+    get-lang           ; -> string
+    get-title          ; -> frame
+    on-full-response   ; -> void
+    on-ajax-response)) ; -> void
 
 (define-syntax (with-response-timer stx)
   (syntax-case stx ()
@@ -158,6 +160,14 @@
       (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
            "If you were in the process of making changes, please check to make sure they have been saved correctly."))
     
+    ; -> void
+    (define/public (on-full-response)
+      (void))
+    
+    ; -> void
+    (define/public (on-ajax-response)
+      (void))
+    
     ; -> (embed-url -> response)
     ;
     ; Makes a response-generator for use with send/suspend/dispatch. The response type varies 
@@ -187,6 +197,7 @@
     ; Makes a response-generator that creates a complete XHTML response for this page.
     (define/public (make-full-response-generator)
       (lambda (embed-url)
+        (on-full-response)
         (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'fast)])
           (with-response-timer
            "Full response"
@@ -239,6 +250,7 @@
     ; refreshes appropriate parts of this page.
     (define/public (make-ajax-response-generator)
       (lambda (embed-url)
+        (on-ajax-response)
         (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'fast)])
           (with-response-timer
            "AJAX response"

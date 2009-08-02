@@ -137,9 +137,12 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 /* notification ------------------------------- */
 
 .smoke-notifications { width: 100%; }
-.smoke-notifications .notification { position: relative; margin: .5em; 
-    background: #ffe url(/images/smoke/flash-background.png) repeat-x; }
-.smoke-notifications .notification-content { margin: .5em 2.5em .5em .5em; }
+.smoke-notifications .notification { position: relative; margin: .5em;
+   background: #ffe url(/images/smoke/flash-background.png) repeat-x; }
+
+.smoke-notifications .notification-content { margin: .5em; }
+.smoke-notifications .notification-content :first-child { margin-top: 0px; }
+.smoke-notifications .notification-content :last-child  { margin-bottom: 0px; }
 
 .smoke-notifications .notification-sticky { position: absolute; top: .5em; right: 40px; }
 .smoke-notifications .notification-sticky { background: url(/images/smoke/sticky.png); }
