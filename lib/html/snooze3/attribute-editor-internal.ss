@@ -25,6 +25,12 @@
          "check-label.ss"
          "editor-internal.ss")
 
+; Configuration ----------------------------------
+
+; (parameter xml+quotable)
+(define default-required-label
+  (make-parameter "(required)"))
+
 ; Interfaces -------------------------------------
 
 (define attribute-editor<%>
@@ -62,6 +68,11 @@
              (not (type-allows-null? (attribute-type attr)))))
       #:accessor)
     
+    (init-field required-label 
+      (default-required-label)
+      #:accessor
+      #:mutator)
+    
     (init [id    (or (attributes->id attributes) (get-component-id))]
           [label (or (attributes->label attributes) (xml-quote id))])
     
@@ -84,7 +95,8 @@
     (define/override (render seed)
       (xml (span (@ [id ,(get-wrapper-id)])
                  ,(super render seed) " "
-                 ,(opt-xml required? "(required) ")
+                 ,(opt-xml (and required? required-label)
+                    ,required-label)
                  ,(render-check-label seed))))
     
     ; snooze-struct -> snooze-struct
@@ -198,3 +210,6 @@
          attribute-editor-mixin
          complete-attribute-editor-mixin
          simple-attribute-editor%)
+
+(provide/contract
+ [default-required-label (parameter/c xml+quotable?)])

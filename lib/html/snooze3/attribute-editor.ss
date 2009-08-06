@@ -140,6 +140,10 @@
 
 (provide (all-from-out "attribute-editor-internal.ss"
                        "foreign-key-editor.ss")
+         time-utc-editor-mixin
+         time-tai-editor-mixin
+         symbol-editor-mixin
+         enum-editor-mixin
          autocomplete-editor%
          check-box-editor%
          combo-box-editor%
