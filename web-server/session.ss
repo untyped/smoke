@@ -39,13 +39,14 @@
          [now        (current-time time-utc)] ; time-utc
          [session    (make-session session-id now now (make-hasheq))] ; session
          [cookie     (cookie:add-path (set-cookie session-cookie-name session-id) "/")] ; cookie
+         [counter    0]
          ; -> any
          [continue   (lambda ()
-                       (when forward?
-                         (clear-continuation-table!))
+                       (set! counter (add1 counter))
+                       (when forward? (clear-continuation-table!))
                        (if (equal? session-id (debug* "request-session-id" request-session-id (current-request)))
                            (hash-set! sessions session-id session)
-                           (error "session could not be established"))
+                           (error (format "session could not be established (counter = ~a)" counter)))
                        (continue session))])
     ; any
     (send/suspend/dispatch
@@ -86,8 +87,7 @@
     (clear-continuation-table!))
   ; session
   (if (request-session-id request)
-      (raise-exn exn:fail:smoke:session
-        "Session cookie could not be removed.")
+      (raise-exn exn:fail:smoke:session "session cookie could not be removed")
       (begin (hash-remove! sessions session-id)
              (void))))
 
