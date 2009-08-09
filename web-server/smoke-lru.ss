@@ -81,12 +81,25 @@
                                            "detail"    (lru-life-point-distribution manager 10)))
                               ; Return collection rate:
                               (if purge
-                                  (lambda (points)
-                                    (cond [(not points)     #f]
-                                          [(< points purge) 0]
-                                          [else             (- points collect-rate)]))
-                                  (lambda (points)
-                                    (and points (- points collect-rate))))))
+                                  (if collect-rate
+                                      (lambda (points)
+                                        (if (integer? points)
+                                            (if (>= points purge)
+                                                (- points collect-rate)
+                                                0)
+                                            #f))
+                                      (lambda (points)
+                                        (if (integer? points)
+                                            (if (>= points purge)
+                                                points
+                                                0)
+                                            #f)))
+                                  (if collect-rate
+                                      (lambda (points)
+                                        (if (integer? points)
+                                            (- points collect-rate)
+                                            #f))
+                                      #f))))
                           #:initial-count initial-points
                           ; Log when continuations are collected:
                           #:inform-p
