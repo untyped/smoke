@@ -143,7 +143,7 @@
         (error "No current HTTP request to respond to."))
       
       (when (expired-continuation-type)
-        (notifications-add-sticky! (expired-continuation-xml (expired-continuation-type)))
+        (notifications-add! (expired-continuation-xml (expired-continuation-type)))
         (expired-continuation-type-reset!))
       
       ; boolean
