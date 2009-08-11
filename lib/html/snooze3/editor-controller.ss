@@ -28,18 +28,26 @@
     (init-cell editor #:accessor #:mutator)
     
     ; Methods ------------------------------------
-        
-    ; -> xml
-    (define/public (get-warning-notification)
-      (xml "The data you submitted has raised warnings. "
-           "Hover over the " ,warning-icon " icons below to see the warning messages. "
-           "Submit your changes again if you are satisfied that the data is correct."))
     
-    ; -> xml
-    (define/public (get-failure-notification)
-      (xml "The data you submitted contains mistakes. "
-           "Hover over the " ,failure-icon " icons below to see the error messages. "
-           "Correct the mistakes and submit your changes again."))
+    ; (listof check-result) -> xml
+    (define/public (get-warning-notification results)
+      (xml "The data you submitted has raised warnings. Hover over the "
+           (span (@ [class "tooltip-anchor"])
+                 ,warning-icon
+                 (div (@ [class "tooltip"])
+                      (ul ,@(for/list ([result (in-list results)])
+                              (xml (li ,(check-result-message result)))))))
+           " icons below to see the warning messages. Submit your changes again if you are satisfied that the data is correct."))
+    
+    ; (listof check-result) -> xml
+    (define/public (get-failure-notification results)
+      (xml "The data you submitted contains mistakes. Hover over the "
+           (span (@ [class "tooltip-anchor"])
+                 ,failure-icon
+                 (div (@ [class "tooltip"])
+                      (ul ,@(for/list ([result (in-list results)])
+                              (xml (li ,(check-result-message result)))))))
+           " icons below to see the error messages. Correct the mistakes and submit your changes again."))
     
     (define/public (get-commit-notification)
       (xml "Your changes have been saved successfully."))
@@ -57,7 +65,7 @@
                                             (send (current-page) respond)]
             [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
+            [(ormap check-failure? results) (notifications-add! (get-failure-notification results))
                                             (send (current-page) respond)]
             [else                           (process-validate-results (send (get-editor) validate))]))
     
@@ -66,10 +74,10 @@
       (send (get-editor) set-check-results! results)
       (cond [(ormap check-fatal? results)   (print-check-fatals results #:id (debug-id this))
                                             (send (current-page) respond)]
-            [(ormap check-failure? results) (notifications-add! (get-failure-notification))
+            [(ormap check-failure? results) (notifications-add! (get-failure-notification results))
                                             (send (current-page) respond)]
             [(ormap check-warning? results) (if (send (get-editor) value-changed?)
-                                                (begin  (notifications-add! (get-warning-notification))
+                                                (begin  (notifications-add! (get-warning-notification results))
                                                         (send (current-page) respond))
                                                 (begin0 (send (get-editor) commit-changes)
                                                         (notifications-add! (get-commit-notification))))]

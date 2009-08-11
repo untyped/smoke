@@ -57,14 +57,17 @@
 (define enum-editor-mixin
   (mixin/cells (attribute-editor<%>) ()
     
-    (init attributes)
-    (init [options (let* ([type (and (pair? attributes) (attribute-type (car attributes)))])
-                     (if (enum-type? type)
-                         (enum-type-options this type)
-                         (raise-exn exn:fail:contract
-                           (format "enum-combo-box-editor% constructor: ~a: ~s"
-                                   "options must be specified for non-enum attributes"
-                                   attributes))))])
+    (init attributes
+          [null-label (if (is-a? this radio-combo%)
+                          "None"
+                          "-- No selection --")]
+          [options    (let* ([type (and (pair? attributes) (attribute-type (car attributes)))])
+                        (if (enum-type? type)
+                            (enum-type-options type null-label)
+                            (raise-exn exn:fail:contract
+                              (format "enum-combo-box-editor% constructor: ~a: ~s"
+                                      "options must be specified for non-enum attributes"
+                                      attributes))))])
     
     (super-new [attributes attributes] [options options])))
 
@@ -121,18 +124,14 @@
 
 ; Helper procedures ------------------------------
 
-; editor<%> enum-type -> (alistof (U symbol #f) string)
-(define (enum-type-options editor type)
+; enum-type [string] -> (alistof (U symbol #f) string)
+(define (enum-type-options type [null-label "-- No selection --"])
   (let* ([enum          (enum-type-enum type)]
          [values        (enum-type-values type)]
          [value->string (if enum
                             (cut enum-prettify enum <>)
                             symbol->string)])
-    `(,@(if (type-allows-null? type)
-            (if (is-a? editor radio-combo%)
-                '((#f . "None"))
-                '((#f . "-- No selection --")))
-            null)
+    `(,@(if (type-allows-null? type) `((#f . ,null-label)) null)
       ,@(for/list ([val (in-list values)])
           (cons val (value->string val))))))
 
