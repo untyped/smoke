@@ -31,10 +31,10 @@
             (with-handlers ([exn:fail? 
                              (lambda (exn)
                                (raise-exn exn:smoke:form 
-                                 (format "value must be in the format: ~a"
+                                 (format "Value must be in the format: ~a"
                                          (get-date-format-example))
                                  this))])
-              (string->date val fmt))
+              (and val (string->date val fmt)))
             (error "date-format-string not specified"))))
     
     ; date -> void
