@@ -60,7 +60,6 @@
     
     ; -> snooze-struct
     (define/public (get-value)
-      
       (let ([init (get-initial-value)])
         (if (snooze-struct? init)
             (for/fold ([val init])
