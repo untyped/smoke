@@ -116,7 +116,11 @@
          [(struct symbol-type (_ max-length))
           (if max-length
               (new (symbol-editor-mixin text-field-editor%) [attributes (list attr)] [size 50] [max-length max-length])
-              (new (symbol-editor-mixin text-area-editor%)  [attributes (list attr)] [cols 50] [rows 5]))])))))
+              (new (symbol-editor-mixin text-area-editor%)  [attributes (list attr)] [cols 50] [rows 5]))]
+         [(? binary-type?)
+          (error "cannot scaffold attribute-editor for binary attribute" attr)]
+         [_
+          (error "unrecognized attribute-type for default-attribute-editor" attr type)])))))
 
 ; attribute -> attribute-editor<%>
 (define (default-attribute-editor attr)
