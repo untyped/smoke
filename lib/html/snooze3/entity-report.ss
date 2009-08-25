@@ -80,9 +80,10 @@
       (list (make-filter 'default "Default"))
       #:override-accessor)
     
-    (init [classes null])
+    (init [sort-col (car columns)])
+    (init [classes  null])
     
-    (super-new [sort-col (car columns)]
+    (super-new [sort-col sort-col]
                [classes  (list* 'smoke-entity-report 'ui-widget classes)])
     
     ; Methods ------------------------------------
@@ -107,7 +108,7 @@
     (define/public (make-where filter pattern)
       (let ([entity (get-entity)])
         (if pattern 
-            (apply sql:and
+            (apply sql:or
                    (for/fold/reverse
                     ([accum null])
                     ([col   (in-list (get-visible-columns))])
