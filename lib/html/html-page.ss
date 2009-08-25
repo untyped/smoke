@@ -63,8 +63,8 @@
     ; (cell string)
     (init-cell lang "en" #:accessor #:mutator)
     
-    ; (cell string)
-    (init-cell title "Untitled" #:accessor #:mutator)
+    ; (cell (U string #f))
+    (init-cell title #f #:accessor #:mutator)
     
     ; (cell string)
     (init-cell description #f #:accessor #:mutator)
