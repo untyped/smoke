@@ -28,11 +28,12 @@
 (define-syntax (with-response-timer stx)
   (syntax-case stx ()
     [(_ msg expr ...)
-     #'(let* ([time1 (current-inexact-milliseconds)]
+     #;#'(let* ([time1 (current-inexact-milliseconds)]
               [ans   ((lambda () expr ...))]
               [time2 (current-inexact-milliseconds)])
          (debug msg (- time2 time1))
-         ans)]))
+         ans)
+     #'(begin expr ...)]))
 
 ; Mixins -----------------------------------------
 
@@ -62,8 +63,8 @@
     ; (cell string)
     (init-cell lang "en" #:accessor #:mutator)
     
-    ; (cell string)
-    (init-cell title "Untitled" #:accessor #:mutator)
+    ; (cell (U string #f))
+    (init-cell title #f #:accessor #:mutator)
     
     ; (cell string)
     (init-cell description #f #:accessor #:mutator)

@@ -62,10 +62,37 @@
   (list establish-session-stage
         establish-prompt-stage))
 
+; (-> any) -> any
+(define (init-smoke thunk)
+  ; -> any
+  (define (establish-prompt)
+    (if (resume-available?)
+        (thunk)
+        (send/suspend/dispatch
+            (lambda (embed-url)
+              (let* ([url0 (request-uri (current-request))]
+                     [url1 (string->url (embed-url thunk))])
+                (make-redirect-response (make-url (url-scheme url1)
+                                                  (url-user url1)
+                                                  (url-host url1)
+                                                  (url-port url1)
+                                                  (url-path-absolute? url1)
+                                                  (url-path url1)
+                                                  (url-query url0)
+                                                  (url-fragment url0))))))))
+  ; any
+  (if (request-session (current-request))
+      (establish-prompt)
+      (start-session
+       #f
+       (lambda (session)
+         (establish-prompt)))))
+
 ; Provide statements -----------------------------
 
 (provide/contract
  [init-smoke-stage?       (-> any/c boolean?)]
  [establish-session-stage procedure?]
  [establish-prompt-stage  procedure?]
- [init-smoke-pipeline     (listof procedure?)])
+ [init-smoke-pipeline     (listof procedure?)]
+ [init-smoke              (-> procedure? any)])

@@ -60,6 +60,8 @@
 
 ; Provide statements -----------------------------
 
+(provide entity-report-page-mixin)
+
 (provide/contract
  [default-scaffolded-report-superclass (parameter/c (subclass?/c entity-report%))]
  [scaffold-report-page                 (->* (entity?)
