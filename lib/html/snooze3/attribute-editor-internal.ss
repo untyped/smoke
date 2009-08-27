@@ -112,7 +112,7 @@
         [(list-rest (? attribute? attr) _)
          (snooze-struct-set struct attr (get-value))]
         [attrs (raise-type-error 'attribute-editor.restructure "(list attribute attribute ...)" attrs)]))
-    
+        
     ; -> (listof check-result)
     (define/override (validate)
       (check/annotate ([ann:form-elements (list this)]

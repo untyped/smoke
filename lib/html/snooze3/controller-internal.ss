@@ -2,7 +2,7 @@
 
 (require (for-syntax scheme/base
                      (planet untyped/unlib:3/syntax))
-         (planet untyped/dispatch:2)
+         (planet untyped/dispatch:3)
          (planet untyped/snooze:3)
          "../../../lib-base.ss"
          "../notification.ss")

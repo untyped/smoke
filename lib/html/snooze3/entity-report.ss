@@ -76,9 +76,7 @@
       (list (make-view 'default "Default" columns))
       #:override-accessor)
     
-    (init-field filters
-      (list (make-filter 'default "Default"))
-      #:override-accessor)
+    (init-field filters null #:override-accessor)
     
     (init [sort-col (car columns)])
     (init [classes  null])
