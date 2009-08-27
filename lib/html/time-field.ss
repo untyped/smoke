@@ -25,10 +25,8 @@
              [hour      (and time-vals (list-ref? time-vals 1) (list-ref time-vals 1))]
              [mins      (and time-vals (list-ref? time-vals 2) (list-ref time-vals 2))])
         (cond [(not val) #f]
-              [(or (not hour) (not mins))
-               (raise-exn exn:smoke:form
-                 "Value must be in the format: HH:MM"
-                 this)]
+              [(and val (or (not hour) (not mins)))
+               (raise-exn exn:smoke:form (format "time value must be in the format: HH:MM") this)]
               [else (cons (string->number hour) (string->number mins))])))
     
     ; (U (cons integer integer) #f) -> void
