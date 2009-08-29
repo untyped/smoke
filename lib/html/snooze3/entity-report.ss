@@ -3,10 +3,12 @@
 (require "../../../lib-base.ss")
 
 (require (only-in srfi/13 string-fold-right)
+         (planet untyped/dispatch:3)
          (planet untyped/snooze:3)
          (planet untyped/unlib:3/for)
          (planet untyped/unlib:3/string)
          (planet untyped/unlib:3/symbol)
+         "../jquery-ui-util.ss"
          "controller-internal.ss"
          "report-column.ss"
          "report-internal.ss")
@@ -138,17 +140,13 @@
       (define current-dir (get-sort-dir))
       ; xml
       (xml (thead (tr (@ [class 'ui-widget-header])
-                      ,(render-review-th seed)
-                      ,(render-update-th seed)
-                      ,(render-delete-th seed)
+                      ,(render-controllers-th seed)
                       ,@(for/list ([col (in-list (get-visible-columns))])
                           (send col render-head seed (and (equal? col current-col) current-dir)))))))
     
     ; seed (listof column) snooze-struct -> xml
     (define/override (render-item seed cols struct)
-      (xml (tr ,(render-review-td seed struct)
-               ,(render-update-td seed struct)
-               ,(render-delete-td seed struct)
+      (xml (tr ,(render-controllers-td seed struct)
                ,@(for/list ([col (in-list cols)])
                    (render-column seed col struct)))))
     
@@ -158,39 +156,40 @@
           (let ([attr (send col get-attribute)])
             (render-value-td seed attr (snooze-struct-ref struct attr)))
           (error "entity-report.render-column: could not render column" col)))
-
-    ; seed -> xml
-    (define/public (render-review-th seed)
-      (opt-xml (and (show-review-column?) (review-controller-set? (get-entity)))
-        (th (& nbsp))))
     
     ; seed -> xml
-    (define/public (render-update-th seed)
-      (opt-xml (and (show-update-column?) (update-controller-set? (get-entity)))
-        (th (& nbsp))))
-    
-    ; seed -> xml
-    (define/public (render-delete-th seed)
-      (opt-xml (and (show-delete-column?) (delete-controller-set? (get-entity)))
-        (th (& nbsp))))
+    (define/public (render-controllers-th seed)
+      (opt-xml (or (and (show-review-column?) (review-controller-set? (get-entity)))
+                   (and (show-update-column?) (update-controller-set? (get-entity)))
+                   (and (show-delete-column?) (delete-controller-set? (get-entity))))
+        (th)))
     
     ; seed string -> xml
-    (define/public (render-review-td seed struct)
-      (opt-xml (and (show-review-column?) (review-controller-set? struct))
-        (td (@ [class 'ui-icon-td])
-            (a (@ [href ,(review-controller-url struct)]) "Review"))))
-    
-    ; seed string -> xml
-    (define/public (render-update-td seed struct)
-      (opt-xml (and (show-update-column?) (update-controller-set? struct))
-        (td (@ [class 'ui-icon-td])
-            (a (@ [href ,(update-controller-url struct)]) "Update"))))
-    
-    ; seed string -> xml
-    (define/public (render-delete-td seed struct)
-      (opt-xml (and (show-delete-column?) (delete-controller-set? struct))
-        (td (@ [class 'ui-icon-td])
-            (a (@ [href ,(delete-controller-url struct)]) "Delete"))))
+    (define/public (render-controllers-td seed struct)
+      (opt-xml (or (and (show-review-column?) (review-controller-set? struct))
+                   (and (show-update-column?) (update-controller-set? (get-entity)))
+                   (and (show-delete-column?) (delete-controller-set? (get-entity))))
+        (td ,(controller-link (review-controller-ref struct) struct
+                              #:body (xml (div (@ [class "controller-icon ui-state-default ui-corner-all"]
+                                                  [title "View this item"])
+                                               (!icon (@ [type "search"]))))
+                              #:else (xml (div (@ [class "controller-icon ui-state-disabled ui-corner-all"]
+                                                  [title "Cannot view this item"])
+                                               (!icon (@ [type "search"])))))
+            ,(controller-link (update-controller-ref struct) struct
+                              #:body (xml (div (@ [class "controller-icon ui-state-default ui-corner-all"]
+                                                  [title "Edit this item"])
+                                               (!icon (@ [type "pencil"]))))
+                              #:else (xml (div (@ [class "controller-icon ui-state-disabled ui-corner-all"]
+                                                  [title "Cannot edit this item"])
+                                               (!icon (@ [type "pencil"])))))
+            ,(controller-link (delete-controller-ref struct) struct
+                              #:body (xml (div (@ [class "controller-icon ui-state-default ui-corner-all"]
+                                                  [title "Delete this item"])
+                                               (!icon (@ [type "trash"]))))
+                              #:else (xml (div (@ [class "controller-icon ui-state-disabled ui-corner-all"]
+                                                  [title "Cannot delete this item"])
+                                               (!icon (@ [type "trash"]))))))))
     
     ; seed attribute any -> xml
     (define/public (render-value-td seed attr val)
