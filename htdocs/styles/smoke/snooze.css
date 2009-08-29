@@ -69,6 +69,12 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
     vertical-align: middle;
 }
 
+.snooze-report-table .controller-icon {
+    padding: 2px;
+    margin: 0 2px;
+    float: left;
+}
+
 /* Controls */
 
 .smoke-snooze-report .controls { position: relative; display: block; margin-bottom: 2ex; }

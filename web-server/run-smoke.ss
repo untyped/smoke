@@ -73,7 +73,7 @@
          start
          test
          #:run-tests?      [run-tests?       #t]
-         #:run-tests       [run-tests        test/text-ui/pause-on-fail]
+         #:run-tests       [run-tests        run-tests/pause]
          #:manager         [manager          (make-default-smoke-manager)]
          #:port            [port             8765]
          #:listen-ip       [listen-ip        #f]
