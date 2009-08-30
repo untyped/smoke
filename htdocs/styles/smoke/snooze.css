@@ -127,9 +127,12 @@ table.pager td.last span {
     cursor: auto;
 }
 
-
 .smoke-snooze-report table.pager a:hover {
     text-decoration: underline;
+}
+
+.smoke-snooze-report .controller-cell {
+    width: 78px;
 }
 
 /* Report data */
