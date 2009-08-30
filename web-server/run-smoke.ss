@@ -79,7 +79,7 @@
          #:listen-ip       [listen-ip        #f]
          #:htdocs-paths    [app-htdocs-paths null]
          #:mime-types-path [mime-types-path  smoke-mime-types-path]
-         #:launch-browser? [launch-browser?  #f]
+         #:launch-browser? [launch-browser?  #t]
          #:404-handler     [404-handler      smoke-404-handler])
   (serve/dispatcher
    (make-smoke-dispatcher (if run-tests?
