@@ -32,19 +32,27 @@
     (init-field empty-text "(none)" #:accessor #:mutator)
     
     ; (cell (listof (alistof (U boolean symbol number) string)))
-    (init-cell selected-items null #:accessor)
-    (init-cell available-items null #:accessor)
+    (cell selected-items null #:accessor)
+    (cell available-items null #:accessor)
     
     ; html-component%
-    (init-field editor
-      (new text-input%)
-      #:child #:accessor #:mutator)
+    (init-field editor (new text-input%)
+                #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
-    (init [value #f])
-    (init [classes null])    
+    (init [value     #f])
+    (init [classes   null])
+    
+    (init [selected  null])
+    (init [available null])
+    
     (super-new [classes (cons 'smoke-set-selector classes)])
+    
+    ; selection initialization
+    (web-cell-set! available-items-cell available)
+    (web-cell-set! selected-items-cell  selected)
+    (refresh-selectable-items)
     
     ; Public methods -----------------------------
     
@@ -93,8 +101,7 @@
       ; selects an item, maintaining original sort order
       (let* ([full-item-data (assoc item (get-available-items))]
              [newly-selected (cons full-item-data (get-selected-items))]) 
-        (set-selected-items! (filter (lambda (item)
-                                       (member item newly-selected))
+        (set-selected-items! (filter (lambda (item) (member item newly-selected))
                                      (get-available-items))))
       (refresh-selectable-items))
     
@@ -119,13 +126,14 @@
     (define/public (reset-editor-value) 
       (error "reset-editor-value must be overridden."))
     
-    ; -> (listof (alist (U boolean symbol number) string)))
-    (define/private (refresh-selectable-items)
+    ; -> void
+    (define/public-final (refresh-selectable-items)
       (let ([selected-items  (get-selected-items)]
             [available-items (get-available-items)])
-        (set-selectable-items! (filter (lambda (item)
-                                         (not (member item selected-items)))
+        (set-selectable-items! (filter (lambda (item) (not (member item selected-items)))
                                        available-items))))
+    
+    
     
     
     ; seed -> xml
@@ -144,15 +152,12 @@
                   [(not (get-enabled?))
                    (list (xml (li ,(get-disabled-text))))]
                   [(null? (get-selected-items))
-                   (list (xml (li (@ [class 'empty-text])
-                                  ,(get-empty-text))))]
+                   (list (xml (li (@ [class 'empty-text]) ,(get-empty-text))))]
                   [else
                    (for/list ([item   (in-list (get-selected-items))]
                               [index  (in-naturals)])
-                     (let* ([item-id (string->symbol 
-                                      (format "~a-item~a" (get-id) index))]
-                            [dismiss-id (string->symbol 
-                                         (format "~a-dismiss" item-id))])
+                     (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
+                            [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
                        (xml 
                         (li (@ [id ,item-id])
                             ,(cdr item)
@@ -162,32 +167,29 @@
                                        [src     "/images/smoke/dismiss.png"]
                                        [title   "Dismiss this item"]
                                        [alt     "Dismiss this item"]
-                                       [onclick 
-                                        ,(embed/ajax seed 
-                                                     (callback dismiss-item (car item)))])))))))]))
-          ,(opt-xml (and (debug* "enabled?" get-enabled?) (debug* "¬visible?" not visible?) (debug* "items-selectable?" items-selectable?)) 
-             (div (@ [class 'item-entry])
-                  (a (@ [id ,(string->symbol (format "~a-activate" (get-id)))] 
-                        [onclick ,(embed/ajax seed (callback activate-item-entry))])
-                     "Add item...")))
-          ,(opt-xml (and (get-enabled?) visible?)
-             (div (@ [class 'item-entry])
-                  ,(send (get-editor) render seed)
-                  (img (@ [class   "add-item rollover-img inner"]
-                          [src     "/images/smoke/add.png"]
-                          [title   "Add item"]
-                          [alt     "Add item"]
-                          [onclick ,(embed/ajax seed (callback activate-item))]))
-                  (img (@ [id ,(string->symbol (format "~a-deactivate" (get-id)))] 
-                          [class   "rollover-img"]
-                          [src     "/images/smoke/dismiss.png"]
-                          [title   "Deactivate editor"]
-                          [alt     "Deactivate editor"]
-                          [onclick ,(embed/ajax seed (callback deactivate-item-entry))])))))))) 
+                                       [onclick ,(embed/ajax seed (callback dismiss-item (car item)))])))))))]))
+          ,(cond [(and (get-enabled?) (not visible?) (items-selectable?)) 
+                  (xml (div (@ [class 'item-entry])
+                            (a (@ [id      ,(string->symbol (format "~a-activate" (get-id)))] 
+                                  [onclick ,(embed/ajax seed (callback activate-item-entry))])
+                               "Add item...")))]
+                 [(and (get-enabled?) visible?)
+                  (xml (div (@ [class 'item-entry])
+                            ,(send (get-editor) render seed)
+                            (img (@ [class   "add-item rollover-img inner"]
+                                    [src     "/images/smoke/add.png"]
+                                    [title   "Add item"]
+                                    [alt     "Add item"]
+                                    [onclick ,(embed/ajax seed (callback activate-item))]))
+                            (img (@ [id ,(string->symbol (format "~a-deactivate" (get-id)))] 
+                                    [class   "rollover-img"]
+                                    [src     "/images/smoke/dismiss.png"]
+                                    [title   "Deactivate editor"]
+                                    [alt     "Deactivate editor"]
+                                    [onclick ,(embed/ajax seed (callback deactivate-item-entry))]))))]
+                 [else (xml)])))))
     
-    ; (U boolean symbol number) -> void
-    (define/public-final #:callback (dismiss-item item)
-      (deselect-item item))
+    ; Callbacks ----------------------------------
     
     ; -> void
     (define/public-final #:callback (activate-item-entry)
@@ -199,14 +201,22 @@
       (send (get-editor) set-visible?! #f)
       (refresh!))
     
+    ; (U boolean symbol number) -> void
+    (define/public-final #:callback (dismiss-item item)
+      (deselect-item item)
+      (refresh-editor))
+    
     ; -> void
     (define/public-final #:callback (activate-item)      
       (let ([item (get-editor-value)])
-        (when item
+        (when item 
           (select-item item)
           (reset-editor-value) 
-          (when (not (items-selectable?))
-            (send (get-editor) set-visible?! #f)))))
+          (refresh-editor))))
+    
+    (define/public-final (refresh-editor)
+      (send (get-editor) set-visible?! (items-selectable?)))
+    
     
     ; seed -> js
     (define/augride (get-on-change seed)
@@ -217,8 +227,9 @@
     (define/augride (get-on-attach seed)
       ; (U symbol #f)
       (define id (get-id))
-      (js ,@(for/list ([index (in-naturals)] [item (get-selected-items)])
-              (define item-id (string->symbol (format "~a-item~a" id index)))
+      (js ,@(for/list ([index (in-naturals)]
+                       [item (get-selected-items)])
+              (define item-id    (string->symbol (format "~a-item~a" id index)))
               (define dismiss-id (string->symbol (format "~a-dismiss" item-id)))
               (js (!dot Smoke SetSelector 
                         (initialize (!dot Smoke (findById ,item-id))
@@ -229,12 +240,14 @@
 (define set-selector%
   (class/cells vanilla-set-selector% () 
     
-    (inherit get-editor)
+    (inherit get-editor activate-item)
     
     ; Fields -------------------------------------        
     
     ; combo-box%
-    (super-new [editor (new combo-box% [classes (list "editor")] [visible? #f])])
+    (super-new [editor (new combo-box% 
+                            [classes   (list "editor")]
+                            [on-change (callback activate-item)])])
     
     ; Methods ------------------------------------
     ; -> void
@@ -257,10 +270,11 @@
     
     ; Fields -------------------------------------
     
-    ; autocomplete-field%    
-    (super-new [editor (new autocomplete-field% 
-                            [classes (list "editor")]
-                            [visible? #f])])
+    ; autocomplete-field% 
+    
+    (init [autocomplete (new autocomplete-field% [classes (list "editor")])]) 
+    
+    (super-new [editor autocomplete])
     
     ; Methods ------------------------------------       
     ; (listof (alistof (U boolean symbol number) string)) -> void
@@ -275,7 +289,7 @@
     (define/override (get-editor-value) 
       (let ([string-value (send (get-editor) get-value)])
         (for/or ([item (in-list (get-available-items))])
-                (and (equal? string-value (cdr item)) (car item)))))
+          (and (equal? string-value (cdr item)) (car item)))))
     
     ; -> void
     (define/override (reset-editor-value) 
