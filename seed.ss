@@ -29,9 +29,7 @@
 
 ; seed (U string (-> void) callback) -> js
 (define (embed/ajax seed handler)
-  (cond [(string? handler)    (js ((!dot Smoke doAjax) ,(embed/full seed handler)))]
-        [(procedure? handler) (js ((!dot Smoke doAjax) ,(embed/full seed handler)))]
-        [(callback? handler)  (js ((!dot Smoke doAjax) ,(callback-url seed handler)))]))
+  (js ((!dot Smoke doAjax) ,(embed/full seed handler))))
 
 ; seed (-> response) -> string
 (define (embed/thunk seed thunk)
