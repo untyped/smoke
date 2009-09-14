@@ -5,15 +5,15 @@
          "class/all-class-tests.ss"
          #;"resource/all-resource-tests.ss"
          "testapp/tests/all-testapp-tests.ss"
-         "web-server/all-web-server-tests.ss")
+         #;"web-server/all-web-server-tests.ss")
 
 ; Tests ------------------------------------------
 
 (define all-smoke-tests
   (test-suite "smoke"
-    all-web-server-tests
+    #;all-web-server-tests
     all-class-tests
-    #;all-resource-tests
+    ;all-resource-tests
     all-testapp-tests))
 
 ; Provide statements -----------------------------

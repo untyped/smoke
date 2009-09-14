@@ -28,18 +28,18 @@
     (test-case "attach and detach scripts"
       (click/wait (node/link/text "FULL refresh"))
       (check-equal? (title-ref) "Script test")
-      (check-equal? (js-ref (js attached)) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0") "initial attached")
-      (check-equal? (js-ref (js detached)) (list) "initial detached")
+      (check-equal? (js-ref attached) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0") "initial attached")
+      (check-equal? (js-ref detached) (list) "initial detached")
       (click/wait (node/link/text "AJAX refresh"))
-      (check-equal? (js-ref (js attached)) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0") "AJAX noop attached")
-      (check-equal? (js-ref (js detached)) (list) "AJAX noop detached")
+      (check-equal? (js-ref attached) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0") "AJAX noop attached")
+      (check-equal? (js-ref detached) (list) "AJAX noop detached")
       (click/wait (node/link/text "AJAX update"))
-      (check-equal? (js-ref (js attached)) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0" "n3" "n2" "n4" "n7") "AJAX change attached")
-      (check-equal? (js-ref (js detached)) (list  "n3" "n4" "n2" "n7") "AJAX change detached"))
+      (check-equal? (js-ref attached) (list "n3" "n4" "n2" "n6" "n7" "n5" "n1" "n0" "n3" "n2" "n4" "n7") "AJAX change attached")
+      (check-equal? (js-ref detached) (list  "n3" "n4" "n2" "n7") "AJAX change detached"))
     
     (test-case "new init-scripts in AJAX"
       (click/wait (node/link/text "AJAX init script update"))
-      (check-equal? (js-ref (js modifiedNodeLoaded)) #t))
+      (check-equal? (js-ref modifiedNodeLoaded) #t))
     
     ))
 

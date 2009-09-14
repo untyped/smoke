@@ -8,11 +8,11 @@
 
 ; symbol -> any
 (define (field-value id)
-  (js-ref (js (!dot (!index ,(node/id id) 0) value))))
+  (js-ref (!dot (!index ,(node/id id) 0) value)))
 
 ; symbol symbol -> any
 (define (field-attr id attr-id)
-  (js-ref (js (!index (!index ,(node/id id) 0) ,attr-id))))
+  (js-ref (!index (!index ,(node/id id) 0) ,attr-id)))
 
 ; symbol -> any
 (define (printed-value id)
@@ -33,9 +33,9 @@
 ; symbol any -> void
 (define-check (check-combo-value id expected)
   (check-equal?
-   (js-ref (js ((function ()
-                  (var [elem (!index ,(node/id id) 0)])
-                  (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text))))))
+   (js-ref ((function ()
+              (var [elem (!index ,(node/id id) 0)])
+              (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text)))))
    expected))
 
 ; Tests ------------------------------------------
@@ -48,7 +48,7 @@
       (check-equal? (title-ref) "Form elements"))
     
     ; Have to do password field first as submitting the page clears its value:
-
+    
     (test-suite "password-field"
       
       (test-case "initial value"
@@ -290,7 +290,7 @@
         (check-field-value 'combo-box "--yes--")
         (check-combo-value 'combo-box "Option 5")
         (check-printed-value 'combo-box #t)))
-
+    
     (test-suite "radio-combo"
       
       (test-suite "horizontal"

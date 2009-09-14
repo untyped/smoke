@@ -9,8 +9,7 @@
          (planet untyped/dispatch:2)
          (planet untyped/mirrors:2)
          "../dispatch.ss"
-         "../smoke.ss"
-         "../lib/html/snooze3/snooze.ss")
+         "../smoke.ss")
 
 ; path
 (define-runtime-path testapp-htdocs-path "htdocs")
@@ -24,8 +23,7 @@
                        (planet untyped/dispatch:2)
                        (planet untyped/mirrors:2)
                        "../dispatch.ss"
-                       "../smoke.ss"
-                       "../lib/html/snooze3/snooze.ss"))
+                       "../smoke.ss"))
 
 (provide/contract
  [testapp-htdocs-path path?])

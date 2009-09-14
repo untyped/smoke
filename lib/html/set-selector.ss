@@ -2,22 +2,31 @@
 
 (require scheme/match
          scheme/pretty
-         (planet untyped/unlib:3/list)
-         (planet untyped/unlib:3/string)
+         ;(planet untyped/unlib:3/list)
+         ;(planet untyped/unlib:3/string)
          "../../lib-base.ss"
-         "autocomplete-field.ss"
          "browser-util.ss"
-         "text-input.ss"
-         "combo-box.ss"
          "form-element.ss"
          "refreshable.ss")
 
-; To use this class, override:
-;   - get-item     : -> (list-of any) ; return a list of Scheme items to show in the list
+; Interfaces -------------------------------------
 
-; Vanilla Combo-box is basic elements; See below for more general combo-box%
+(define set-selector<%>
+  (interface (form-element<%>)
+    get-editor-value    ; -> any
+    reset-editor-value  ; -> void
+    item->raw           ; any -> (U boolean integer symbol)
+    raw->item           ; (U boolean integer symbol) -> any
+    item->string        ; any -> string
+    get-available-items ; -> (listof any)
+    select-item         ; any -> void
+    deselect-item       ; any -> void
+    items-available?))  ; -> boolean
+
+; Generic classes --------------------------------
+
 (define vanilla-set-selector%
-  (class/cells (refreshable-mixin form-element%) ()
+  (class/cells (refreshable-mixin form-element%) (set-selector<%>)
     
     (inherit get-id
              get-classes
@@ -27,96 +36,55 @@
     
     ; Fields -------------------------------------
     ; string
-    (init-field disabled-text "N/A" #:accessor #:mutator)
+    (init-field disabled-text "N/A" #:accessor)
     ; string
-    (init-field empty-text "(none)" #:accessor #:mutator)
+    (init-field empty-text "(none)" #:accessor)
     
-    ; (cell (listof (alistof (U boolean symbol number) string)))
-    (cell selected-items null #:accessor)
-    (cell available-items null #:accessor)
+    ; (cellof (listof any))
+    (init-cell value null #:override-accessor)
+    ; boolean
+    (init-cell has-value-changed? #f #:accessor #:mutator)
+    
+    ; Editors ------------------------------------
     
     ; html-component%
-    (init-field editor (new text-input%)
+    (init-field editor (error "editor must be set")
                 #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
-    (init [value     #f])
-    (init [classes   null])
-    
-    (init [selected  null])
-    (init [available null])
+    ; (listof (U symbol string))
+    (init [classes null])
     
     (super-new [classes (cons 'smoke-set-selector classes)])
-    
-    ; selection initialization
-    (web-cell-set! available-items-cell available)
-    (web-cell-set! selected-items-cell  selected)
-    (refresh-selectable-items)
     
     ; Public methods -----------------------------
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
-      (list* rollover-script
-             (inner null get-html-requirements)))
+      (list* rollover-script (inner null get-html-requirements)))
     
     ; -> (listof (U js (seed -> js)))
     (define/augment (get-js-requirements)
-      (list* dismiss-script
-             (inner null get-js-requirements)))
+      (list* dismiss-script (inner null get-js-requirements)))
     
-    ; -> any
-    (define/override (get-value)
-      #f)
-    
-    ; any -> void
+    ; (listof any) -> void
     (define/override (set-value! value)
-      #f)
+      (unless (equal? value (get-value))
+        (set-has-value-changed?! #t))
+      (web-cell-set! value-cell value)
+      (refresh-selectable-items))
     
     ; -> boolean
     (define/override (value-valid?)
-      #t)
+      #t) ; values are always valid, since the list must only contain valid values
     
     ; -> boolean
-    (define/override (value-changed?) #f)
+    (define/override (value-changed?)
+      (begin0 (get-has-value-changed?)
+              (set-has-value-changed?! #f)))
     
-    
-    ; -> (listof (alistof (U boolean symbol number) string))
-    (define/public-final (set-available-items! items)
-      (web-cell-set! available-items-cell items)
-      (refresh-selectable-items)) 
-    
-    ; -> (listof (alistof (U boolean symbol number) string))
-    (define/public-final (set-selected-items! items)
-      (web-cell-set! selected-items-cell items)
-      (refresh-selectable-items))
-    
-    ; -> (listof (U boolean symbol number))
-    (define/public-final (get-selected-values)
-      (map car (get-selected-items)))
-    
-    ; (U boolean symbol number) -> void
-    (define/public (select-item item) 
-      ; selects an item, maintaining original sort order
-      (let* ([full-item-data (assoc item (get-available-items))]
-             [newly-selected (cons full-item-data (get-selected-items))]) 
-        (set-selected-items! (filter (lambda (item) (member item newly-selected))
-                                     (get-available-items))))
-      (refresh-selectable-items))
-    
-    ; (U boolean symbol number) -> void
-    (define/public (deselect-item item)
-      (set-selected-items! (alist-delete item (get-selected-items)))
-      (refresh-selectable-items)) 
-    
-    ; -> boolean
-    (define/public (items-selectable?)
-      (< (length (get-selected-items)) (length (get-available-items)))) 
-    
-    ; (listof (alist (U boolean symbol number) string))) -> void
-    (define/public (set-selectable-items! items) 
-      (error "set-selectable-items! must be overridden."))
+    ; Interface methods --------------------------
     
     ; -> (U number symbol)
     (define/public (get-editor-value) 
@@ -126,97 +94,101 @@
     (define/public (reset-editor-value) 
       (error "reset-editor-value must be overridden."))
     
+    ; any -> (U boolean integer symbol)
+    (define/public (item->raw item)
+      (error "item->raw must be overridden"))
+    
+    ; (U boolean integer symbol) -> any
+    (define/public (raw->item raw)
+      (error "raw->item must be overridden"))
+    
+    ; any -> string
+    (define/public (item->string item)
+      (error "item->string must be overridden"))
+    
+    ; -> (listof any)
+    (define/public (get-available-items)
+      (error "get-available-items must be overridden"))
+    
+    ; Adds item to the list of selected items, maintaining original sort order
+    ; any -> void
+    (define/public (select-item item) 
+      (let ([unordered-value (cons item (get-value))]) 
+        (set-value! (filter (cut member <> unordered-value) (get-available-items))))
+      (refresh-selectable-items))
+    
+    ; any -> void
+    (define/public (deselect-item item)
+      (set-value! (remove item (get-value)))
+      (refresh-selectable-items))
+    
+    ; -> boolean
+    (define/public (items-available?)
+      (error "items-available? must be overridden"))
+    
     ; -> void
-    (define/public-final (refresh-selectable-items)
-      (let ([selected-items  (get-selected-items)]
-            [available-items (get-available-items)])
-        (set-selectable-items! (filter (lambda (item) (not (member item selected-items)))
-                                       available-items))))
+    (define/public (refresh-selectable-items)
+      (error "refresh-selectable-items must be overridden"))
     
-    
-    
+    ; Rendering ----------------------------------
     
     ; seed -> xml
     (define/override (render seed)
       (let ([visible? (send (get-editor) get-visible?)])
         (xml 
-         (div 
-          (@ ,(core-html-attributes 
-               seed 
-               #:classes (cond 
-                           [visible?             (cons 'edit-mode (get-classes))]
-                           [(not (get-enabled?)) (cons 'disabled (get-classes))]
-                           [else                 (get-classes)])))
-          (ul (@ [class 'active])
-              ,@(cond 
-                  [(not (get-enabled?))
-                   (list (xml (li ,(get-disabled-text))))]
-                  [(null? (get-selected-items))
-                   (list (xml (li (@ [class 'empty-text]) ,(get-empty-text))))]
-                  [else
-                   (for/list ([item   (in-list (get-selected-items))]
-                              [index  (in-naturals)])
-                     (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
-                            [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
-                       (xml 
-                        (li (@ [id ,item-id])
-                            ,(cdr item)
-                            ,(opt-xml (get-enabled?)
-                               (img (@ [id      ,dismiss-id] 
-                                       [class   "rollover-img"]
-                                       [src     "/images/smoke/dismiss.png"]
-                                       [title   "Dismiss this item"]
-                                       [alt     "Dismiss this item"]
-                                       [onclick ,(embed/ajax seed (callback dismiss-item (car item)))])))))))]))
-          ,(cond [(and (get-enabled?) (not visible?) (items-selectable?)) 
-                  (xml (div (@ [class 'item-entry])
-                            (a (@ [id      ,(string->symbol (format "~a-activate" (get-id)))] 
-                                  [onclick ,(embed/ajax seed (callback activate-item-entry))])
-                               "Add item...")))]
-                 [(and (get-enabled?) visible?)
-                  (xml (div (@ [class 'item-entry])
-                            ,(send (get-editor) render seed)
-                            (img (@ [class   "add-item rollover-img inner"]
-                                    [src     "/images/smoke/add.png"]
-                                    [title   "Add item"]
-                                    [alt     "Add item"]
-                                    [onclick ,(embed/ajax seed (callback activate-item))]))
-                            (img (@ [id ,(string->symbol (format "~a-deactivate" (get-id)))] 
-                                    [class   "rollover-img"]
-                                    [src     "/images/smoke/dismiss.png"]
-                                    [title   "Deactivate editor"]
-                                    [alt     "Deactivate editor"]
-                                    [onclick ,(embed/ajax seed (callback deactivate-item-entry))]))))]
-                 [else (xml)])))))
+         (div (@ ,(core-html-attributes seed #:classes (cond [visible?             (cons 'edit-mode (get-classes))]
+                                                             [(not (get-enabled?)) (cons 'disabled (get-classes))]
+                                                             [else                 (get-classes)])))
+              (ul (@ [class 'active])
+                  ,@(cond [(not (get-enabled?))
+                           (list (xml (li ,(get-disabled-text))))]
+                          [(null? (get-value))
+                           (list (xml (li (@ [class 'empty-text]) ,(get-empty-text))))]
+                          [else
+                           (for/list ([item   (in-list (get-value))]
+                                      [index  (in-naturals)])
+                             (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
+                                    [item-raw   (item->raw item)]
+                                    [item-str   (item->string item)]
+                                    [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
+                               (xml 
+                                (li (@ [id ,item-id])
+                                    ,item-str
+                                    ,(opt-xml (get-enabled?)
+                                       (img (@ [id      ,dismiss-id] 
+                                               [class   "rollover-img"]
+                                               [src     "/images/smoke/dismiss.png"]
+                                               [title   "Dismiss this item"]
+                                               [alt     "Dismiss this item"]
+                                               [onclick ,(embed/ajax seed (callback dismiss-item item-raw))])))))))]))
+              ,(cond [(and (get-enabled?) visible?)
+                      (xml (div (@ [class 'item-entry])
+                                ,(send (get-editor) render seed)
+                                (img (@ [class   "add-item rollover-img inner"]
+                                        [src     "/images/smoke/add.png"]
+                                        [title   "Add item"]
+                                        [alt     "Add item"]
+                                        [onclick ,(embed/ajax seed (callback activate-item))]))))]
+                     [else (xml)])))))
     
     ; Callbacks ----------------------------------
     
-    ; -> void
-    (define/public-final #:callback (activate-item-entry)
-      (send (get-editor) set-visible?! #t)
-      (refresh!))
-    
-    ; -> void
-    (define/public-final #:callback (deactivate-item-entry)         
-      (send (get-editor) set-visible?! #f)
-      (refresh!))
-    
     ; (U boolean symbol number) -> void
     (define/public-final #:callback (dismiss-item item)
-      (deselect-item item)
+      (deselect-item (raw->item item))
       (refresh-editor))
     
     ; -> void
     (define/public-final #:callback (activate-item)      
-      (let ([item (get-editor-value)])
+      (let ([item (and (get-editor-value) (raw->item (get-editor-value)))])
         (when item 
           (select-item item)
           (reset-editor-value) 
           (refresh-editor))))
     
+    ; -> void
     (define/public-final (refresh-editor)
-      (send (get-editor) set-visible?! (items-selectable?)))
-    
+      (send (get-editor) set-visible?! (items-available?)))
     
     ; seed -> js
     (define/augride (get-on-change seed)
@@ -228,73 +200,13 @@
       ; (U symbol #f)
       (define id (get-id))
       (js ,@(for/list ([index (in-naturals)]
-                       [item (get-selected-items)])
+                       [item  (get-value)])
               (define item-id    (string->symbol (format "~a-item~a" id index)))
               (define dismiss-id (string->symbol (format "~a-dismiss" item-id)))
               (js (!dot Smoke SetSelector 
                         (initialize (!dot Smoke (findById ,item-id))
                                     (!dot Smoke (findById ,dismiss-id))))))
           (!dot (jQuery ,(format "#~a .rollover-img" (get-id))) (rollover "-hover"))))))
-
-
-(define set-selector%
-  (class/cells vanilla-set-selector% () 
-    
-    (inherit get-editor activate-item)
-    
-    ; Fields -------------------------------------        
-    
-    ; combo-box%
-    (super-new [editor (new combo-box% 
-                            [classes   (list "editor")]
-                            [on-change (callback activate-item)])])
-    
-    ; Methods ------------------------------------
-    ; -> void
-    (define/override (set-selectable-items! items) 
-      (send (get-editor) set-options! items))
-    
-    ; -> (U number symbol)
-    (define/override (get-editor-value) 
-      (send (get-editor) get-value))
-    
-    ; -> void
-    (define/override (reset-editor-value) 
-      (void)))) ; do nothing - combo default is fine
-
-
-(define set-selector-autocomplete%
-  (class/cells vanilla-set-selector% ()    
-    
-    (inherit get-editor set-editor! get-available-items get-id)
-    
-    ; Fields -------------------------------------
-    
-    ; autocomplete-field% 
-    
-    (init [autocomplete (new autocomplete-field% [classes (list "editor")])]) 
-    
-    (super-new [editor autocomplete])
-    
-    ; Methods ------------------------------------       
-    ; (listof (alistof (U boolean symbol number) string)) -> void
-    (define/override (set-selectable-items! items) 
-      (send (get-editor) set-options! (map cdr items)))
-    
-    ; autocomplete-field% -> void
-    (define/public (set-autocomplete-field! autocomplete)
-      (set-editor! autocomplete))
-    
-    ; -> (U number symbol)
-    (define/override (get-editor-value) 
-      (let ([string-value (send (get-editor) get-value)])
-        (for/or ([item (in-list (get-available-items))])
-          (and (equal? string-value (cdr item)) (car item)))))
-    
-    ; -> void
-    (define/override (reset-editor-value) 
-      (send (get-editor) set-value! #f)))) ; clear autocomplete text
-
 
 ; Helpers ----------------------------------------
 
@@ -315,6 +227,5 @@
 
 ; Provide statements -----------------------------
 
-(provide vanilla-set-selector%
-         set-selector%
-         set-selector-autocomplete%)
+(provide set-selector<%>
+         vanilla-set-selector%)

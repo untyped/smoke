@@ -31,7 +31,7 @@
           (check-true (node-exists? (node/id id))))))
     
     #;(test-case "initial content"
-      (check-equal? (js-ref (js (!dot ($ "#editor") (val)))) "Content")
+      (check-equal? (js-ref (!dot ($ "#editor") (val))) "Content")
       (check-equal? (inner-html-ref (node/id 'inline-preview)) "Content")
       (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "Content"))
         
@@ -39,7 +39,7 @@
       (enter-text (node/id 'editor) "New content")
       (reload/wait)
       (read-line)
-      (check-equal? (js-ref (js (!dot ($ "#editor") (val)))) "New content")
+      (check-equal? (js-ref (!dot ($ "#editor") (val))) "New content")
       (check-equal? (inner-html-ref (node/id 'inline-preview)) "New content")
       (check-equal? (inner-html-ref (node/id 'nested-inline-preview)) "New content"))
     
