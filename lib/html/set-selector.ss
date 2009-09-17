@@ -56,7 +56,7 @@
     ; (listof (U symbol string))
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-set-selector 'ui-widget 'ui-corner-all classes)])
+    (super-new [classes (list* 'smoke-set-selector 'ui-widget 'ui-corner-all classes)])
     
     ; Public methods -----------------------------
     
