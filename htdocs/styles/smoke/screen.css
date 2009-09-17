@@ -244,12 +244,14 @@ span.wizard-step-title {
 
 /* set-selectors */
 div.smoke-set-selector {
+  border: 1px solid white;
+  padding: 2px 3px;
 }
 
 div.smoke-set-selector ul.active {
   list-style-position: inside;
-  padding: 2px 3px;
-  border: 1px solid white;
+  margin: 0;
+  padding: 0;
 }
 
 /*div.smoke-set-selector.edit-mode ul.active {

@@ -56,7 +56,7 @@
     ; (listof (U symbol string))
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-set-selector classes)])
+    (super-new [classes (cons 'smoke-set-selector 'ui-widget 'ui-corner-all classes)])
     
     ; Public methods -----------------------------
     
@@ -139,28 +139,27 @@
          (div (@ ,(core-html-attributes seed #:classes (cond [visible?             (cons 'edit-mode (get-classes))]
                                                              [(not (get-enabled?)) (cons 'disabled (get-classes))]
                                                              [else                 (get-classes)])))
-              (ul (@ [class 'active])
-                  ,@(cond [(not (get-enabled?))
-                           (list (xml (li ,(get-disabled-text))))]
-                          [(null? (get-value))
-                           (list (xml (li (@ [class 'empty-text]) ,(get-empty-text))))]
-                          [else
-                           (for/list ([item   (in-list (get-value))]
-                                      [index  (in-naturals)])
-                             (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
-                                    [item-raw   (item->raw item)]
-                                    [item-str   (item->string item)]
-                                    [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
-                               (xml 
-                                (li (@ [id ,item-id])
-                                    ,item-str
-                                    ,(opt-xml (get-enabled?)
-                                       (img (@ [id      ,dismiss-id] 
-                                               [class   "rollover-img"]
-                                               [src     "/images/smoke/dismiss.png"]
-                                               [title   "Dismiss this item"]
-                                               [alt     "Dismiss this item"]
-                                               [onclick ,(embed/ajax seed (callback dismiss-item item-raw))])))))))]))
+              ,(cond [(null? (get-value))
+                      (xml (span (@ [class 'empty-text]) ,(get-empty-text)))]
+                     [else
+                      (xml
+                       (ul (@ [class 'active])
+                           ,@(for/list ([item   (in-list (get-value))]
+                                        [index  (in-naturals)])
+                               (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
+                                      [item-raw   (item->raw item)]
+                                      [item-str   (item->string item)]
+                                      [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
+                                 (xml 
+                                  (li (@ [id ,item-id])
+                                      ,item-str
+                                      ,(opt-xml (get-enabled?)
+                                         (img (@ [id      ,dismiss-id] 
+                                                 [class   "rollover-img"]
+                                                 [src     "/images/smoke/dismiss.png"]
+                                                 [title   "Dismiss this item"]
+                                                 [alt     "Dismiss this item"]
+                                                 [onclick ,(embed/ajax seed (callback dismiss-item item-raw))])))))))))])
               ,(cond [(and (get-enabled?) visible?)
                       (xml (div (@ [class 'item-entry])
                                 ,(send (get-editor) render seed)
