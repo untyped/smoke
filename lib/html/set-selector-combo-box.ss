@@ -38,7 +38,7 @@
     
     ; (U boolean integer symbol) -> any
     (define/override (raw->item raw)
-      (assoc raw (get-value)))
+      (assoc raw (get-available-items)))
     
     ; any -> string
     (define/override (item->string item)
