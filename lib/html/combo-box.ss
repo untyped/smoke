@@ -100,7 +100,8 @@
     (define/augment (on-request request)
       (when (get-enabled?)
         (let ([binding (request-binding-ref request (get-id))])
-          (when binding (set-raw-value! binding)))))
+          (when binding (set-raw-value! binding))
+          (inner (void) on-request request))))
     
     ; seed -> js
     (define/augment (get-on-change seed)
