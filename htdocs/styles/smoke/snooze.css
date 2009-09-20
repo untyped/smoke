@@ -26,12 +26,18 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 
 /* views -------------------------------------- */
 
-.smoke-entity-view .attribute-label { 
+.smoke-entity-view th.attribute-label { 
   text-align: right;
   vertical-align: top;
-  white-space: nowrap;
+  padding: 0 .5em 1ex 0;
   width: 20em;
-  padding: 0.5ex 1em 0.5ex 0;
+  white-space: nowrap;
+}
+
+.smoke-entity-view td.attribute-value { 
+  text-align: left;
+  vertical-align: top;
+  padding: 0 0 1ex .5em;
 }
 
 /* snooze-report% ----------------------------- */

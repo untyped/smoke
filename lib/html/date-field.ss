@@ -38,11 +38,13 @@
     
     (init [classes     null]
           [max-length  (date-format->max-length date-format)]
-          [size        max-length])
+          [size        max-length]
+          [placeholder (date-format->placeholder date-format)])
     
     (super-new [classes     (list* 'smoke-date-field classes)]
                [size        size]
-               [max-length  max-length])
+               [max-length  max-length]
+               [placeholder placeholder])
     
     ; Methods ------------------------------------
     
@@ -173,6 +175,40 @@
        ["~y" "y"]
        ["~Y" "yy"]
        [_ (return #f)]))))
+
+; string -> (U string #f)
+(define (date-format->placeholder fmt)
+  (let/ec return
+    (regexp-replace*
+     #px"~."
+     (regexp-replace*
+      #px"(~.)?([^~]+)(~.)?"
+      (regexp-replace* #px"'" fmt "''")
+      (lambda (a b c d)
+        (if b
+            (if d
+                (format "~a~a~a" b c d)
+                (format "~a~a" b c))
+            (if d
+                (format "~a~a" c d)
+                (format "~a" c)))))
+     (match-lambda
+       ["~~" "~"]
+       ["~a" (return #f)]
+       ["~A" (return #f)]
+       ["~b" (return #f)]
+       ["~B" (return #f)]
+       ["~d" "DD"]
+       ["~e" "DD"]
+       ["~h" (return #f)]
+       ["~H" "HH"]
+       ["~k" "HH"]
+       ["~m" "MM"]
+       ["~M" "MM"]
+       ["~S" "SS"]
+       ["~y" "YY"]
+       ["~Y" "YYYY"]
+       [_    (return #f)]))))
 
 ; Provide statements -----------------------------
 
