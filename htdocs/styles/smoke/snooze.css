@@ -81,6 +81,10 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
     float: left;
 }
 
+.snooze-report-table .controller-cell {
+    white-space: nowrap;
+}
+
 /* Controls */
 
 .smoke-snooze-report .controls { position: relative; display: block; margin-bottom: 2ex; }

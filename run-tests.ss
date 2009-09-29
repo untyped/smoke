@@ -22,4 +22,5 @@
    (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
    (dispatch (current-request) test-site))
  all-smoke-tests
+ #:launch-browser? #t
  #:htdocs-paths (list testapp-htdocs-path))

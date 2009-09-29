@@ -1,8 +1,8 @@
 #lang scheme/base
 
-(require (planet schematics/schemeunit:2/test)
-         (planet schematics/schemeunit:2/text-ui)
-         (planet schematics/schemeunit:2/util)
+(require (planet schematics/schemeunit:3)
+         (planet schematics/schemeunit:3/text-ui)
+         (planet schematics/schemeunit:3/util)
          (planet untyped/delirium:3)
          "lib-base.ss"
          "smoke.ss"
@@ -10,9 +10,9 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet schematics/schemeunit:2/test)
-                       (planet schematics/schemeunit:2/text-ui)
-                       (planet schematics/schemeunit:2/util)
+(provide (all-from-out (planet schematics/schemeunit:3)
+                       (planet schematics/schemeunit:3/text-ui)
+                       (planet schematics/schemeunit:3/util)
                        (planet untyped/delirium:3)
                        "lib-base.ss"
                        "smoke.ss"

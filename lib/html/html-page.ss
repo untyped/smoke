@@ -1,11 +1,8 @@
 #lang scheme/base
 
 (require (for-syntax scheme/base)
-         (only-in srfi/1 
-                  delete
-                  delete-duplicates)
-         (only-in (planet schematics/schemeunit:2/text-ui)
-                  display-exn)
+         (only-in srfi/1 delete delete-duplicates)
+         (only-in (planet schematics/schemeunit:3/text-ui) display-exn)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
