@@ -73,7 +73,8 @@
                 [(event ...)             (map (cut make-id stx <>) event-names)]
                 [(on-event ...)          (map (cut make-id stx 'on- <>) event-names)]
                 [(get-on-event ...)      (map (cut make-id stx 'get-on- <>) event-names)]
-                [(get-on-event/fold ...) (map (cut make-id stx 'get-on- <> '/fold) event-names)])
+                [(get-on-event/fold ...) (map (cut make-id stx 'get-on- <> '/fold) event-names)]
+                [(set-on-event! ...)     (map (cut make-id stx 'set-on- <> '!) event-names)])
     
     ; syntax -> syntax
     (define (expand-clause clause-stx)
@@ -125,7 +126,7 @@
                (get-on-event/fold seed))
              
              ...
-             
+                          
              ; (seed -> (U js #f))
              (define/public (get-on-event/fold seed)
                ; (U js #f)
@@ -145,6 +146,12 @@
                    (if default-handler
                        default-handler
                        #f)))
+             
+             ...
+             
+             ; (U callback js (seed -> js)) -> void
+             (define/public (set-on-event! handler)
+               (set-default-event-handler! 'event handler))
              
              ...
              
