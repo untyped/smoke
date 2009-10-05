@@ -44,7 +44,7 @@
          [continue   (lambda ()
                        (set! counter (add1 counter))
                        (when forward? (clear-continuation-table!))
-                       (if (equal? session-id (debug* "request-session-id" request-session-id (current-request)))
+                       (if (equal? session-id (request-session-id (current-request)))
                            (hash-set! sessions session-id session)
                            (error (format "session could not be established (counter = ~a)" counter)))
                        (continue session))])
