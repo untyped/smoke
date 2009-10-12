@@ -135,11 +135,11 @@ if (!window.console.log) {
   
   // AJAX ========================================
   
-  // U(string, arrayOf(string)) [object] -> void
+  // (U string (arrayOf string)) [object] -> void
   //
   // url can be a string or an array, with the base callback url at index 0
   // and the arguments at indices 1 and up
-  Smoke.doAjax = function (url) {
+  Smoke.doAjax = function (url, data) {
     var request = null;
     
     try {
@@ -152,10 +152,10 @@ if (!window.console.log) {
         ? url
         : url[0] + "/" + $.map(url.slice(1), encodeURIComponent).join("/");
   
-      var data = arguments.length > 1
-        ? $.extend(Smoke.submitData, arguments[1])
+      var data = data
+        ? $.extend(Smoke.submitData, data)
         : Smoke.submitData;
-        
+      
       Smoke.submitData = {};
       
       // The result JS is automatically evaluated by jQuery:
@@ -178,6 +178,38 @@ if (!window.console.log) {
     } catch (exn) {
       Smoke.onAjaxFailure (request, "Could not send background request", exn);
     }
+  };
+  
+  // (objectOf string integer)
+  //
+  // A map of url => timeoutId for pending AJAX requests.
+  Smoke.delayedAjaxIds = {};
+  
+  // (objectOf string object)
+  //
+  // A map of url => postdata for pending AJAX requests.
+  Smoke.delayedAjaxData = {};
+      
+  // natural (U string (arrayOf string)) [object] -> void
+  //
+  // Send data to url after time milliseconds. If another call to delayAjax occurs
+  // within time, the data objects are appended and sent in a single request.
+  Smoke.doDelayedAjax = function (time, url, data) {
+    data = data || {};
+  
+    var oldId =  Smoke.delayedAjaxIds[url];
+    if(typeof(oldId) != "undefined") {
+      window.clearTimeout(oldId);
+      data = $.extend(Smoke.delayedAjaxData[url], data);
+    }
+
+    Smoke.delayedAjaxData[url] = data;
+    Smoke.delayedAjaxIds[url] = window.setTimeout(function () {
+      var data = Smoke.delayedAjaxData[url];
+      delete Smoke.delayedAjaxIds[url];
+      delete Smoke.delayedAjaxData[url];
+      Smoke.doAjax(url, data);
+    }, time);
   };
   
   // xhr any ... -> void
