@@ -126,7 +126,7 @@
                                       (pre (@ [id ,(symbol-append (send control get-id) '-value)]
                                               [style "padding: 0px; margin: 0px; font-family: monaco,courier"])
                                            ,(pretty-format (send control get-value)))))
-                               (td (a (@ [id      ,(symbol-append (send control get-id) '-show-hide)]
+                               (td (a (@ [id      ,(symbol-append (send control get-id) '-disclosure)]
                                          [onclick ,(embed/ajax seed (callback on-toggle-visibility (send control get-id)))])
                                       ,(if (send control get-visible?) "Hide" "Show")))))))))
     

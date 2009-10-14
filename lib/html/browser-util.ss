@@ -44,14 +44,6 @@
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/smoke/rollover.js"]))))
 
-(define show-hide-script
-  (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/smoke/show-hide.js"]))
-       (link (@ [rel   "stylesheet"]
-                [href  "/styles/smoke/show-hide.css"]
-                [type  "text/css"]
-                [media "screen, projection"]))))
-
 (define excanvas-script
   (xml (!raw "<!--[if IE]>")
        (script (@ [type "text/javascript"]
@@ -123,7 +115,6 @@
  [tooltip-script                  xml?]
  [picker-script                   xml?]
  [rollover-script                 xml?]
- [show-hide-script                xml?]
  [excanvas-script                 xml?]
  [firebug-script                  xml?]
  [current-jquery-ui-stylesheet    (parameter/c string?)]
