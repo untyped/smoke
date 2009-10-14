@@ -75,21 +75,17 @@ if (!window.console.log) {
   // (U string null)
   Smoke.focusedId = null;
   
-  var focusListener = function (evt) {
-    if(evt.target && evt.target.id) {
-      Smoke.focusedId = evt.target.id;
-    }
+  // -> (U string null)
+  Smoke.getFocusedId = function () {
+    return Smoke.focusedId;
   };
   
-  var blurListener = function (evt) {
-    Smoke.focusedId = null;
+  // (U string null) -> void
+  Smoke.setFocusedId = function (id) {
+    Smoke.focusedId = id;
   };
   
   $(document).bind("smoke-page-update", function () {
-    $("select,textarea,input").unbind("focus", focusListener);
-    $("select,textarea,input").unbind("blur",  blurListener);
-    $("select,textarea,input").bind("focus", focusListener);
-    $("select,textarea,input").bind("blur",  blurListener);
     if(Smoke.focusedId) {
       $("#" + Smoke.focusedId).focus();
     }
@@ -145,7 +141,7 @@ if (!window.console.log) {
     try {
       if (!Smoke.triggerSubmitEvent(false)) {
         return false;
-      };
+      }
       
       // Convert array-form URL into a string URL:
       var url = (typeof url == "string")

@@ -8,19 +8,17 @@
          (planet untyped/delirium:3)
          "all-smoke-tests.ss"
          "smoke.ss"
-         "testapp/content-base.ss"
-         (directory-in "testapp/content"))
+         (except-in "testapp/content-base.ss" focus)
+         "testapp/content/content.ss")
 
 ; Main program body ----------------------------
 
 (print-struct #t)
-
 (dev? #t)
 
 (serve/smoke/delirium
  (lambda ()
-   (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
    (dispatch (current-request) test-site))
  all-smoke-tests
  #:launch-browser? #t
- #:htdocs-paths (list testapp-htdocs-path))
+ #:htdocs-paths    (list testapp-htdocs-path))

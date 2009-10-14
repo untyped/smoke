@@ -78,6 +78,14 @@
       (web-cell-changed? raw-cell))
     
     ; seed -> js
+    (define/augment (get-on-focus seed)
+      (js (= (!dot Smoke focusedId) ,(get-id))))
+    
+    ; seed -> js
+    (define/augment (get-on-blur seed)
+      (js (= (!dot Smoke focusedId) null)))
+    
+    ; seed -> js
     (define/augride (get-on-change seed)
       (define id (get-id))
       (js (!dot Smoke (setSubmitData ,id (!dot Smoke (findById ,id) value)))))))

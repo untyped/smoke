@@ -5,6 +5,7 @@
          "counter-test.ss"
          "current-request-test.ss"
          "editor-test.ss"
+         "focus-test.ss"
          "form-hidden-test.ss"
          "form-test.ss"
          "notification-test.ss"
@@ -23,13 +24,13 @@
     ;requirements-tests
     ;redirect-tests
     ;notification-tests
-    ;editor-tests
+    focus-tests
     form-tests
     form-tests/hidden
     tab-tests
-    ;segfault-tests
-    ;autocomplete-tests
-    #;tooltip-tests))
+    segfault-tests
+    autocomplete-tests
+    tooltip-tests))
 
 ; Provide statements -----------------------------
 

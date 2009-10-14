@@ -17,7 +17,7 @@
    [(url "/refresh-counter")              refresh-counter]
    [(url "/current-request")              test-current-request]
    [(url "/dialog")                       dialog]
-   [(url "/editor")                       editor]
+   [(url "/focus")                        focus]
    [(url "/form")                         form]
    [(url "/form/checked")                 checked-form]
    [(url "/form/hidden")                  form/hidden]

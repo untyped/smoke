@@ -100,7 +100,7 @@
                (!raw ,(js (!dot ($ document)
                                 (bind "smoke-page-submit"
                                       (function (evt fullRefresh)
-                                        (!dot ($ ".smoke-tiny-mce")
+                                        (!dot ($ "textarea.smoke-tiny-mce")
                                               (each (function ()
                                                       (var [id (!dot this id)])
                                                       (!dot Smoke (setSubmitData id (!dot tinyMCE (get id) (getContent))))))))))))

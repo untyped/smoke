@@ -33,11 +33,11 @@
       (check-equal? (notification-count) 2))
     
     (test-case "notifications dismissed by clicking 'x'"
-      (click/wait (node/first (node/jquery ".notification .dismiss")))
+      (click/wait (node/first (node/jquery ".notification .notification-dismiss")))
       (check-equal? (notification-count) 1)
       (reload/wait)
       (check-equal? (notification-count) 1)
-      (click/wait (node/first (node/jquery ".notification .dismiss")))
+      (click/wait (node/first (node/jquery ".notification .notification-dismiss")))
       (reload/wait)
       (check-equal? (notification-count) 0))
     
