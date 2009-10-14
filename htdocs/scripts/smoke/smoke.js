@@ -176,7 +176,7 @@ if (!window.console.log) {
         dataType   : "text",
         success    : function (responseText) {
                        eval(responseText);
-                       // Smoke.triggerUpdateEvent(false);
+                       Smoke.triggerUpdateEvent(false);
                      },
         error      : Smoke.onAjaxFailure });
     } catch (exn) {
