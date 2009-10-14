@@ -134,7 +134,7 @@ if (!window.console.log) {
   };
   
   // AJAX ========================================
-  
+    
   // (U string (arrayOf string)) [object] -> void
   //
   // url can be a string or an array, with the base callback url at index 0
@@ -160,19 +160,23 @@ if (!window.console.log) {
       
       // The result JS is automatically evaluated by jQuery:
       request = $.ajax({
+        async      : true,
+        global     : false,
         url        : url,
         type       : "post",
         data       : data,
         beforeSend : function (xhr) {
-                       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                       xhr.setRequestHeader("Content-Type",
+                         "application/x-www-form-urlencoded");
                        if (Smoke.currentPage) {
-                         xhr.setRequestHeader("X-Smoke-Page", Smoke.currentPage);
+                         xhr.setRequestHeader("X-Smoke-Page",
+                           Smoke.currentPage);
                        }
                      },
         dataType   : "text",
         success    : function (responseText) {
                        eval(responseText);
-                       Smoke.triggerUpdateEvent(false);
+                       // Smoke.triggerUpdateEvent(false);
                      },
         error      : Smoke.onAjaxFailure });
     } catch (exn) {
@@ -197,8 +201,8 @@ if (!window.console.log) {
   Smoke.doDelayedAjax = function (time, url, data) {
     data = data || {};
   
-    var oldId =  Smoke.delayedAjaxIds[url];
-    if(typeof(oldId) != "undefined") {
+    var oldId = Smoke.delayedAjaxIds[url];
+    if(oldId) {
       window.clearTimeout(oldId);
       data = $.extend(Smoke.delayedAjaxData[url], data);
     }

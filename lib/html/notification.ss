@@ -27,11 +27,7 @@
     (super-new [classes (list* 'smoke-notifications 'ui-widget classes)])
     
     ; Methods ------------------------------------
-    
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (list* rollover-script (inner null get-html-requirements)))
-    
+        
     ; seed -> xml
     (define/override (render seed)
       (let* ([id            (get-id)]                 ; (U symbol #f)
