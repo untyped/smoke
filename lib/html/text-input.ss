@@ -79,11 +79,13 @@
     
     ; seed -> js
     (define/augment (get-on-focus seed)
-      (js (= (!dot Smoke focusedId) ,(get-id))))
+      (js (= (!dot Smoke focusedId) ,(get-id))
+          ,(inner (js) get-on-focus seed)))
     
     ; seed -> js
     (define/augment (get-on-blur seed)
-      (js (= (!dot Smoke focusedId) null)))
+      (js (= (!dot Smoke focusedId) null)
+          ,(inner (js) get-on-blur seed)))
     
     ; seed -> js
     (define/augride (get-on-change seed)
