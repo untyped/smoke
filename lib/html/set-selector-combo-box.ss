@@ -17,9 +17,8 @@
     (init-cell available-items null #:override-accessor #:mutator)
     
     ; combo-box%
-    (super-new [editor (new combo-box% 
-                            [classes   (list "editor")]
-                            [on-change (callback activate-item)])])
+    (super-new [editor (new combo-box% [classes (list "editor")])])
+    
     (refresh-selectable-items)
     
     ; Methods ------------------------------------
@@ -52,7 +51,8 @@
     (define/override (refresh-selectable-items)
       (let ([selected-items (get-value)])
         (send (get-editor) set-options! 
-              (filter (lambda (item) (not (member item selected-items))) (get-available-items)))))))
+              (filter (lambda (item) (not (member item selected-items)))
+                      (get-available-items)))))))
 
 
 ; Provides ---------------------------------------

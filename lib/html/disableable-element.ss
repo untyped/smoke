@@ -33,7 +33,7 @@
                                            #:tooltip [title   (get-tooltip)])
       (append (super core-html-attributes seed
                      #:id      id
-                     #:classes (if (get-enabled?) classes (cons 'smoke-disabled classes))
+                     #:classes (if (get-enabled?) classes (cons 'ui-state-disabled classes))
                      #:style   style
                      #:tooltip title)
               (if (get-enabled?) null (xml-attrs [disabled "disabled"]))))))

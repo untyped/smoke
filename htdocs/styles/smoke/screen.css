@@ -103,11 +103,6 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
   border-left: none;
 }
 
-.smoke-disabled {
-  background: #eee;
-  color: #222;
-}
-
 /* html-dialog -------------------------------- */
 
 .smoke-dialog-background {
@@ -140,7 +135,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 .smoke-notifications .notification { position: relative; margin: .5em;
    background: #ffe url(/images/smoke/flash-background.png) repeat-x; }
 
-.smoke-notifications .notification-content { margin: .5em; }
+.smoke-notifications .notification-content { margin: .5em 40px .5em .5em; }
 .smoke-notifications .notification-content :first-child { margin-top: 0px; }
 .smoke-notifications .notification-content :last-child  { margin-bottom: 0px; }
 
@@ -243,49 +238,33 @@ span.wizard-step-title {
 }
 
 /* set-selectors */
-div.smoke-set-selector {
-  border: 1px solid white;
-  padding: 2px 3px;
-}
+
+div.smoke-set-selector {}
 
 div.smoke-set-selector ul.active {
-  list-style-position: inside;
-  margin: 0;
+  list-style-type: none;
+  margin: 0 0 8px 0;
   padding: 0;
-}
-
-/*div.smoke-set-selector.edit-mode ul.active {
-  background-color: #eee;
-  color: #777;
-  border: 1px solid #777;
-}*/
-
-.rollover-img {
-  position: absolute;
-  top: 20%;
-  right: 1px;
-}
-
-.rollover-img.inner {
-  right: 20px;
 }
 
 div.smoke-set-selector ul.active li {
   position: relative;
-  padding: 4px 22px 4px 2px; /* larger right padding for image*/
-  margin: 0px;
+  padding: 0 2em 4px 0; /* larger right padding for image*/
+  margin: 0;
+}
+
+div.smoke-set-selector .add-button,
+div.smoke-set-selector .remove-button {
+  position: absolute;
+  top: 5%;
+  right: 1px;
+  cursor: pointer;
 }
 
 div.smoke-set-selector div.item-entry {
   position: relative;
-  margin: 5px;
-  margin-right: 3px;
-  padding: 2px 48px 2px 8px;
-  border-left: 3px solid #aaa;
-}
-
-div.smoke-set-selector div.item-entry a {
-  
+  margin: 0;
+  padding: 0 2em 0 0;
 }
 
 div.smoke-set-selector div.item-entry select,
@@ -293,9 +272,11 @@ div.smoke-set-selector div.item-entry input {
   width: 100%;
 }
 
-div.smoke-set-selector.disabled {
-  background-color: threedface !important;
-  border: 1px solid #BBBBBB;
-  color: graytext !important;
-  cursor: inherit;
+#person-review-page #roles {
+  list-style-type: none; padding: 0; margin: 0;
+}
+
+#person-review-page #roles li {
+  margin: 0;
+  padding: 0;
 }

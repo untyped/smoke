@@ -31,6 +31,7 @@
     (inherit get-id
              get-classes
              get-enabled?
+             get-visible?
              core-html-attributes
              refresh!)
     
@@ -42,14 +43,12 @@
     
     ; (cellof (listof any))
     (init-cell value null #:override-accessor)
-    ; boolean
-    (init-cell has-value-changed? #f #:accessor #:mutator)
     
     ; Editors ------------------------------------
     
     ; html-component%
     (init-field editor (error "editor must be set")
-                #:child #:accessor #:mutator)
+      #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -60,30 +59,15 @@
     
     ; Public methods -----------------------------
     
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (list* rollover-script (inner null get-html-requirements)))
-    
-    ; -> (listof (U js (seed -> js)))
-    (define/augment (get-js-requirements)
-      (list* dismiss-script (inner null get-js-requirements)))
-    
     ; (listof any) -> void
     (define/override (set-value! value)
-      (unless (equal? value (get-value))
-        (set-has-value-changed?! #t))
       (web-cell-set! value-cell value)
       (refresh-selectable-items))
     
     ; -> boolean
     (define/override (value-valid?)
       #t) ; values are always valid, since the list must only contain valid values
-    
-    ; -> boolean
-    (define/override (value-changed?)
-      (begin0 (get-has-value-changed?)
-              (set-has-value-changed?! #f)))
-    
+        
     ; Interface methods --------------------------
     
     ; -> (U number symbol)
@@ -113,8 +97,8 @@
     ; Adds item to the list of selected items, maintaining original sort order
     ; any -> void
     (define/public (select-item item) 
-      (let ([unordered-value (cons item (get-value))]) 
-        (set-value! (filter (cut member <> unordered-value) (get-available-items))))
+      (set-value! (filter (cute member <> (cons item (get-value)))
+                          (get-available-items)))
       (refresh-selectable-items))
     
     ; any -> void
@@ -134,95 +118,84 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (let ([visible? (send (get-editor) get-visible?)])
-        (xml 
-         (div (@ ,(core-html-attributes seed #:classes (cond [visible?             (cons 'edit-mode (get-classes))]
-                                                             [(not (get-enabled?)) (cons 'disabled (get-classes))]
-                                                             [else                 (get-classes)])))
-              ,(cond [(null? (get-value))
-                      (xml (span (@ [class 'empty-text]) ,(get-empty-text)))]
-                     [else
-                      (xml
-                       (ul (@ [class 'active])
-                           ,@(for/list ([item   (in-list (get-value))]
-                                        [index  (in-naturals)])
-                               (let* ([item-id    (string->symbol (format "~a-item~a" (get-id) index))]
-                                      [item-raw   (item->raw item)]
-                                      [item-str   (item->string item)]
-                                      [dismiss-id (string->symbol (format "~a-dismiss" item-id))])
-                                 (xml 
-                                  (li (@ [id ,item-id])
-                                      ,item-str
-                                      ,(opt-xml (get-enabled?)
-                                         (img (@ [id      ,dismiss-id] 
-                                                 [class   "rollover-img"]
-                                                 [src     "/images/smoke/dismiss.png"]
-                                                 [title   "Dismiss this item"]
-                                                 [alt     "Dismiss this item"]
-                                                 [onclick ,(embed/ajax seed (callback dismiss-item item-raw))])))))))))])
-              ,(cond [(and (get-enabled?) visible?)
-                      (xml (div (@ [class 'item-entry])
-                                ,(send (get-editor) render seed)
-                                (img (@ [class   "add-item rollover-img inner"]
-                                        [src     "/images/smoke/add.png"]
-                                        [title   "Add item"]
-                                        [alt     "Add item"]
-                                        [onclick ,(embed/ajax seed (callback activate-item))]))))]
-                     [else (xml)])))))
+      (let* ([id       (get-id)]
+             [visible? (send (get-editor) get-visible?)]
+             [classes  (if (get-enabled?)
+                           (get-classes)
+                           (cons 'disabled (get-classes)))])
+        (xml (div (@ ,(core-html-attributes seed #:classes classes))
+                  ,(opt-xml (pair? (get-value))
+                     (ul (@ [class 'active])
+                         ,@(for/list ([item   (in-list (get-value))]
+                                      [index  (in-naturals)])
+                             (let* ([item-id    (format "~a-item~a" id index)]
+                                    [dismiss-id (format "~a-item~a-dismiss" id index)]
+                                    [item-raw   (item->raw item)]
+                                    [item-str   (item->string item)])
+                               (xml (li (@ [id ,item-id])
+                                        ,item-str
+                                        ,(opt-xml (get-enabled?)
+                                           (span (@ [id    ,dismiss-id] 
+                                                    [class "remove-button ui-icon ui-icon-close ui-state-default"]
+                                                    [title "Remove this item"]
+                                                    [alt   "Remove this item"])))))))))
+                  ,(opt-xml (and (get-enabled?) visible? (items-available?))
+                     (div (@ [class "item-entry"])
+                          ,(send (get-editor) render seed)
+                          (span (@ [class "add-button ui-icon ui-icon-plus ui-state-default"]
+                                   [title "Add item"]
+                                   [alt   "Add item"]))))))))
     
     ; Callbacks ----------------------------------
     
     ; (U boolean symbol number) -> void
     (define/public-final #:callback (dismiss-item item)
-      (deselect-item (raw->item item))
-      (refresh-editor))
+      (when (and (get-enabled?) (get-visible?))
+        (deselect-item (raw->item item))))
     
     ; -> void
-    (define/public-final #:callback (activate-item)      
-      (let ([item (and (get-editor-value) (raw->item (get-editor-value)))])
-        (when item 
-          (select-item item)
-          (reset-editor-value) 
-          (refresh-editor))))
-    
-    ; -> void
-    (define/public-final (refresh-editor)
-      (send (get-editor) set-visible?! (items-available?)))
-    
-    ; seed -> js
-    (define/augride (get-on-change seed)
-      (define id (get-id))
-      (js (!dot Smoke (setSubmitData ,id (!dot Smoke (findById ,id) value)))))    
+    (define/public-final #:callback (activate-item)
+      (when (and (get-enabled?) (get-visible?))
+        (let ([item (and (get-editor-value) (raw->item (get-editor-value)))])
+          (when item 
+            (select-item item)
+            (reset-editor-value)))))
     
     ; seed -> js
     (define/augride (get-on-attach seed)
-      ; (U symbol #f)
-      (define id (get-id))
-      (js ,@(for/list ([index (in-naturals)]
+      (let ([id (get-id)])
+        (opt-js (and (get-enabled?) (get-visible?))
+          ,@(for/list ([index (in-naturals)]
                        [item  (get-value)])
-              (define item-id    (string->symbol (format "~a-item~a" id index)))
-              (define dismiss-id (string->symbol (format "~a-dismiss" item-id)))
-              (js (!dot Smoke SetSelector 
-                        (initialize (!dot Smoke (findById ,item-id))
-                                    (!dot Smoke (findById ,dismiss-id))))))
-          (!dot (jQuery ,(format "#~a .rollover-img" (get-id))) (rollover "-hover"))))))
-
-; Helpers ----------------------------------------
-
-; js
-(define dismiss-script
-  (js (= (!dot Smoke SetSelector)
-         (!object))
-      ; element element -> void
-      (= (!dot Smoke SetSelector initialize)
-         (function (notification dismiss)
-           (!dot ($ dismiss)
-                 (click (function ()
-                          (!dot ($ dismiss)
-                                (unbind))
-                          (!dot ($ notification)
-                                (unbind)
-                                (fadeOut "fast")))))))))
+              (js (var [item    ($ ,(format "#~a-item~a" id index))]
+                       [dismiss ($ ,(format "#~a-item~a-dismiss" id index))])
+                  (!dot ($ dismiss)
+                        (click (function ()
+                                 ,(embed/ajax seed (callback dismiss-item (item->raw item)))
+                                 (!dot ($ dismiss)
+                                       (unbind))
+                                 (!dot ($ item)
+                                       (unbind)
+                                       (fadeOut "fast"))))
+                        (hover (function () (!dot ($ this) (addClass    "ui-state-highlight")))
+                               (function () (!dot ($ this) (removeClass "ui-state-highlight")))))))
+          ,(opt-js (items-available?)
+             (!dot ($ ,(format "#~a .add-button" id))
+                   (click (function ()
+                            ,(embed/ajax seed (callback activate-item))))
+                   (hover (function () (!dot ($ this) (addClass    "ui-state-highlight")))
+                          (function () (!dot ($ this) (removeClass "ui-state-highlight")))))))))
+    
+    ; seed -> js
+    (define/augride (get-on-detach seed)
+      (let ([id (get-id)])
+        (opt-js (and (get-enabled?) (get-visible?))
+          ,@(for/list ([index (in-naturals)]
+                       [item  (get-value)])
+              (js (!dot ($ ,(format "#~a-item~a-dismiss" id index))
+                        (unbind))))
+          ,(opt-js (items-available?)
+             (!dot ($ ,(format "#~a .add-button" id)) (unbind))))))))
 
 ; Provide statements -----------------------------
 

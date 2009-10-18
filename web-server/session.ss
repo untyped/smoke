@@ -116,4 +116,3 @@
  [request-session    (-> request? (or/c session? false/c))]
  [start-session      (->* () (boolean? (-> (or/c session? false/c) any)) any)]
  [end-session        (->* ((or/c session? string?)) (boolean?) void?)])
-
