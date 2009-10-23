@@ -8,7 +8,7 @@
          scheme/class)
 
 (define inferred-id-prefix
-  (make-parameter 'smoke))
+  (make-parameter "smoke"))
 
 ; Syntax -----------------------------------------
 
@@ -49,7 +49,7 @@
        #'(parameterize ([inferred-id-prefix 'prefix])
            (new (class/cells superclass (interface ...) clause ...))))]))
 
-(define-for-syntax (class->id-prefix stx)
+(define-syntax (new/inferred-id stx)
   ; string -> string
   (define (filter-id str)
     (string-filter (lambda (chr)
@@ -57,17 +57,14 @@
                          (char-numeric? chr)
                          (memq chr '(#\- #\_))))
                    str))
-  (syntax-case stx ()
-    [x (identifier? #'x)
-       (filter-id (symbol->string (syntax->datum #'x)))]
-    [_ #f]))
   
-(define-syntax (new/inferred-id stx)
   (syntax-case stx ()
     [(_ class arg ...)
-     (with-syntax ([prefix (or (syntax-local-name)
-                               (class->id-prefix #'class)
-                               'smoke)])
+     (with-syntax ([prefix (filter-id (or (and (syntax-local-name)
+                                               (symbol->string (syntax-local-name)))
+                                          (and (identifier? #'class)
+                                               (symbol->string (syntax->datum #'class)))
+                                          "smoke"))])
        #'(parameterize ([inferred-id-prefix 'prefix])
            (new class arg ...)))]))
 
