@@ -1,13 +1,10 @@
 #lang scheme/base
 
-(require scheme/class
-         (planet untyped/unlib:3/debug)
-         "class-internal.ss"
+(require "class-internal.ss"
          "syntax.ss")
 
 ; Provide statements ---------------------------
 
-(provide (all-from-out scheme/class
-                       "class-internal.ss"
+(provide (all-from-out "class-internal.ss"
                        "syntax.ss"))
 

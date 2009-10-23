@@ -25,13 +25,11 @@
     ; Fields -------------------------------------
     
     ; (cell symbol)
-    (init-field component-id
-      (gensym/interned 'smoke)
-      #:accessor)
+    (init-field component-id (gensym/interned (inferred-id-prefix)) #:accessor)
     
     ; (cell (alistof symbol (-> (listof component<%>)))
     (cell child-registry null)
-    
+        
     ; Request handling ---------------------------
     
     ; There are two methods involved here:

@@ -16,7 +16,9 @@
 (define date-field%
   (class/cells text-field% (date-field<%>)    
     
-    (inherit get-enabled? get-id)
+    (inherit get-enabled?
+             get-id
+             get-placeholder)
     
     ; Fields -------------------------------------    
     
@@ -62,7 +64,9 @@
             [fmt (get-date-format)])
         (with-handlers ([exn:fail? (lambda (exn)
                                      (raise-exn exn:smoke:form 
-                                       (format "Value must be in the format: ~a" (get-date-format-example))
+                                       (format "Value must be in the format: ~a"
+                                               (or (get-placeholder)
+                                                   (get-date-format-example)))
                                        this))])
           (and val (string->date val fmt)))))
     
