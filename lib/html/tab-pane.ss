@@ -72,7 +72,7 @@
       (if (procedure? tabs)
           (car (tabs))
           (car tabs))
-      #:accessor #:mutator)
+      #:accessor)
     
     ; Constructor --------------------------------
     
@@ -174,8 +174,12 @@
     
     ; integer -> void
     (define/public #:callback (on-load id)
-      (let ([current-tab (get-tab id)])
-        (set-current-tab! current-tab)
+      (set-current-tab! (get-tab id)))
+    
+    ; tab% -> void
+    (define/public (set-current-tab! current-tab)
+      (let ([id (send current-tab get-id)])
+        (web-cell-set! current-tab-cell current-tab)
         (for ([tab (in-list (get-tabs))])
           (let* ([tab-id   (send tab get-id)]
                  [current? (eq? tab current-tab)]
