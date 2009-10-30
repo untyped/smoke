@@ -21,6 +21,5 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [current-request-cell thread-cell?]
- [current-request      (-> (or/c request? false/c))]
+ [current-request      (-> (or/c request? #f))]
  [current-request-set! (-> request? void?)])

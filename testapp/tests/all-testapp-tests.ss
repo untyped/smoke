@@ -12,6 +12,7 @@
          "redirect-test.ss"
          "requirements-test.ss"
          "segfault-test.ss"
+         "session-test.ss"
          "tab-test.ss"
          "tooltip-test.ss")
 
@@ -19,11 +20,12 @@
 
 (define all-testapp-tests
   (test-suite "testapp"
-    ;counter-tests
-    ;current-request-tests
-    ;requirements-tests
-    ;redirect-tests
-    ;notification-tests
+    session-tests
+    counter-tests
+    current-request-tests
+    requirements-tests
+    redirect-tests
+    notification-tests
     focus-tests
     form-tests
     form-tests/hidden

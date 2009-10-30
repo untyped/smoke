@@ -45,16 +45,16 @@
      seed
      ; -> any
      (lambda ()
-       ; request
-       (define request (current-request))
-       ; html-page<%>
-       (define page (seed-page seed))
-       ; callback
-       (define callback (request->callback request page))
-       (send (callback-component callback)
-             call-callback
-             (callback-callback-id callback)
-             (callback-args callback)))))
+       (let* ([request   (current-request)]
+              [page      (seed-page seed)]
+              [callback  (request->callback request page)]
+              [component (and callback (callback-component callback))])
+         (if (and component callback)
+             (send (callback-component callback)
+                   call-callback
+                   (callback-callback-id callback)
+                   (callback-args callback))
+             (error "no component or callback" (list component callback)))))))
   ; string
   (continuation-url->codes (string->url base-url)))
 

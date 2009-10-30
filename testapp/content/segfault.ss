@@ -45,10 +45,8 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller segfault
-  init-smoke-pipeline
-  (lambda ()
-    (send test-page respond)))
+(define-controller (segfault)
+  (send test-page respond))
 
 ; Components -------------------------------------
 

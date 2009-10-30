@@ -5,10 +5,8 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller refresh-counter
-  init-smoke-pipeline
-  (lambda ()
-    (send refresh-counter-page respond)))
+(define-controller (refresh-counter)
+  (send refresh-counter-page respond))
 
 ; Components -------------------------------------
 

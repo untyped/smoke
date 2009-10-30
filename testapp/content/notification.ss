@@ -50,13 +50,9 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller notification1
-  init-smoke-pipeline
-  (lambda ()
-    (send notification-page1 respond)))
+(define-controller (notification1)
+  (send notification-page1 respond))
 
 ; request -> response
-(define-controller notification2
-  init-smoke-pipeline
-  (lambda ()
-    (send notification-page2 respond)))
+(define-controller (notification2)
+  (send notification-page2 respond))

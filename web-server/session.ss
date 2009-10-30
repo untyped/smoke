@@ -1,95 +1,106 @@
 #lang scheme/base
 
 (require mzlib/md5
-         net/url
          srfi/19
-         (planet untyped/mirrors:2)
-         (planet untyped/unlib:3/cache)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
+         (planet untyped/unlib:3/time)
          "../base.ss"
          "cookie.ss"
          "servlet.ss"
-         "session-internal.ss")
+         "session-internal.ss"
+         "web-cell.ss")
+
+; (web-cell (U string #f))
+(define expected-session-id-cell (make-web-cell #f))
+
+; -> (U string #f)
+(define (expected-session-id)
+  (web-cell-ref expected-session-id-cell))
+
+; (U string #f) -> void
+(define (expected-session-id-set! id)
+  (debug "setting expected-session-id" id)
+  (web-cell-set! expected-session-id-cell id))
 
 ; Procedures -------------------------------------
 
 ; request -> (U string #f)
 (define (request-session-id request)
   (define cookies (ensure-string (assoc-value/default 'cookie (request-headers request) #f)))
-  (and cookies (get-cookie/single session-cookie-name cookies)))
+  (and cookies (get-cookie/single (session-cookie-name) cookies)))
 
 ; request -> (U session #f)
 (define (request-session request)
-  (define session-id
-    (request-session-id request))
-  (and session-id
-       (let ([session (hash-ref sessions session-id #f)])
-         (when session
-           (set-session-accessed! session (current-time time-utc)))
-         session)))
+  (let ([session-id (request-session-id request)])
+    (and session-id
+         (let ([session (hash-ref sessions session-id #f)])
+           (when session
+             (set-session-accessed! session (current-time time-utc)))
+           session))))
 
-; symbol [boolean] [((U session #f) -> any)] -> any
+; request -> boolean
+(define/debug (request-session-valid? request)
+  (let ([session-id  (request-session-id request)]
+        [expected-id (expected-session-id)])
+    (equal? session-id expected-id)))
+
+; [#:expires (U time-utc #f)] [#:continue (-> any)] -> any
 ;
 ; The continuation table is cleared if forward? is #t.
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
-(define (start-session [forward? #t] [continue (lambda (session) session)])
-  (let* ([session-id (generate-session-id)]   ; string
-         [now        (current-time time-utc)] ; time-utc
-         [session    (make-session session-id now now (make-hasheq))] ; session
-         [cookie     (cookie:add-path (set-cookie session-cookie-name session-id) "/")] ; cookie
-         [counter    0]
-         ; -> any
-         [continue   (lambda ()
-                       (set! counter (add1 counter))
-                       (when forward? (clear-continuation-table!))
-                       (if (equal? session-id (request-session-id (current-request)))
-                           (hash-set! sessions session-id session)
-                           (error (format "session could not be established (counter = ~a)" counter)))
-                       (continue session))])
-    ; any
-    (send/suspend/dispatch
-     (lambda (embed-url)
-       (make-redirect-response
-        (embed-url continue)
-        #:code    302
-        #:message "Establishing session"
-        #:headers (list* (make-header #"Set-Cookie" (string->bytes/utf-8 (print-cookie cookie))) no-cache-http-headers))))))
+(define/debug (start-session #:expires [expires #f] #:continue [continue void])
+  (unless (current-request) 
+    (error "no current request"))
+  (match (request-session (current-request))
+    [#f (let* ([session-id (generate-session-id)]
+               [now        (current-time time-utc)]
+               [session    (make-session session-id now now expires (make-hasheq))]
+               [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
+               [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
+          (send/cookie "Establishing session" cookie session-id session (lambda ()
+                                                                          (expected-session-id-set! session-id)
+                                                                          (continue))))]
+    [sess (set-session-expiry expires #:continue (lambda ()
+                                                   (unless (expected-session-id)
+                                                     (expected-session-id-set! (session-cookie-id sess)))
+                                                   (continue)))]))
 
-; (U session string) [boolean] -> void
+; (U session symbol) (U time-utc #f) [#:continue (-> any)] -> any
 ;
 ; The continuation table is cleared if forward? is #t.
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
-(define (end-session session+id [forward? #t])
-  ; string
-  (define session-id
-    (if (session? session+id)
-        (session-cookie-id session+id)
-        session+id))
-  ; cookie
-  (define cookie 
-    (cookie:add-expires 
-     (cookie:add-path (set-cookie session-cookie-name session-id) "/")
-     (- (current-seconds) (* 7 24 60 60))))
-  ; request
-  (define request
-    (send/suspend/dispatch
-     (lambda (embed-url)
-       (make-plain-response
-        #:code    302
-        #:message "Terminating session"
-        #:headers (list (make-header #"Set-Cookie" (string->bytes/utf-8 (print-cookie cookie)))
-                        (make-header #"Location"   (string->bytes/utf-8 (embed-url (lambda () (current-request))))))
-        (list "One moment please: ending your session.")))))
-  (when forward?
-    (clear-continuation-table!))
-  ; session
-  (if (request-session-id request)
-      (raise-exn exn:fail:smoke:session "session cookie could not be removed")
-      (begin (hash-remove! sessions session-id)
-             (void))))
+(define (set-session-expiry expires #:continue [continue void])
+  (unless (current-request) 
+    (error "no current request"))
+  (let ([session (request-session (current-request))])
+    (if (equal? (and expires (time-second expires))
+                (and (session-expires session) (time-second (session-expires session))))
+        (continue)
+        (let* ([session-id (session-cookie-id session)]
+               [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
+               [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
+          (set-session-expires! session expires)
+          (send/cookie "Adjusting session expiry" cookie session-id session continue)))))
+
+; (U session string) [#:continue (-> any)] -> any
+;
+; The continuation table is cleared if forward? is #t.
+; We normally want this to be the case, but we can't clear the continuation
+; table when testing the code with Delirium.
+(define (end-session #:continue [continue void])
+  (unless (current-request) 
+    (error "no current request"))
+  (let* ([session    (request-session (current-request))]
+         [session-id (session-cookie-id session)]
+         [cookie     (cookie:add-expires 
+                      (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")
+                      (- (current-seconds) (* 7 24 60 60)))])
+    (send/cookie "Terminating session" cookie session-id #f (lambda ()
+                                                              (expected-session-id-set! #f)
+                                                              (continue)))))
 
 ; Helpers ----------------------------------------
 
@@ -99,20 +110,42 @@
    (bytes->string/utf-8
     (md5 (string->bytes/utf-8 (number->string (random)))))))
 
-; -> void
-(define (default-ensure-session-failure-thunk)
-  (error "A session cookie could not be saved: you must have cookies enabled in your browser to view this page."))
+; The message and the cookie are sent to the client.
+; Passing a session struct adds a session to the global hash.
+; Passing a session of #f removes the session from the global hash.
+; 
+; string cookie symbol (U session #f) -> void
+(define (send/cookie message cookie session-id session continue)
+  (send/suspend/dispatch
+   (lambda (embed-url)
+     (make-redirect-response
+      (embed-url (lambda ()
+                   (if (equal? session-id (request-session-id (current-request)))
+                       (if session
+                           (begin (hash-set! sessions session-id session))
+                           (begin (hash-remove! sessions session-id)))
+                       (raise-exn exn:fail:smoke:session "Session not established"))
+                   (continue)))
+      #:code    302
+      #:message message
+      #:headers (list* (make-header #"Set-Cookie" (string->bytes/utf-8 (print-cookie cookie)))
+                       no-cache-http-headers)))))
 
 ; Provide statements -----------------------------
 
-(provide (except-out (struct-out session) make-session)
+(provide (except-out (struct-out session)
+                     make-session
+                     set-session-expires!)
+         session-cookie-name
          session-set?
          session-ref
          session-set!
          session-remove!)
 
 (provide/contract
- [request-session-id (-> request? (or/c string? false/c))]
- [request-session    (-> request? (or/c session? false/c))]
- [start-session      (->* () (boolean? (-> (or/c session? false/c) any)) any)]
- [end-session        (->* ((or/c session? string?)) (boolean?) void?)])
+ [request-session-id     (-> request? (or/c string? #f))]
+ [request-session        (-> request? (or/c session? #f))]
+ [request-session-valid? (-> request? boolean?)]
+ [start-session          (->* () (#:continue (-> any) #:expires (or/c time-utc? #f)) any)]
+ [set-session-expiry     (->* ((or/c time-utc? #f)) (#:continue (-> any)) any)]
+ [end-session            (->* () (#:continue (-> any)) any)])

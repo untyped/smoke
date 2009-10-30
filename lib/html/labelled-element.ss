@@ -8,6 +8,8 @@
   (interface (html-element<%>)
     ; seed -> xml
     render-label
+    ; seed -> xml
+    render-label-content
     ; -> (U xml (seed -> xml) #f)
     get-label
     ; (U xml (seed -> xml) #f) -> void
@@ -26,18 +28,20 @@
     ; Methods ------------------------------------
     
     ; seed -> xml
+    (define/public (render-label-content seed)
+      (let ([label (get-label)])
+        (if (procedure? label)
+            (label seed)
+            label)))
+    
+    ; seed -> xml
     (define/public (render-label seed)
-      (let ([id    (get-id)]
-            [label (get-label)])
-        (opt-xml label
+      (let ([id (get-id)])
+        (opt-xml (get-label)
           ,(if (is-a? this form-element<%>)
                (xml (label (@ [for ,id])
-                           ,(if (procedure? label)
-                                (label seed)
-                                label)))
-               (if (procedure? label)
-                   (label seed)
-                   label)))))))
+                           ,(render-label-content seed)))
+               (render-label-content seed)))))))
 
 ; Provide statements -----------------------------
 

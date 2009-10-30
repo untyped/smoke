@@ -19,12 +19,22 @@
          web-server/private/mime-types
          web-server/servlet/setup
          (planet untyped/delirium:3)
-         (planet untyped/mirrors:2)
          "../base.ss"
          "current-request.ss"
+         "resume.ss"
          "send-suspend-dispatch.ss"
          "session.ss"
          "smoke-lru.ss")
+
+
+; Smoke needs to be initialised in two places:
+;   - use serve/smoke or serve/smoke/delirium to initialise the dispatcher;
+;   - when a request has been successfully dispatched to Smoke page,
+;     wrap the call in init-smoke to establish a session cookie and create
+;     an AJAX resume prompt.
+; Both of these calls are handled below.
+
+; Called by top-level application ----------------
 
 ;  (-> response)
 ;  [#:manager         manager]
@@ -201,13 +211,45 @@
 
 ; request -> response
 (define (smoke-404-handler request)
-  (debug "404 not found" (url->string (request-uri request)))
   (make-html-response
    #:code    404
    #:message "Not found"
    (xml (html (head (title "404 not found"))
               (body (p "Sorry! We could not find that file or resource on our server:")
                     (blockquote (tt ,(url->string (request-uri request)))))))))
+
+; Called within a servlet ------------------------
+
+; (-> any) -> any
+(define (init-smoke thunk)
+  
+  (define (check-session)
+    (dynamic-wind
+     (lambda ()
+       (unless (request-session-valid? (current-request))
+         (raise-exn exn:fail:smoke:session
+           "Session invalid.")))
+     thunk
+     void))
+  
+  (define (establish-prompt)
+    (if (resume-available?)
+        (check-session)
+        (send/suspend/dispatch
+         (lambda (embed-url)
+           (let* ([url0 (request-uri (current-request))]
+                  [url1 (string->url (embed-url check-session))])
+             (make-redirect-response
+              (make-url (url-scheme url1)
+                        (url-user url1)
+                        (url-host url1)
+                        (url-port url1)
+                        (url-path-absolute? url1)
+                        (url-path url1)
+                        (url-query url0)
+                        (url-fragment url0))))))))
+  
+  (start-session #:continue establish-prompt))
 
 ; Provide statements -----------------------------
 
@@ -232,4 +274,5 @@
                                         #:mime-types-path path?
                                         #:launch-browser? boolean?
                                         #:404-handler     (-> request? any))
-                             void?)])
+                             void?)]
+ [init-smoke            (-> procedure? any)])

@@ -19,10 +19,13 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 .smoke-entity-editor td { vertical-align: top; padding: .5em; }
 
 .smoke-entity-editor .attribute-label { text-align: right; }
+.smoke-entity-editor .attribute-label label { display: inline; }
 
-.smoke-entity-editor input,
-.smoke-entity-editor textarea,
-.smoke-entity-editor select { vertical-align: top; }
+.smoke-entity-editor .attribute-value input,
+.smoke-entity-editor .attribute-value select,
+.smoke-entity-editor .attribute-value textarea {
+  margin-top: -.1em;
+}
 
 /* views -------------------------------------- */
 

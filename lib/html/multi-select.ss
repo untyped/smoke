@@ -96,7 +96,7 @@
     ; -> void
     (define/public #:callback (on-editor-confirm)
       (with-handlers ([exn:smoke:form? void])
-        (add-item! (debug* "editor-value" send editor get-value))
+        (add-item! (send editor get-value))
         (set-editor-visible?! #f)))
     
     ; -> void

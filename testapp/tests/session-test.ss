@@ -1,9 +1,8 @@
 #lang scheme/base
 
-(require (planet untyped/mirrors:2)
-         "../test-base.ss"
-         "../testapp/base.ss"
-         "session.ss")
+(require "../../test-base.ss"
+         "../../web-server/session.ss"
+         "../base.ss")
 
 ; Tests ------------------------------------------
 

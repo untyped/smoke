@@ -18,7 +18,7 @@
 
 (serve/smoke/delirium
  (lambda ()
-   (dispatch (current-request) test-site))
+   (site-dispatch test-site (current-request)))
  all-smoke-tests
  #:launch-browser? #t
  #:htdocs-paths    (list testapp-htdocs-path))

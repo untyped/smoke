@@ -1,7 +1,7 @@
 #lang scheme/base
 
 (require (planet untyped/mirrors:2)
-         "base.ss" ; not reprovided
+         "base.ss" ; not reprovided in its entirety
          "seed.ss"
          "class/class.ss"
          "lib/page.ss"
@@ -41,8 +41,9 @@
          "lib/html/text-input.ss"
          "lib/html/time-field.ss"
          "lib/html/tiny-mce.ss"
+         "web-server/continuation-url.ss"
+         "web-server/current-request.ss"
          "web-server/notification.ss"
-         "web-server/pipeline.ss"
          "web-server/run-smoke.ss"
          "web-server/servlet.ss"
          "web-server/session.ss"
@@ -91,12 +92,19 @@
                        "lib/html/text-input.ss"
                        "lib/html/time-field.ss"
                        "lib/html/tiny-mce.ss"
+                       "web-server/continuation-url.ss"
+                       "web-server/current-request.ss"
                        "web-server/notification.ss"
-                       "web-server/pipeline.ss"
                        "web-server/run-smoke.ss"
                        "web-server/servlet.ss"
                        "web-server/session.ss"
                        "web-server/session-cell.ss"
                        "web-server/smoke-lru.ss")
+         ; From base.ss:
          dev?
-         (struct-out exn:smoke:form))
+         smoke-htdocs-path
+         smoke-mime-types-path
+         (struct-out exn:smoke)
+         (struct-out exn:smoke:form)
+         (struct-out exn:fail:smoke)
+         (struct-out exn:fail:smoke:session))

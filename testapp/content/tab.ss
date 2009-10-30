@@ -6,10 +6,8 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller tab
-  init-smoke-pipeline
-  (lambda ()
-    (send tab-page respond)))
+(define-controller (tab)
+  (send tab-page respond))
 
 ; Components -------------------------------------
 

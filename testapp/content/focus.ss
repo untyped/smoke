@@ -6,10 +6,8 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller focus
-  init-smoke-pipeline
-  (lambda ()
-    (send focus-page respond)))
+(define-controller (focus)
+  (send focus-page respond))
 
 ; Components -------------------------------------
 

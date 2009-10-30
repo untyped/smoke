@@ -8,10 +8,8 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller test-current-request
-  init-smoke-pipeline
-  (lambda ()
-    (send test-page respond)))
+(define-controller (test-current-request)
+  (send test-page respond))
 
 ; Components -------------------------------------
 
