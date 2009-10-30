@@ -20,7 +20,6 @@
 
 ; (U string #f) -> void
 (define (expected-session-id-set! id)
-  (debug "setting expected-session-id" id)
   (web-cell-set! expected-session-id-cell id))
 
 ; Procedures -------------------------------------
@@ -40,7 +39,7 @@
            session))))
 
 ; request -> boolean
-(define/debug (request-session-valid? request)
+(define (request-session-valid? request)
   (let ([session-id  (request-session-id request)]
         [expected-id (expected-session-id)])
     (equal? session-id expected-id)))
@@ -50,7 +49,7 @@
 ; The continuation table is cleared if forward? is #t.
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
-(define/debug (start-session #:expires [expires #f] #:continue [continue void])
+(define (start-session #:expires [expires #f] #:continue [continue void])
   (unless (current-request) 
     (error "no current request"))
   (match (request-session (current-request))
@@ -76,8 +75,7 @@
   (unless (current-request) 
     (error "no current request"))
   (let ([session (request-session (current-request))])
-    (if (equal? (and expires (time-second expires))
-                (and (session-expires session) (time-second (session-expires session))))
+    (if (equal? (and expires (time-second expires)) (and (session-expires session) (time-second (session-expires session))))
         (continue)
         (let* ([session-id (session-cookie-id session)]
                [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
