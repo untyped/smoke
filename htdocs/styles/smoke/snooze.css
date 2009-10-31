@@ -47,11 +47,13 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 
 .snooze-report-table { border-collapse: collapse; margin: 3px 0px; }
 .snooze-report-table tr { background: #fff; border: 1px solid #ccc; }
-.snooze-report-table th { padding: 0px; }
+.snooze-report-table th { padding: 0px; white-space: nowrap; font-size: .85em; }
 
 .snooze-report-table th a,
 .snooze-report-table th span.not-sortable,
 .snooze-report-table td { padding: 4px 5px; }
+
+.snooze-report-table th .sort-icon { float: right; }
 
 .snooze-report-table th span.not-sortable {
     display: block;

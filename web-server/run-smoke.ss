@@ -226,10 +226,7 @@
   (define (check-session)
     (dynamic-wind
      (lambda ()
-       (unless (request-session-valid? (current-request))
-         (debug-location "run-smoke - raising session exn")
-         (raise-exn exn:fail:smoke:session
-           "Session invalid.")))
+       (assert-request-session-valid (current-request)))
      thunk
      void))
   

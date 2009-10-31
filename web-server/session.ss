@@ -44,6 +44,15 @@
         [expected-id (expected-session-id)])
     (equal? session-id expected-id)))
 
+(define (assert-request-session-valid request)
+  (let ([session-id  (request-session-id request)]
+        [expected-id (expected-session-id)])
+    (unless (equal? session-id expected-id)
+      (raise-exn exn:fail:smoke:session
+        (format "Session invalid. Expected ~a, received ~a."
+                expected-id
+                session-id)))))
+
 ; [#:expires (U time-utc #f)] [#:continue (-> any)] -> any
 ;
 ; The continuation table is cleared if forward? is #t.
@@ -53,18 +62,19 @@
   (unless (current-request) 
     (error "no current request"))
   (match (request-session (current-request))
-    [#f (let* ([session-id (generate-session-id)]
-               [now        (current-time time-utc)]
-               [session    (make-session session-id now now expires (make-hasheq))]
-               [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
-               [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
-          (send/cookie "Establishing session" cookie session-id session (lambda ()
-                                                                          (expected-session-id-set! session-id)
-                                                                          (continue))))]
-    [sess (set-session-expiry expires #:continue (lambda ()
-                                                   (unless (expected-session-id)
-                                                     (expected-session-id-set! (session-cookie-id sess)))
-                                                   (continue)))]))
+    [#f   (let* ([session-id (generate-session-id)]
+                 [now        (current-time time-utc)]
+                 [session    (make-session session-id now now expires (make-hasheq))]
+                 [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
+                 [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
+            (expected-session-id-set! session-id)
+            (send/cookie "Establishing session" cookie session-id session continue))]
+    [sess (set-session-expiry
+           expires
+           #:continue (lambda ()
+                        (unless (expected-session-id)
+                          (expected-session-id-set! (session-cookie-id sess)))
+                        (continue)))]))
 
 ; (U session symbol) (U time-utc #f) [#:continue (-> any)] -> any
 ;
@@ -96,9 +106,8 @@
          [cookie     (cookie:add-expires 
                       (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")
                       (- (current-seconds) (* 7 24 60 60)))])
-    (send/cookie "Terminating session" cookie session-id #f (lambda ()
-                                                              (expected-session-id-set! #f)
-                                                              (continue)))))
+    (expected-session-id-set! session-id)
+    (send/cookie "Terminating session" cookie session-id #f continue)))
 
 ; Helpers ----------------------------------------
 
@@ -141,9 +150,10 @@
          session-remove!)
 
 (provide/contract
- [request-session-id     (-> request? (or/c string? #f))]
- [request-session        (-> request? (or/c session? #f))]
- [request-session-valid? (-> request? boolean?)]
- [start-session          (->* () (#:continue (-> any) #:expires (or/c time-utc? #f)) any)]
- [set-session-expiry     (->* ((or/c time-utc? #f)) (#:continue (-> any)) any)]
- [end-session            (->* () (#:continue (-> any)) any)])
+ [request-session-id           (-> request? (or/c string? #f))]
+ [request-session              (-> request? (or/c session? #f))]
+ [request-session-valid?       (-> request? boolean?)]
+ [assert-request-session-valid (-> request? void?)]
+ [start-session                (->* () (#:continue (-> any) #:expires (or/c time-utc? #f)) any)]
+ [set-session-expiry           (->* ((or/c time-utc? #f)) (#:continue (-> any)) any)]
+ [end-session                  (->* () (#:continue (-> any)) any)])
