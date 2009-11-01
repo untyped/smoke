@@ -58,23 +58,23 @@
 ; The continuation table is cleared if forward? is #t.
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
-(define (start-session #:expires [expires #f] #:continue [continue void])
-  (unless (current-request) 
+(define (start-session #:expires [expires (void)] #:continue [continue void])
+  (unless (current-request)
     (error "no current request"))
   (match (request-session (current-request))
     [#f   (let* ([session-id (generate-session-id)]
                  [now        (current-time time-utc)]
+                 [expires    (if (void? expires) #f expires)]
                  [session    (make-session session-id now now expires (make-hasheq))]
                  [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
                  [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
             (expected-session-id-set! session-id)
             (send/cookie "Establishing session" cookie session-id session continue))]
-    [sess (set-session-expiry
-           expires
-           #:continue (lambda ()
-                        (unless (expected-session-id)
-                          (expected-session-id-set! (session-cookie-id sess)))
-                        (continue)))]))
+    [sess (unless (expected-session-id)
+            (expected-session-id-set! (session-cookie-id sess)))
+          (if (void? expires)
+              (continue)
+              (set-session-expiry expires #:continue continue))]))
 
 ; (U session symbol) (U time-utc #f) [#:continue (-> any)] -> any
 ;

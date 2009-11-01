@@ -132,8 +132,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 /* notification ------------------------------- */
 
 .smoke-notifications { width: 100%; }
-.smoke-notifications .notification { position: relative; margin: .5em;
-   background: #ffe url(/images/smoke/flash-background.png) repeat-x; }
+.smoke-notifications .notification { position: relative; margin: .5em; }
 
 .smoke-notifications .notification-content { margin: .5em 40px .5em .5em; }
 .smoke-notifications .notification-content :first-child { margin-top: 0px; }
