@@ -81,12 +81,14 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
   margin: 0px;
 }
 
-.smoke-autocomplete-options tr:hover {
+.smoke-autocomplete-options tr:hover,
+.smoke-autocomplete-options tr:hover td {
   background: #ccf;
 }
-
 .smoke-autocomplete-options tr.current,
-.smoke-autocomplete-options tr.current:hover {
+.smoke-autocomplete-options tr.current:hover,
+.smoke-autocomplete-options tr.current td,
+.smoke-autocomplete-options tr.current:hover td{
   background: #aaf;
 }
 
