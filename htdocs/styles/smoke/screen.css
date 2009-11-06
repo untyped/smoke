@@ -54,12 +54,10 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 
 /* autocomplete-field ------------------------- */
 
-.smoke-autocomplete-field {
-/*
+.smoke-autocomplete-field-trigger {
   background-image: url(/images/smoke/down-arrow.png);
   background-position: right center;
   background-repeat: no-repeat;
-*/
 }
 
 .smoke-autocomplete-options {

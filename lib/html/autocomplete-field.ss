@@ -51,6 +51,12 @@
       (list* autocomplete-script
              (inner null get-html-requirements)))
     
+    ; -> (listof (U symbol string)
+    (define/override (get-classes)
+      (if (zero? (get-min-trigger-length))
+          (list* "smoke-autocomplete-field-trigger" (super get-classes))
+          (super get-classes)))
+    
     ; seed -> xml
     (define/override (render seed)
       (define id         (get-id))
@@ -87,6 +93,12 @@
                                                   js:array)
                                               options)))))))))
     
+    ; string (U string #f) -> boolean
+    (define (option+column-matches? option prefix)
+      (or (not prefix) 
+          (let ([index (string-contains option prefix)])
+            (and index (zero? index)))))
+    
     ; string -> (listof string)
     (define/public (get-options prefix)
       ; option -> boolean
@@ -95,12 +107,10 @@
         (if (get-multi-column?)
             (lambda (option)
               (ormap (lambda (column)
-                       (cond [(string-contains column prefix) => zero?]
-                             [else #f]))
+                       (option+column-matches? column prefix))
                      option))
             (lambda (option)
-              (cond [(string-contains option prefix) => zero?]
-                    [else #f]))))
+              (option+column-matches? option prefix))))
       ; (listof string)
       (filter option-matches? (web-cell-ref options-cell)))
     
