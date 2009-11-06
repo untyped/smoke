@@ -2,8 +2,6 @@
 
 (require scheme/match
          scheme/pretty
-         ;(planet untyped/unlib:3/list)
-         ;(planet untyped/unlib:3/string)
          "../../lib-base.ss"
          "browser-util.ss"
          "form-element.ss"
@@ -17,7 +15,7 @@
     reset-editor-value  ; -> void
     item->raw           ; any -> (U boolean integer symbol)
     raw->item           ; (U boolean integer symbol) -> any
-    item->string        ; any -> string
+    item->string        ; any -> string             TODO rename to item->xml
     get-available-items ; -> (listof any)
     select-item         ; any -> void
     deselect-item       ; any -> void
@@ -67,7 +65,7 @@
     ; -> boolean
     (define/override (value-valid?)
       #t) ; values are always valid, since the list must only contain valid values
-        
+    
     ; Interface methods --------------------------
     
     ; -> (U number symbol)
@@ -96,7 +94,7 @@
     
     ; Adds item to the list of selected items, maintaining original sort order
     ; any -> void
-    (define/public (select-item item) 
+    (define/public (select-item item)
       (set-value! (filter (cute member <> (cons item (get-value)))
                           (get-available-items)))
       (refresh-selectable-items))

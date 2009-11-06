@@ -34,9 +34,11 @@
     ; (U (cons integer integer) #f) -> void
     (define/override (set-value! val)
       (let ([time (match val
-                    [#f                      val]
-                    [(cons integer? integer) val]
-                    [_                       (raise-type-error 'set-value! "(U (cons hour minute) #f)" val)])])
+                    [#f val]
+                    [(cons (? (lambda (h) (and (integer? h) (<= 0 h) (< h 24))))
+                           (? (lambda (m) (and (integer? m) (<= 0 m) (< m 60)))))
+                     val]
+                    [_ (raise-type-error 'set-value! "(U (cons hour minute) #f)" val)])])
         (super set-value! (and time (format "~a:~a"
                                             (string-pad (number->string (car time)) 2 #\0)
                                             (string-pad (number->string (cdr time)) 2 #\0))))))))
