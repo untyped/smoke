@@ -12,6 +12,10 @@
 
 ; Syntax -----------------------------------------
 
+; string -> string
+(define-for-syntax (filter-id str)
+  (regexp-replace* #rx"[^a-zA-Z0-9_-]" str "_"))
+
 (define-syntax (class/cells stx)
   (syntax-case stx ()
     [(_ superclass (interface ...) clause ...)
@@ -45,19 +49,13 @@
 (define-syntax (singleton/cells stx)
   (syntax-case stx ()
     [(_ superclass (interface ...) clause ...)
-     (with-syntax ([prefix (or (syntax-local-name) 'smoke)])
+     (with-syntax ([prefix (filter-id (or (and (syntax-local-name)
+                                               (symbol->string (syntax-local-name)))
+                                          "smoke"))])
        #'(parameterize ([inferred-id-prefix 'prefix])
            (new (class/cells superclass (interface ...) clause ...))))]))
 
 (define-syntax (new/inferred-id stx)
-  ; string -> string
-  (define (filter-id str)
-    (string-filter (lambda (chr)
-                     (or (char-alphabetic? chr)
-                         (char-numeric? chr)
-                         (memq chr '(#\- #\_))))
-                   str))
-  
   (syntax-case stx ()
     [(_ class arg ...)
      (with-syntax ([prefix (filter-id (or (and (syntax-local-name)
