@@ -34,17 +34,16 @@
               (append (url-path-base (url-path (request-uri (current-request))))
                       (map (cut make-path/param <> null)
                            (list* "_"
-                                  (uri-encode (symbol->string (send (callback-component callback) get-component-id)))
-                                  (uri-encode (symbol->string (send (callback-component callback)
-                                                                    verify-callback-id
-                                                                    (callback-callback-id callback))))
+                                  (symbol->string (send (callback-component callback) get-component-id))
+                                  (symbol->string (send (callback-component callback)
+                                                        verify-callback-id
+                                                        (callback-callback-id callback)))
                                   (map (lambda (arg)
-                                         (uri-encode
-                                          (if (symbol? arg)
-                                              (if (memq arg '(true false null))
-                                                  (error "Cannot serialize the symbols 'true, 'false or 'null in a callback URL.")
-                                                  (symbol->string arg))
-                                              (scheme->json arg))))
+                                         (if (symbol? arg)
+                                             (if (memq arg '(true false null))
+                                                 (error "Cannot serialize the symbols 'true, 'false or 'null in a callback URL.")
+                                                 (symbol->string arg))
+                                             (scheme->json arg)))
                                        (callback-args callback)))))
               null #f)
     (send (seed-page seed) get-callback-codes))))
