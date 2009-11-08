@@ -3,6 +3,7 @@
 (require (planet untyped/unlib:3/hash)
          "../test-base.ss"
          "../lib/component.ss"
+         "../lib/html/html-element.ss"
          "syntax.ss")
 
 ; Tests ------------------------------------------
@@ -13,6 +14,11 @@
     (test-case "class name inferred correctly"
       (check-equal? (format "~a" (let ([test% (class/cells object% ())]) test%)) "#<class:test%>" "let")
       (check-not-false (regexp-match #rx"#<class:.*>" (format "~a" (class/cells object% ()))) "anonymous"))
+    
+    (test-case "IDs inferred correctly"
+      (let ([test/element% (class/cells html-element% ())])
+        (check-not-false (regexp-match #rx"^html-element" (symbol->string (send (new html-element%) get-id))))
+        (check-not-false (regexp-match #rx"^test_element" (symbol->string (send (new test/element%) get-id))))))
     
     (test-case "init-cell and init-field: initial values are required"
       (check-exn exn:fail:object?
