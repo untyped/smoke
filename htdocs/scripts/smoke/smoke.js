@@ -174,7 +174,9 @@ if (!window.console.log) {
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },
-        error      : Smoke.onAjaxFailure });
+        error      : function (xhr, msg, exn) {
+                       Smoke.onAjaxFailure(url, xhr, msg, exn);
+                     }});
     } catch (exn) {
       Smoke.onAjaxFailure (request, "Could not send background request", exn);
     }
@@ -212,13 +214,37 @@ if (!window.console.log) {
     }, time);
   };
   
-  // xhr any ... -> void
-  Smoke.onAjaxFailure = function (xhr) {
-    Smoke.log("AJAX failed", arguments);
-  
-    alert("There was an error communicating with the server. "
-      + "Try reloading the web page and contact your system administrator "
-      + "if the problem persists.");
+  // string xhr (U string null) (U exn null) -> void
+  Smoke.onAjaxFailure = function (url, xhr, msg, exn) {
+    Smoke.log("AJAX failure", url, xhr, msg, exn);
+        
+    var title = "Oops! Something went wrong";
+    var html = "<p>Your browser just tried to contact the web server, but an "
+      + "unexpected error occurred. No further information is available.</p>";
+
+    if (msg == "timeout") {
+      title = "Could not contact the server";
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "did not respond. This is probably due to a network error or high a server "
+        + "load.</p>";
+    } else if (msg == "error") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "responded with an unexpected error message. This is probably a bug in the "
+        + "software.</p>";
+    } else if (msg == "notmodified") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "responded with an unexpected error message. This is probably a bug in the "
+        + "software.</p>";
+    } else if (msg == "parseerror") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "produced a malformed response. This is probably a bug in the software.</p>";
+    }
+
+    html += "<p>Please <a href=\"javascript:void(0);\" onclick=\"window.location.reload()\">reload the page</a> and try again.</p>";
+    
+    $("<div class=\"ui-helper-hidden\">" + html + "</div>")
+      .appendTo("body")
+      .dialog({ dialogClass: "smoke-error-dialog", width: 500, title: title, modal: true });
   };
   
   // DOM manipulation ============================

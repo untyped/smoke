@@ -52,6 +52,18 @@
     
     ; Fields -------------------------------------
     
+    ; Optionally stores a function to use as jQuery's onError AJAX handler.
+    ; The function should take four arguments and return void:
+    ;
+    ;     string          ; callback URL
+    ;     XHR             ; the XHR used to make the request
+    ;     (U string null) ; a message as to what went wrong ("timeout", "parseerror", etc)
+    ;                     ;   - the second argument to jQuery's onError handler
+    ;     (U exn null)    ; an exception (if any)
+    ;
+    ; (cell (U js (seed -> js) #f))
+    (init-field ajax-error-handler #f #:accessor #:mutator)
+    
     ; (cell xml)
     (init-cell doctype
       xhtml-1.0-transitional-doctype
@@ -115,10 +127,10 @@
         (list* (if dev?
                    jquery-script/dev
                    jquery-script/min)
-               smoke-script
                (if dev?
                    jquery-ui-script/dev
                    jquery-ui-script/min)
+               smoke-script
                jquery-ui-styles
                smoke-styles
                (inner null get-html-requirements))))
@@ -338,6 +350,12 @@
       (js (!dot ($ ,(format "#~a" (get-form-id)))
                 (bind "submit" (function (evt)
                                  (!dot Smoke (triggerSubmitEvent #t)))))
+          ,(cond [(get-ajax-error-handler)
+                  => (lambda (handler)
+                       (if (procedure? handler)
+                           (js (= (!dot Smoke onAjaxFailure) ,(handler seed)))
+                           (js (= (!dot Smoke onAjaxFailure) ,handler))))]
+                 [else (js)])
           ,(inner (js) get-on-attach seed)))
     
     ; seed -> js

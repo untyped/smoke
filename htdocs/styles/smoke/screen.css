@@ -129,6 +129,10 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
     z-index: 1001;
 }
 
+.smoke-error-dialog .ui-dialog-titlebar-close {
+    display: none;
+}
+
 /* notification ------------------------------- */
 
 .smoke-notifications { width: 100%; }
