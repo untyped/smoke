@@ -1,7 +1,6 @@
 #lang scheme/base
 
 (require net/url
-         net/uri-codec
          scheme/contract
          (only-in srfi/1 drop-right)
          srfi/13
@@ -57,12 +56,9 @@
      (let ([component-id (string->symbol (path/param-path component-id-element))]
            [callback-id  (string->symbol (path/param-path callback-id-element))]
            [args         (map (lambda (path/param)
-                                ; string
-                                (define path
-                                  (uri-decode (path/param-path path/param)))
-                                ; any
-                                (with-handlers ([exn? (lambda _ (string->symbol path))])
-                                  (json->scheme path)))
+                                (let/debug ([path (path/param-path path/param)])
+                                  (with-handlers ([exn? (lambda _ (string->symbol path))])
+                                    (json->scheme path))))
                               arg-elements)])
        (make-callback (send page find-component/id component-id)
                       callback-id
