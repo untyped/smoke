@@ -20,6 +20,8 @@
     set-style!             ; string -> void
     get-tooltip            ; -> string
     set-tooltip!           ; string -> void
+    get-visible?           ; -> boolean
+    set-visible?!          ; boolean -> void
     core-html-attributes)) ; -> (alistof symbol (U string symbol number boolean (-> any)))
 
 ; Helpers ----------------------------------------
