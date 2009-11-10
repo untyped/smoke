@@ -120,5 +120,5 @@
  [current-jquery-ui-stylesheet    (parameter/c string?)]
  [jquery-ui-script/min            xml?]
  [jquery-ui-script/dev            xml?]
- [jquery-ui-styles                (-> seed? xml?)]
+ [jquery-ui-styles                (-> any/c xml?)]
  [default-tiny-mce-options-script xml?])
