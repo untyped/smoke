@@ -134,13 +134,13 @@
                                         ,item-str
                                         ,(opt-xml (get-enabled?)
                                            (span (@ [id    ,dismiss-id] 
-                                                    [class "remove-button ui-icon ui-icon-close ui-state-default"]
+                                                    [class "remove-button ui-icon ui-icon-close ui-state-default ui-corner-all"]
                                                     [title "Remove this item"]
                                                     [alt   "Remove this item"])))))))))
                   ,(opt-xml (and (get-enabled?) visible? (items-available?))
                      (div (@ [class "item-entry"])
                           ,(send (get-editor) render seed)
-                          (span (@ [class "add-button ui-icon ui-icon-plus ui-state-default"]
+                          (span (@ [class "add-button ui-icon ui-icon-plus ui-state-default ui-corner-all"]
                                    [title "Add item"]
                                    [alt   "Add item"]))))))))
     
