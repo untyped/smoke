@@ -32,6 +32,9 @@
          ans)
      #'(begin expr ...)]))
 
+(define-syntax-rule (choose-rendering-mode dev?)
+  (if (dev?) 'pretty 'packed))
+
 ; Mixins -----------------------------------------
 
 (define html-page-mixin
@@ -208,7 +211,7 @@
     (define/public (make-full-response-generator)
       (lambda (embed-url)
         (on-full-response)
-        (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'packed)])
+        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (with-response-timer
            "Full response"
            ; seed
@@ -261,7 +264,7 @@
     (define/public (make-ajax-response-generator)
       (lambda (embed-url)
         (on-ajax-response)
-        (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'packed)])
+        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (with-response-timer
            "AJAX response"
            ; seed
@@ -296,7 +299,7 @@
     ; aren't lost if they hit Reload.
     (define/public (make-full-redirect-response-generator)
       (lambda (embed-url)
-        (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'packed)])
+        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (with-response-timer
            "Full redirect response"
            ; seed
@@ -319,7 +322,7 @@
     ; is squeezed into the AJAX frame right before the response is sent.
     (define/public (make-ajax-redirect-response-generator)
       (lambda (embed-url)
-        (parameterize ([javascript-rendering-mode (if (dev?) 'pretty 'packed)])
+        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (with-response-timer
            "AJAX redirect response"
            ; seed

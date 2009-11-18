@@ -56,7 +56,7 @@
      (let ([component-id (string->symbol (path/param-path component-id-element))]
            [callback-id  (string->symbol (path/param-path callback-id-element))]
            [args         (map (lambda (path/param)
-                                (let/debug ([path (path/param-path path/param)])
+                                (let ([path (path/param-path path/param)])
                                   (with-handlers ([exn? (lambda _ (string->symbol path))])
                                     (json->scheme path))))
                               arg-elements)])

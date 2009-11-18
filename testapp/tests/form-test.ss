@@ -223,11 +223,11 @@
       
       (test-case "full refresh"
         (printf "These tests have not been automated yet (might need an exec-javascript Delirium command).")
-        (printf "Change the value of the tinyMCE field, do a full refresh, and check the repoted value changes:")
+        (printf "Change the value of the tinyMCE field, do a full refresh, and check the reported value changes:")
         (read-line))
       
       (test-case "full refresh"
-        (printf "Change the value of the tinyMCE field, do an AJAX refresh, and check the repoted value changes:")
+        (printf "Change the value of the tinyMCE field, do an AJAX refresh, and check the reported value changes:")
         (read-line)))
     
     (test-suite "check-box"
