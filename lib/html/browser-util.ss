@@ -34,6 +34,10 @@
 
 (define tooltip-script
   (xml (script (@ [type "text/javascript"]
+                  [src  "/scripts/smoke/ui.stackfix.js"]))
+       (script (@ [type "text/javascript"]
+                  [src  "/scripts/smoke/ui.position.js"]))
+       (script (@ [type "text/javascript"]
                   [src  "/scripts/smoke/tooltip.js"]))))
 
 (define picker-script

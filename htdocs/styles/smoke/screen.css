@@ -37,7 +37,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
   position: relative;
 }
 
-.tooltip-anchor .tooltip {
+.tooltip {
   display: none;
   position: absolute;
 
@@ -48,6 +48,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
   background: #fff;
   padding: 3px;
   -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
 
   z-index: 1;
 }

@@ -35,7 +35,13 @@
            (p "This is a visual test that would be very hard to automated. "
               "Hover over each of these tooltips and check that the tooltip appears inside the viewport. "
               "Also, try making the browser height less than the tooltip height and see if the tooltip is placed in a sensible position.")
-           ,@(for/list ([index (in-range 0 50)])
+           ,(render-tooltips seed)
+           (div (@ [id "dialog"])
+                ,(render-tooltips seed))))
+    
+    ; seed -> xml
+    (define/public (render-tooltips seed)
+      (xml ,@(for/list ([index (in-range 0 50)])
                (xml (div (@ [class "tooltip-anchor"]
                             [style ,(format "clear: both; float: ~a"
                                             (if (even? index) "left" "right"))])
@@ -46,4 +52,8 @@ Lorem ipsum in eum graeco iriure admodum, iusto epicurei his eu. No est libris d
 
 Quod voluptaria delicatissimi nec cu, an vix nisl utroque interpretaris. Nemore perfecto eos id. Quo quis viris possit te, pri id utamur aperiam recusabo. Et eam eius habeo salutandi, mea brute graece nominati et, at eum aperiam platonem. Fugit maiorum indoctum ut qui.
 ENDTEXT
-                              ))))))))
+                              ))))))
+    
+    (define/augment (get-on-attach seed)
+      (js (!dot ($ "#dialog") (dialog))))))
+  

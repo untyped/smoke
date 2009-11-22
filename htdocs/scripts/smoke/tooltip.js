@@ -45,6 +45,30 @@
       return { top: 0, left: 0 };
     }
   };
+
+  $.fn.moveToBody = function () {
+    return this.each(function () {
+      var src = $(this).data("original-location");
+      
+      if (!src) {
+        var src = $("<span></span>").insertBefore(this);
+        $(this).data("breakout-source", src);
+        $(this).remove().appendTo($("body"));
+      }
+    });
+  };
+
+  $.fn.returnFromBody = function () {
+    return this.each(function () {
+      var src = $(this).data("original-location");
+      
+      if (src) {
+        return;
+        $(this).remove().insertAfter(src);
+        src.remove();
+      }
+    });
+  };
   
   // string object -> jQuery
   $.fn.tooltip = function (tooltipClass, settings) {
@@ -78,7 +102,7 @@
       $(this).attr("title", null);
 
       // timerID
-      var animationTimer = null;
+      var delayTimer = null;
   
       // boolean
       var appearing = false;
@@ -86,63 +110,53 @@
 
       // element      
       var anchor = $(this);
-      var tooltip = $("." + tooltipClass, this).css("opacity", 0);
+      var tooltip = $("." + tooltipClass, this).css("opacity", 0).moveToBody();
 
       $([this, tooltip.get(0)]).mouseover(function () {
+        Smoke.log("over");
 
-        if (animationTimer) {
-          clearTimeout(animationTimer);
+        if (delayTimer) {
+          clearTimeout(delayTimer);
         }
   
         if (!appearing && !visible) {
           appearing = true;
 
-          // absolute coordinates of the viewport edges:
-          var viewLeft   = $(window).scrollLeft();
-          var viewRight  = $(window).width() + viewLeft;
-          var viewTop    = $(window).scrollTop();
-          var viewBottom = $(window).height() + viewTop;
-          
-          // size of the tooltip:
-          var toolWidth  = $(tooltip).width();
-          var toolHeight = $(tooltip).height();
-          
-          // absolute position of the anchor:
-          var anchorPos  = $(anchor).absolutePosition();
-          var anchorLeft = anchorPos.left;
-          var anchorTop  = anchorPos.top;
-          
-          // adjustment to keep the tooptip on-screen:
-          var posX = Math.max(viewLeft + offsetX,
-            Math.min(anchorLeft + offsetX,
-              viewRight - toolWidth - offsetX - scrollbarSize)) - anchorLeft;
-          var posY = Math.max(viewTop + offsetY, 
-            Math.min(anchorTop + offsetY,
-              viewBottom - toolHeight - offsetY - scrollbarSize)) - anchorTop;
-          
           // reset position of tooltip box
-          tooltip.css({ left: posX, top: posY });
-  
-          tooltip.css({ display: "block" }).animate({ opacity: 1 }, time, "swing", function () {
-            // once the animation is complete, set the tracker variables
-            appearing = false;
-            visible = true;
-          });
+          tooltip.css({
+            display: "block",
+            position: "absolute",
+            zIndex: 1000001
+          }).position({
+            my: "left top",
+            at: "left bottom",
+            of: anchor,
+            collision: "flip"
+          }).animate(
+            { opacity: 1 },
+            time,
+            "swing",
+            function () {
+              // once the animation is complete, set the tracker variables
+              appearing = false;
+              visible = true;
+            });
         }
         
         return this;
       }).mouseout(function () {
+        Smoke.log("out");
       
-        if (animationTimer) {
-          clearTimeout(animationTimer);
+        if (delayTimer) {
+          clearTimeout(delayTimer);
         }
         
-        animationTimer = setTimeout(function () {
-          animationTimer = null;
+        delayTimer = setTimeout(function () {
+          delayTimer = null;
           tooltip.animate({ opacity: 0 }, time, "swing", function () {
             visible = false;
             tooltip.css("display", "none");
-          });
+          }).returnFromBody();
         }, delay);
         
         return this;
@@ -151,8 +165,11 @@
   };
   
   $(document).ready(function (evt) {
-    $(document).bind("smoke-page-update", function (evt) {
-      $(".tooltip-anchor").tooltip("tooltip");
+    $(".tooltip-anchor").live("mouseover", function () {
+      if(!$(this).data("tooltip-bound")) {
+        $(this).tooltip("tooltip");
+        $(this).mouseover();
+      }
     });
   });
 })(jQuery);
