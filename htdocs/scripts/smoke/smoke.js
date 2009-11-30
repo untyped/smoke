@@ -27,7 +27,6 @@ if (!window.console.log) {
         for (var i = 0; i < arguments.length; i++) {
           str += i > 0 ? " " + arguments[i] : "" + arguments[i];
         }
-        window.console.log(str);
       };
     // Other browsers:
     } else {
