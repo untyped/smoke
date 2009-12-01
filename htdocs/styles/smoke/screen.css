@@ -1,3 +1,16 @@
+/* ajax-spinner ------------------------------- */
+
+#smoke-ajax-spinner {
+  display: none;
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  padding: 5px 5px 5px 26px;
+  background: #fff url(/images/smoke/spinner.gif) no-repeat scroll 5px 5px;
+  border: 1px solid #aaa;
+  color: #555;
+}
+
 /* text-field --------------------------------- */
 
 input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }

@@ -53,6 +53,10 @@ if (!window.console.log) {
     Smoke.currentPage = currentPage;
     Smoke.documentHead = $("head").get(0);
     Smoke.documentBody = $("body").get(0);
+    if($("#smoke-ajax-spinner").length == 0) {
+      $(Smoke.documentBody).append(
+        "<span id=\"smoke-ajax-spinner\" class=\"ui-corner-all\">Loading...</span>");
+    }
     initComponents();
     Smoke.triggerUpdateEvent(true);
   };
@@ -153,6 +157,8 @@ if (!window.console.log) {
       
       Smoke.submitData = {};
       
+      Smoke.showAjaxSpinner();
+      
       // The result JS is automatically evaluated by jQuery:
       request = $.ajax({
         async      : true,
@@ -170,10 +176,12 @@ if (!window.console.log) {
                      },
         dataType   : "text",
         success    : function (responseText) {
+                       Smoke.hideAjaxSpinner();
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },
         error      : function (xhr, msg, exn) {
+                       Smoke.hideAjaxSpinner();
                        Smoke.onAjaxFailure(url, xhr, msg, exn);
                      }});
     } catch (exn) {
@@ -244,6 +252,16 @@ if (!window.console.log) {
     $("<div class=\"ui-helper-hidden\">" + html + "</div>")
       .appendTo("body")
       .dialog({ dialogClass: "smoke-error-dialog", width: 500, title: title, modal: true });
+  };
+  
+  // -> void
+  Smoke.showAjaxSpinner = function () {
+    $("#smoke-ajax-spinner").show();
+  };
+  
+  // -> void
+  Smoke.hideAjaxSpinner = function () {
+    $("#smoke-ajax-spinner").hide();
   };
   
   // DOM manipulation ============================
