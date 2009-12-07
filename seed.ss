@@ -31,6 +31,10 @@
 (define (embed/ajax seed handler)
   (js ((!dot Smoke doAjax) ,(embed/full seed handler))))
 
+; seed (U string (-> void) callback) natural -> js
+(define (embed/ajax/delay seed handler [delay 100])
+  (js ((!dot Smoke doDelayedAjax) ,(embed/full seed handler))))
+
 ; seed (-> response) -> string
 (define (embed/thunk seed thunk)
   ((seed-embed-url seed) 
@@ -76,5 +80,6 @@
  [embed               (-> seed? (or/c string? procedure? callback?) (or/c string? url?))]
  [embed/full          (-> seed? (or/c string? procedure? callback?) (or/c string? url?))]
  [embed/ajax          (-> seed? (or/c string? procedure? callback?) javascript?)]
+ [embed/ajax/delay    (->* (seed? (or/c string? procedure? callback?)) (natural-number/c) javascript?)]
  [embed/thunk         (-> seed? procedure? (or/c string? url?))]
  [make-callback-codes (-> seed? (list/c natural? natural? natural?))])
