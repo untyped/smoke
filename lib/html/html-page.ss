@@ -7,6 +7,7 @@
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "../../web-server/expired-continuation.ss"
+         "../../web-server/resume.ss"
          "../page.ss"
          "browser-util.ss"
          "html-box.ss"
@@ -26,10 +27,10 @@
   (syntax-case stx ()
     [(_ msg expr ...)
      #;#'(let* ([time1 (current-inexact-milliseconds)]
-              [ans   ((lambda () expr ...))]
-              [time2 (current-inexact-milliseconds)])
-         (debug msg (- time2 time1))
-         ans)
+                [ans   ((lambda () expr ...))]
+                [time2 (current-inexact-milliseconds)])
+           (debug msg (- time2 time1))
+           ans)
      #'(begin expr ...)]))
 
 (define-syntax-rule (choose-rendering-mode dev?)
@@ -101,7 +102,7 @@
     
     ; (listof symbol)
     (init [classes null])
-
+    
     ; boolean
     (init-field custom-notification-position? #f #:accessor)
     
@@ -140,6 +141,15 @@
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])
+      (define (actually-respond)
+        (let ([push-frame? (and (not (ajax-request? (current-request)))
+                                (not (post-request? (current-request))))])
+          (when forward? (clear-continuation-table!))
+          (parameterize ([current-page this])
+            (when push-frame?
+              (resume-from-here))
+            (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
+      
       #;(with-handlers ([exn? (lambda (exn)
                                 (log-debug* "Frame unserializable" 
                                             (frame-id (current-frame))
@@ -159,14 +169,21 @@
         (notifications-add! (expired-continuation-xml (expired-continuation-type)))
         (expired-continuation-type-reset!))
       
-      ; boolean
-      (let ([push-frame? (and (not (ajax-request? (current-request)))
-                              (not (post-request? (current-request))))])
-        (when forward? (clear-continuation-table!))
-        (parameterize ([current-page this])
-          (when push-frame?
-            (resume-from-here))
-          (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
+      (if (resume-available?)
+          (actually-respond)
+          (send/suspend/dispatch
+           (lambda (embed-url)
+             (let* ([url0 (request-uri (current-request))]
+                    [url1 (string->url (embed-url actually-respond))])
+               (make-redirect-response
+                (make-url (url-scheme url1)
+                          (url-user url1)
+                          (url-host url1)
+                          (url-port url1)
+                          (url-path-absolute? url1)
+                          (url-path url1)
+                          (url-query url0)
+                          (url-fragment url0))))))))
     
     ; expired-continuation-type -> xml
     (define/public (expired-continuation-xml type)

@@ -21,7 +21,6 @@
          (planet untyped/delirium:3)
          "../base.ss"
          "current-request.ss"
-         "resume.ss"
          "send-suspend-dispatch.ss"
          "session.ss"
          "smoke-lru.ss")
@@ -229,25 +228,8 @@
        (assert-request-session-valid (current-request)))
      thunk
      void))
-  
-  (define (establish-prompt)
-    (if (resume-available?)
-        (check-session)
-        (send/suspend/dispatch
-         (lambda (embed-url)
-           (let* ([url0 (request-uri (current-request))]
-                  [url1 (string->url (embed-url check-session))])
-             (make-redirect-response
-              (make-url (url-scheme url1)
-                        (url-user url1)
-                        (url-host url1)
-                        (url-port url1)
-                        (url-path-absolute? url1)
-                        (url-path url1)
-                        (url-query url0)
-                        (url-fragment url0))))))))
-  
-  (start-session #:continue establish-prompt))
+    
+  (start-session #:continue check-session))
 
 ; Provide statements -----------------------------
 
