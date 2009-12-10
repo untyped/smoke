@@ -32,7 +32,7 @@
          ; Start with 300 life points (natural-lifetime = initial-points * natural-interval = 300 mins):
          #:initial-points   [initial-points   300]
          ; Log diagnostic information every 5 seconds:
-         #:message-interval [message-interval 5000])
+         #:message-interval [message-interval (* 60 1000)])
   (letrec ([next-message (+ (current-inexact-milliseconds) message-interval)]
            [threshold1   (* threshold 1.00)]
            [threshold2   (* threshold 0.80)]
