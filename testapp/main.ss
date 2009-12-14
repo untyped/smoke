@@ -8,5 +8,5 @@
 
 (serve/smoke
  (lambda ()
-   (dispatch (current-request) test-site))
+   (site-dispatch test-site (current-request)))
  #:htdocs-paths (list testapp-htdocs-path))
