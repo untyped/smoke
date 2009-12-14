@@ -46,15 +46,6 @@
                   null
                   (list #'(inspect #f))))))]))
 
-(define-syntax (singleton/cells stx)
-  (syntax-case stx ()
-    [(_ superclass (interface ...) clause ...)
-     (with-syntax ([prefix (filter-id (or (and (syntax-local-name)
-                                               (symbol->string (syntax-local-name)))
-                                          "smoke"))])
-       #'(parameterize ([inferred-id-prefix 'prefix])
-           (new (class/cells superclass (interface ...) clause ...))))]))
-
 (define-syntax (new/inferred-id stx)
   (syntax-case stx ()
     [(_ class arg ...)
@@ -66,10 +57,20 @@
        #'(parameterize ([inferred-id-prefix 'prefix])
            (new class arg ...)))]))
 
+(define-syntax (singleton/cells stx)
+  (syntax-case stx ()
+    [(_ superclass (interface ...) clause ...)
+     (with-syntax ([prefix (filter-id (or (and (syntax-local-name)
+                                               (symbol->string (syntax-local-name)))
+                                          "smoke"))])
+       (if (syntax-local-name)
+           (with-syntax ([class-id (make-id stx (syntax-local-name) '%)])
+             #'(new/inferred-id (let ([class-id (class/cells superclass (interface ...) clause ...)]) class-id)))
+           #'(new/inferred-id (class/cells superclass (interface ...) clause ...))))]))
+
 ; Provide statements -----------------------------
 
-(provide (except-out (all-from-out scheme/class)
-                     new)
+(provide (except-out (all-from-out scheme/class) new)
          (rename-out [new/inferred-id new])
          class/cells
          mixin/cells
