@@ -388,13 +388,6 @@
       (js (!dot ($ ,(format "#~a" (get-form-id))) (unbind))
           ,(inner (js) get-on-detach seed)))))
 
-
-(define render-augride-mixin 
-  (mixin/cells (html-component<%>) ()
-    ; seed -> xml
-    (define/augride (render seed)
-      (xml))))
-
 ; Classes ----------------------------------------
 
 (define html-page%
@@ -421,5 +414,4 @@
 
 (provide html-page<%>
          html-page-mixin
-         render-augride-mixin
          html-page%)
