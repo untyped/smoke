@@ -13,7 +13,7 @@
     
     ; Fields -------------------------------------
     
-    ; (cell (U seed (seed -> xml)))
+    ; (cell (U xml (seed -> xml)))
     (init-cell content #:accessor #:mutator)
     
     ; Constructor --------------------------------

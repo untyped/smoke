@@ -10,7 +10,6 @@
          "../../web-server/resume.ss"
          "../page.ss"
          "browser-util.ss"
-         "html-box.ss"
          "html-component.ss"
          "html-element.ss"
          "notification.ss")
