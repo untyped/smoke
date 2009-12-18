@@ -9,8 +9,6 @@ ul.check-results li.check-warning { background-image: url(/images/smoke/warning.
 ul.check-results li.check-failure { background-image: url(/images/smoke/failure.png); }
 ul.check-results li.check-error   { background-image: url(/images/smoke/error.png);   }
 
-img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.check-error.icon { position: relative; top: 2px; }
-
 .success { border: none; background: transparent; }
 
 /* editors ------------------------------------ */
@@ -26,6 +24,9 @@ img.check-success.icon, img.check-warning.icon, img.check-failure.icon, img.chec
 .smoke-entity-editor .attribute-value textarea {
   margin-top: -.1em;
 }
+
+.smoke-entity-editor .attribute-value ul { margin: 0; }
+.smoke-entity-editor .attribute-value li { list-style-type: none; }
 
 /* views -------------------------------------- */
 
