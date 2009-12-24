@@ -53,12 +53,12 @@
                 expected-id
                 session-id)))))
 
-; [#:expires (U time-utc #f)] [#:continue (-> any)] -> any
+; [#:expires (U time-utc #f)] [#:domain string] [#:continue (-> any)] -> any
 ;
 ; The continuation table is cleared if forward? is #t.
 ; We normally want this to be the case, but we can't clear the continuation
 ; table when testing the code with Delirium.
-(define (start-session #:expires [expires (void)] #:continue [continue void])
+(define (start-session #:expires [expires (void)] #:domain [domain #f] #:continue [continue void])
   (unless (current-request)
     (error "no current request"))
   (match (request-session (current-request))
@@ -67,7 +67,8 @@
                  [expires    (if (void? expires) #f expires)]
                  [session    (make-session session-id now now expires (make-hasheq))]
                  [cookie0    (cookie:add-path (set-cookie (session-cookie-name) session-id) "/")]
-                 [cookie     (if expires (cookie:add-expires cookie0 (time-second expires)) cookie0)])
+                 [cookie1    (if domain (cookie:add-domain cookie0 domain) cookie0)]
+                 [cookie     (if expires (cookie:add-expires cookie1 (time-second expires)) cookie1)])
             (expected-session-id-set! session-id)
             (send/cookie "Establishing session" cookie session-id session continue))]
     [sess (unless (expected-session-id)
@@ -154,6 +155,6 @@
  [request-session              (-> request? (or/c session? #f))]
  [request-session-valid?       (-> request? boolean?)]
  [assert-request-session-valid (-> request? void?)]
- [start-session                (->* () (#:continue (-> any) #:expires (or/c time-utc? #f)) any)]
+ [start-session                (->* () (#:continue (-> any) #:expires (or/c time-utc? void? #f) #:domain (or/c string? #f)) any)]
  [set-session-expiry           (->* ((or/c time-utc? #f)) (#:continue (-> any)) any)]
  [end-session                  (->* () (#:continue (-> any)) any)])

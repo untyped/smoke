@@ -19,6 +19,7 @@
          web-server/private/mime-types
          web-server/servlet/setup
          (planet untyped/delirium:3)
+         (planet untyped/unlib:3/time)
          "../base.ss"
          "current-request.ss"
          "send-suspend-dispatch.ss"
@@ -220,7 +221,7 @@
 ; Called within a servlet ------------------------
 
 ; (-> any) -> any
-(define (init-smoke thunk)
+(define (init-smoke thunk #:session-expires [expires (void)] #:session-domain [domain #f])
   
   (define (check-session)
     (dynamic-wind
@@ -229,7 +230,7 @@
      thunk
      void))
     
-  (start-session #:continue check-session))
+  (start-session #:continue check-session #:expires expires #:domain domain))
 
 ; Provide statements -----------------------------
 
@@ -255,4 +256,6 @@
                                         #:launch-browser? boolean?
                                         #:404-handler     (-> request? any))
                              void?)]
- [init-smoke            (-> procedure? any)])
+ [init-smoke            (->* (procedure?)
+                             (#:session-expires (or/c time-utc? void? #f) #:session-domain (or/c string? #f))
+                             any)])
