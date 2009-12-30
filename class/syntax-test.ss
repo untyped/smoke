@@ -131,7 +131,24 @@
         (check-equal? (get-field e obj) 5)
         (check-equal? (get-field f obj) 6)
         (check-equal? (web-cell-ref (get-field g-cell obj)) 7)
-        (check-equal? (web-cell-ref (get-field h-cell obj)) 8)))))
+        (check-equal? (web-cell-ref (get-field h-cell obj)) 8)))
+    
+    (test-case "#:child, #:children, #:optional-child, #:child-transform"
+      (match-let* ([(list child0 child1 child2 child3 child4 child5 child6 child7 child8 child9)
+                    (for/list ([i (in-range 10)])
+                      (new text-field% [id (string->symbol (format "child~a" i))]))]
+                   [page (singleton/cells html-page% ()
+                           (cell cell0 child0)
+                           (cell cell1 child1 #:child)
+                           (cell cell2 (list child2 child3) #:children)
+                           (cell cell3 #f #:optional-child)
+                           (cell cell4 child4 #:optional-child)
+                           (cell cell5 #f #:child-transform (lambda (x) (or x null)))
+                           (cell cell6 (list child5 child6) #:child-transform (lambda (x) (or x null)))
+                           (cell cell7 (list (cons child7 1) (cons child8 2)) #:child-transform (lambda (x) (map car x)))
+                           (super-new [title "Child test"]))])
+        (check-equal? (send page get-child-components)
+                      (list child1 child2 child3 child4 child5 child6 child7))))))
 
 ; Provide statements -----------------------------
 
