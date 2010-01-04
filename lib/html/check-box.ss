@@ -58,20 +58,20 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (define id         (get-id))
-      (define wrapper-id (get-wrapper-id))
-      (define hidden-id  (get-hidden-id))
-      (define value      (get-value))
-      (xml (span (@ [id ,wrapper-id])
-                 (input (@ [id    ,hidden-id]
-                           [name  ,hidden-id]
-                           [type  "hidden"]
-                           [value "yes"]))
-                 (input (@ ,(core-html-attributes seed)
-                           [type "checkbox"]
-                           ,(opt-xml-attr value checked "checked")))
-                 ,(opt-xml (get-show-label?)
-                    ,(render-label seed)))))
+      (let ([id         (get-id)]
+            [wrapper-id (get-wrapper-id)]
+            [hidden-id  (get-hidden-id)]
+            [value      (get-value)])
+        (xml (span (@ [id ,wrapper-id])
+                   (input (@ [id    ,hidden-id]
+                             [name  ,hidden-id]
+                             [type  "hidden"]
+                             [value "yes"]))
+                   (input (@ ,(core-html-attributes seed)
+                             [type "checkbox"]
+                             ,(opt-xml-attr value checked "checked")))
+                   ,(opt-xml (get-show-label?)
+                      ,(render-label seed))))))
     
     ; request -> void
     (define/augment (on-request request)

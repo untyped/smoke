@@ -44,8 +44,10 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 /* tooltip ------------------------------------ */
 
 /*
- * Adapted from a tutorial by Remy Sharp (http://jqueryfordesigners.com/coda-popup-bubbles/),
- * originally inspired by the web page for Coda by Panic (http://www.panic.com/coda).
+ * Adapted from a tutorial by Remy Sharp
+ * (http://jqueryfordesigners.com/coda-popup-bubbles/),
+ * originally inspired by the web page for Coda by Panic
+ * (http://www.panic.com/coda).
  */
 
 .tooltip-anchor {
@@ -64,6 +66,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
   padding: 3px;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
+  max-width: 50%;
 
   z-index: 1;
 }

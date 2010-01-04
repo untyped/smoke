@@ -9,6 +9,8 @@ ul.check-results li.check-warning { background-image: url(/images/smoke/warning.
 ul.check-results li.check-failure { background-image: url(/images/smoke/failure.png); }
 ul.check-results li.check-error   { background-image: url(/images/smoke/error.png);   }
 
+ul.check-results.tooltip { padding: 2px; max-width: 50%; }
+
 .success { border: none; background: transparent; }
 
 /* editors ------------------------------------ */
