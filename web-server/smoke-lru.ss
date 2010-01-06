@@ -32,7 +32,9 @@
          ; Start with 300 life points (natural-lifetime = initial-points * natural-interval = 300 mins):
          #:initial-points   [initial-points   300]
          ; Log diagnostic information every 60 seconds:
-         #:message-interval [message-interval (* 60 1000)])
+         #:message-interval [message-interval (* 60 1000)]
+         ; memory-use:number threshold:number purge-value:number purge-rate:number detail:listof-number -> void
+         #:message-logger   [message-logger   #f])
   (letrec ([next-message (+ (current-inexact-milliseconds) message-interval)]
            [threshold1   (* threshold 1.00)]
            [threshold2   (* threshold 0.80)]
@@ -62,23 +64,18 @@
                             (let* ([purge        (begin0 (unbox purge-box)
                                                          (set-box! purge-box #f))]
                                    [memory-use   (current-memory-use)]
-                                   [collect-rate (cond [(> memory-use threshold1) 50]
-                                                       [(> memory-use threshold2) 50]
-                                                       [(> memory-use threshold3) 50]
-                                                       [(> memory-use threshold4) 50]
+                                   [collect-rate (cond [(> memory-use threshold1) (quotient initial-points 2)]
+                                                       [(> memory-use threshold2) #f]
+                                                       [(> memory-use threshold3) #f]
+                                                       [(> memory-use threshold4) #f]
                                                        [(> memory-use threshold5) #f]
                                                        [else #f])]
                                    [now          (current-inexact-milliseconds)])
                               ; Log collection rate and memory stats:
-                              (when (> now next-message)
+                              (when (and message-logger (> now next-message))
                                 (collect-garbage)
                                 (set! next-message (+ now message-interval))
-                                (log-info* "LRU"
-                                           "memory"    memory-use
-                                           "threshold" threshold
-                                           "purge"     purge
-                                           "rate"      collect-rate
-                                           "detail"    (lru-life-point-distribution manager 10)))
+                                (message-logger memory-use threshold purge collect-rate (lru-life-point-distribution manager 10)))
                               ; Return collection rate:
                               (if purge
                                   (if collect-rate
@@ -132,5 +129,11 @@
                               #:check-interval   (and/c integer? (>=/c 1000))
                               #:natural-interval (and/c integer? (>=/c 1000))
                               #:initial-points   (and/c integer? (>=/c 1))
-                              #:message-interval (and/c integer? (>=/c 1000)))
+                              #:message-interval (and/c integer? (>=/c 1000))
+                              #:message-logger   (or/c (-> number?
+                                                           number?
+                                                           (or/c number? #f)
+                                                           (or/c number? #f)
+                                                           (listof number?)
+                                                           any) #f))
        manager?)])

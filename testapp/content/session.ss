@@ -25,11 +25,13 @@
 ; request -> response
 (define-controller (test-session-end)
   (define session (request-session (current-request)))
-  (end-session session)
-  (make-html-response
-   (xml (html (head (title "Session ended"))
-              (body (p "Session ended")
-                    ,(session-html session))))))
+  (end-session
+   #:continue
+   (lambda ()
+     (make-html-response
+      (xml (html (head (title "Session ended"))
+                 (body (p "Session ended")
+                       ,(session-html session))))))))
 
 ; request symbol string -> response
 (define-controller (test-session-set key val)
