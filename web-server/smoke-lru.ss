@@ -31,7 +31,7 @@
          #:natural-interval [natural-interval 60000]
          ; Start with 300 life points (natural-lifetime = initial-points * natural-interval = 300 mins):
          #:initial-points   [initial-points   300]
-         ; Log diagnostic information every 5 seconds:
+         ; Log diagnostic information every 60 seconds:
          #:message-interval [message-interval (* 60 1000)])
   (letrec ([next-message (+ (current-inexact-milliseconds) message-interval)]
            [threshold1   (* threshold 1.00)]
@@ -63,10 +63,10 @@
                                                          (set-box! purge-box #f))]
                                    [memory-use   (current-memory-use)]
                                    [collect-rate (cond [(> memory-use threshold1) 50]
-                                                       [(> memory-use threshold2) 10]
-                                                       [(> memory-use threshold3)  5]
-                                                       [(> memory-use threshold4)  3]
-                                                       [(> memory-use threshold5)  1]
+                                                       [(> memory-use threshold2) 50]
+                                                       [(> memory-use threshold3) 50]
+                                                       [(> memory-use threshold4) 50]
+                                                       [(> memory-use threshold5) #f]
                                                        [else #f])]
                                    [now          (current-inexact-milliseconds)])
                               ; Log collection rate and memory stats:

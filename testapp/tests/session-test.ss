@@ -32,7 +32,7 @@
     
     (test-case "end-session"
       (let ([old-cookie-id (inner-html-ref (node/id 'cookie-id))])
-        (open/wait (controller-url test-session-end #f))
+        (open/wait (controller-url test-session-end))
         (open/wait (controller-url test-session-show))
         (check-false (equal? old-cookie-id (inner-html-ref (node/id 'cookie-id))))
         (check-false (node-exists? (node/jquery "tbody th + td")))))))

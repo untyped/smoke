@@ -137,7 +137,7 @@
       (match-let* ([(list child0 child1 child2 child3 child4 child5 child6 child7 child8 child9)
                     (for/list ([i (in-range 10)])
                       (new text-field% [id (string->symbol (format "child~a" i))]))]
-                   [page (singleton/cells html-page% ()
+                   [page (singleton/cells html-component% ()
                            (cell cell0 child0)
                            (cell cell1 child1 #:child)
                            (cell cell2 (list child2 child3) #:children)
@@ -146,9 +146,12 @@
                            (cell cell5 #f #:child-transform (lambda (x) (or x null)))
                            (cell cell6 (list child5 child6) #:child-transform (lambda (x) (or x null)))
                            (cell cell7 (list (cons child7 1) (cons child8 2)) #:child-transform (lambda (x) (map car x)))
-                           (super-new [title "Child test"]))])
-        (check-equal? (send page get-child-components)
-                      (list child1 child2 child3 child4 child5 child6 child7))))))
+                           (super-new))])
+        (check-equal? (sort (send page get-child-components)
+                            (lambda (a b)
+                              (string<? (symbol->string (send a get-id))
+                                        (symbol->string (send b get-id)))))
+                      (list child1 child2 child3 child4 child5 child6 child7 child8))))))
 
 ; Provide statements -----------------------------
 

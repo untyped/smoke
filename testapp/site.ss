@@ -25,7 +25,7 @@
    [("/session/set/" (symbol-arg) "/" (string-arg)) test-session-set]
    [("/session/remove/" (symbol-arg)) test-session-remove]
    [("/session/start/" (boolean-arg)) test-session-start]
-   [("/session/end/" (boolean-arg))   test-session-end]
+   [("/session/end")                  test-session-end]
    [("/tab")                          tab]
    [("/tooltip")                      tooltip])
   #:requestless? #t)

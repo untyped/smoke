@@ -6,6 +6,7 @@
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
+         "../../sizeof.ss"
          "../../web-server/expired-continuation.ss"
          "../../web-server/resume.ss"
          "../page.ss"
@@ -22,18 +23,34 @@
     on-full-response   ; -> void
     on-ajax-response)) ; -> void
 
-(define-syntax (with-response-timer stx)
-  (syntax-case stx ()
-    [(_ msg expr ...)
-     #;#'(let* ([time1 (current-inexact-milliseconds)]
-                [ans   ((lambda () expr ...))]
-                [time2 (current-inexact-milliseconds)])
-           (debug msg (- time2 time1))
-           ans)
-     #'(begin expr ...)]))
-
 (define-syntax-rule (choose-rendering-mode dev?)
   (if (dev?) 'pretty 'packed))
+
+; Logging ----------------------------------------
+
+; (parameter (U (url number -> void) #f))
+(define frame-size-logger (make-parameter #f))
+
+; (parameter (U (string url number -> void) #f))
+(define response-time-logger (make-parameter #f))
+
+; (_ logger any ...) -> void
+(define-syntax-rule (log-frame-size)
+  (let ([log (frame-size-logger)])
+    (when log
+      (log (request-uri (current-request))
+           (sizeof (current-frame))))))
+
+(define-syntax-rule (log-response-time msg expr ...)
+  (let ([body (lambda () expr ...)]
+        [log  (response-time-logger)])
+    (if log
+        (let* ([time1 (current-inexact-milliseconds)]
+               [ans   (body)]
+               [time2 (current-inexact-milliseconds)])
+          (log msg (request-uri (current-request)) (- time2 time1))
+          ans)
+        (body))))
 
 ; Mixins -----------------------------------------
 
@@ -149,18 +166,6 @@
               (resume-from-here))
             (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
       
-      #;(with-handlers ([exn? (lambda (exn)
-                                (log-debug* "Frame unserializable" 
-                                            (frame-id (current-frame))
-                                            "unserializable"
-                                            (exn-message exn)))])
-          (log-debug* "Frame serializable"
-                      (frame-id (current-frame))
-                      (format "~a bytes"
-                              (let ([out (open-output-bytes)])
-                                (write (frame-serialize (current-frame)) out)
-                                (bytes-length (get-output-bytes out))))))
-      
       (unless (current-request)
         (error "No current HTTP request to respond to."))
       
@@ -227,8 +232,9 @@
     (define/public (make-full-response-generator)
       (lambda (embed-url)
         (on-full-response)
+        (log-frame-size)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (with-response-timer
+          (log-response-time
            "Full response"
            ; seed
            (define seed (make-seed this embed-url))
@@ -280,8 +286,9 @@
     (define/public (make-ajax-response-generator)
       (lambda (embed-url)
         (on-ajax-response)
+        (log-frame-size)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (with-response-timer
+          (log-response-time
            "AJAX response"
            ; seed
            (define seed (make-seed this embed-url))
@@ -316,7 +323,7 @@
     (define/public (make-full-redirect-response-generator)
       (lambda (embed-url)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (with-response-timer
+          (log-response-time
            "Full redirect response"
            ; seed
            (define seed (make-seed this embed-url))
@@ -339,7 +346,7 @@
     (define/public (make-ajax-redirect-response-generator)
       (lambda (embed-url)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (with-response-timer
+          (log-response-time
            "AJAX redirect response"
            ; seed
            (define seed (make-seed this embed-url))
@@ -415,3 +422,7 @@
 (provide html-page<%>
          html-page-mixin
          html-page%)
+
+(provide/contract
+ [frame-size-logger    (parameter/c (or/c (-> url? number? any) #f))]
+ [response-time-logger (parameter/c (or/c (-> string? url? number? any) #f))])
