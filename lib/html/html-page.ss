@@ -3,6 +3,7 @@
 (require (for-syntax scheme/base)
          (only-in srfi/1 delete delete-duplicates)
          (only-in (planet schematics/schemeunit:3/text-ui) display-exn)
+         (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
@@ -28,6 +29,9 @@
 
 ; Logging ----------------------------------------
 
+(define-enum smoke-response-types
+  (full ajax full-redirect ajax-redirect))
+
 ; (parameter (U (url number -> void) #f))
 (define frame-size-logger (make-parameter #f))
 
@@ -41,14 +45,14 @@
       (log (request-uri (current-request))
            (sizeof (current-frame))))))
 
-(define-syntax-rule (log-response-time msg expr ...)
+(define-syntax-rule (log-response-time type expr ...)
   (let ([body (lambda () expr ...)]
         [log  (response-time-logger)])
     (if log
         (let* ([time1 (current-inexact-milliseconds)]
                [ans   (body)]
                [time2 (current-inexact-milliseconds)])
-          (log msg (request-uri (current-request)) (- time2 time1))
+          (log type (request-uri (current-request)) (- time2 time1))
           ans)
         (body))))
 
@@ -235,7 +239,7 @@
         (log-frame-size)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (log-response-time
-           "Full response"
+           (smoke-response-types full)
            ; seed
            (define seed (make-seed this embed-url))
            (set-callback-codes! (make-callback-codes seed))
@@ -289,7 +293,7 @@
         (log-frame-size)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (log-response-time
-           "AJAX response"
+           (smoke-response-types ajax)
            ; seed
            (define seed (make-seed this embed-url))
            ; response
@@ -324,7 +328,7 @@
       (lambda (embed-url)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (log-response-time
-           "Full redirect response"
+           (smoke-response-types full-redirect)
            ; seed
            (define seed (make-seed this embed-url))
            (make-html-response
@@ -347,7 +351,7 @@
       (lambda (embed-url)
         (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
           (log-response-time
-           "AJAX redirect response"
+           (smoke-response-types ajax-redirect)
            ; seed
            (define seed (make-seed this embed-url))
            ; response
@@ -419,10 +423,11 @@
 
 ; Provide statements -----------------------------
 
-(provide html-page<%>
+(provide smoke-response-types
+         html-page<%>
          html-page-mixin
          html-page%)
 
 (provide/contract
  [frame-size-logger    (parameter/c (or/c (-> url? number? any) #f))]
- [response-time-logger (parameter/c (or/c (-> string? url? number? any) #f))])
+ [response-time-logger (parameter/c (or/c (-> (enum-value/c smoke-response-types) url? number? any) #f))])
