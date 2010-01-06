@@ -24,23 +24,29 @@
 ; [natural] -> manager
 (define (make-default-smoke-manager
          ; We start docking life points at 20% of 128M:
-         #:memory-threshold [threshold        (* 128 1024 1024)]
+         #:memory-threshold  [threshold         (* 128 1024 1024)]
          ; The memory use condition is checked every 5 seconds:
-         #:check-interval   [check-interval   5000]
+         #:check-interval    [check-interval    5000]
          ; One life point is deducted naturally every minute:
-         #:natural-interval [natural-interval 60000]
+         #:natural-interval  [natural-interval  60000]
          ; Start with 300 life points (natural-lifetime = initial-points * natural-interval = 300 mins):
-         #:initial-points   [initial-points   300]
+         #:initial-points    [initial-points    300]
+         #:purge-points      [purge-points      100]
          ; Log diagnostic information every 60 seconds:
-         #:message-interval [message-interval (* 60 1000)]
+         #:message-interval  [message-interval  (* 60 1000)]
          ; memory-use:number threshold:number purge-value:number purge-rate:number detail:listof-number -> void
-         #:message-logger   [message-logger   #f])
+         #:message-logger    [message-logger    #f]
+         #:collection-logger [collection-logger #f])
   (letrec ([next-message (+ (current-inexact-milliseconds) message-interval)]
-           [threshold1   (* threshold 1.00)]
-           [threshold2   (* threshold 0.80)]
-           [threshold3   (* threshold 0.60)]
-           [threshold4   (* threshold 0.40)]
-           [threshold5   (* threshold 0.20)] ; in bytes
+           [initial-use  (let ([use (current-memory-use)])
+                           (if (<= threshold use)
+                               (error "LRU memory threshold <= initial memory use" (list threshold use))
+                               use))]
+           [threshold1   (+ initial-use (* (- threshold initial-use) 1.00))]
+           [threshold2   (+ initial-use (* (- threshold initial-use) 0.80))]
+           [threshold3   (+ initial-use (* (- threshold initial-use) 0.60))]
+           [threshold4   (+ initial-use (* (- threshold initial-use) 0.40))]
+           [threshold5   (+ initial-use (* (- threshold initial-use) 0.20))] ; in bytes
            [manager      (create-LRU-manager
                           ; Called when an instance has expired:
                           (lambda (request)
@@ -61,8 +67,9 @@
                           (quotient natural-interval 1000)
                           ; Detemine the number of life points to deduct from the continuation:
                           (lambda ()
-                            (let* ([purge        (begin0 (unbox purge-box)
-                                                         (set-box! purge-box #f))]
+                            (let* ([purge        (let ([num (unbox purge-box)])
+                                                   (when num (set-box! purge-box #f))
+                                                   num)]
                                    [memory-use   (current-memory-use)]
                                    [collect-rate (cond [(> memory-use threshold1) (quotient initial-points 2)]
                                                        [(> memory-use threshold2) 10]
@@ -75,7 +82,11 @@
                               (when (and message-logger (> now next-message))
                                 (collect-garbage)
                                 (set! next-message (+ now message-interval))
-                                (message-logger memory-use threshold purge collect-rate (lru-life-point-distribution manager 10)))
+                                (message-logger memory-use
+                                                threshold
+                                                purge
+                                                collect-rate
+                                                (lru-life-point-distribution manager 10)))
                               ; Return collection rate:
                               (if purge
                                   (if collect-rate
@@ -100,9 +111,11 @@
                           #:initial-count initial-points
                           ; Log when continuations are collected:
                           #:inform-p
-                          (lambda args
-                            (unless (and (pair? args) (integer? (car args)) (zero? (car args)))
-                              (log-info* "Collected" args))
+                          (lambda (num)
+                            (when (and num (> num 0))
+                              (set-box! purge-box purge-points)
+                              (when collection-logger
+                                (collection-logger num)))
                             (void)))])
     manager))
 
@@ -126,14 +139,16 @@
  [purge-continuations! (-> natural-number/c void?)]
  [make-default-smoke-manager
   (->* () (#:memory-threshold natural-number/c
-                              #:check-interval   (and/c integer? (>=/c 1000))
-                              #:natural-interval (and/c integer? (>=/c 1000))
-                              #:initial-points   (and/c integer? (>=/c 1))
-                              #:message-interval (and/c integer? (>=/c 1000))
-                              #:message-logger   (or/c (-> number?
-                                                           number?
-                                                           (or/c number? #f)
-                                                           (or/c number? #f)
-                                                           (listof number?)
-                                                           any) #f))
+                              #:check-interval    (and/c integer? (>=/c 1000))
+                              #:natural-interval  (and/c integer? (>=/c 1000))
+                              #:initial-points    (and/c integer? (>=/c 1))
+                              #:purge-points      (or/c natural-number/c #f)
+                              #:message-interval  (and/c integer? (>=/c 1000))
+                              #:message-logger    (or/c (-> number?
+                                                            number?
+                                                            (or/c number? #f)
+                                                            (or/c number? #f)
+                                                            (listof number?)
+                                                            any) #f)
+                              #:collection-logger (or/c (-> (or/c number? #f) any) #f))
        manager?)])
