@@ -65,10 +65,10 @@
                                                          (set-box! purge-box #f))]
                                    [memory-use   (current-memory-use)]
                                    [collect-rate (cond [(> memory-use threshold1) (quotient initial-points 2)]
-                                                       [(> memory-use threshold2) #f]
-                                                       [(> memory-use threshold3) #f]
-                                                       [(> memory-use threshold4) #f]
-                                                       [(> memory-use threshold5) #f]
+                                                       [(> memory-use threshold2) 10]
+                                                       [(> memory-use threshold3) 5]
+                                                       [(> memory-use threshold4) 3]
+                                                       [(> memory-use threshold5) 1]
                                                        [else #f])]
                                    [now          (current-inexact-milliseconds)])
                               ; Log collection rate and memory stats:
