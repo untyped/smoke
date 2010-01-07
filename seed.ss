@@ -29,11 +29,11 @@
 
 ; seed (U string (-> void) callback) -> js
 (define (embed/ajax seed handler)
-  (js ((!dot Smoke doAjax) ,(embed/full seed handler))))
+  (embed/ajax/delay seed handler))
 
 ; seed (U string (-> void) callback) natural -> js
 (define (embed/ajax/delay seed handler [delay 100])
-  (js ((!dot Smoke doDelayedAjax) ,(embed/full seed handler))))
+  (js (!dot Smoke (doDelayedAjax ,delay ,(embed/full seed handler)))))
 
 ; seed (-> response) -> string
 (define (embed/thunk seed thunk)
