@@ -17,6 +17,7 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 
 .smoke-entity-editor th,
 .smoke-entity-editor td { vertical-align: top; padding: .5em; }
+.smoke-entity-editor th { white-space: nowrap; }
 
 .smoke-entity-editor .attribute-label { text-align: right; }
 .smoke-entity-editor .attribute-label label { display: inline; }
