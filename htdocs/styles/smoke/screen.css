@@ -60,6 +60,7 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 
   min-width: 200px;
   max-width: 500px;
+  min-height: 20px;
 
   border: 1px solid #aaa;
   background: #fff;
