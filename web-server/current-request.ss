@@ -2,7 +2,22 @@
 
 (require net/url
          scheme/contract
-         web-server/http)
+         web-server/http
+         web-server/private/connection-manager)
+
+; Current connection -----------------------------
+
+; (thread-cell (U connection #f))
+(define current-connection-cell
+  (make-thread-cell #f))
+
+; request -> void
+(define (current-connection-set! conn)
+  (thread-cell-set! current-connection-cell conn))
+
+; natural -> void
+(define (adjust-http-timeout! timeout)
+  (adjust-connection-timeout! (thread-cell-ref current-connection-cell) timeout))
 
 ; Current request --------------------------------
 
@@ -21,5 +36,7 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [current-request      (-> (or/c request? #f))]
- [current-request-set! (-> request? void?)])
+ [adjust-http-timeout!    (-> natural-number/c void?)]
+ [current-connection-set! (-> connection? void?)]
+ [current-request         (-> (or/c request? #f))]
+ [current-request-set!    (-> request? void?)])

@@ -199,6 +199,7 @@
   ; connection request -> void
   (apply sequencer:make
          `(,(lambda (conn req)
+              (current-connection-set! conn)
               (current-request-set! req)
               (next-dispatcher))
            ,(servlet:make url->servlet)

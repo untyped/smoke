@@ -5,8 +5,7 @@
 (require net/url
          scheme/contract
          srfi/26
-         (except-in web-server/http
-                    redirect-to)
+         (except-in web-server/http redirect-to)
          (except-in web-server/servlet
                     clear-continuation-table!
                     ; Web cell stuff:
@@ -53,7 +52,6 @@
 
 (provide (all-from-out web-server/http
                        web-server/servlet
-                       
                        "request.ss"
                        "request-util.ss"
                        "resume.ss"
@@ -61,6 +59,7 @@
                        "web-cell.ss"
                        "web.ss")
          ; From current-request.ss:
+         adjust-http-timeout!
          current-request)
 
 (provide/contract
