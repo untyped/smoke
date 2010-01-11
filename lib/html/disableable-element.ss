@@ -29,8 +29,8 @@
     (define/override (core-html-attributes seed
                                            #:id      [id      (get-id)]
                                            #:classes [classes (if (get-enabled?) 
-                                                                  classes
-                                                                  (cons 'ui-state-disabled classes))]
+                                                                  (get-classes)
+                                                                  (cons 'ui-state-disabled (get-classes)))]
                                            #:style   [style   (get-style)]
                                            #:tooltip [title   (get-tooltip)])
       (append (super core-html-attributes seed
