@@ -28,15 +28,19 @@
     ; Does NOT output the value.
     (define/override (core-html-attributes seed
                                            #:id      [id      (get-id)]
-                                           #:classes [classes (get-classes)]
+                                           #:classes [classes (if (get-enabled?) 
+                                                                  classes
+                                                                  (cons 'ui-state-disabled classes))]
                                            #:style   [style   (get-style)]
                                            #:tooltip [title   (get-tooltip)])
       (append (super core-html-attributes seed
                      #:id      id
-                     #:classes (if (get-enabled?) classes (cons 'ui-state-disabled classes))
+                     #:classes classes
                      #:style   style
                      #:tooltip title)
-              (if (get-enabled?) null (xml-attrs [disabled "disabled"]))))))
+              (if (get-enabled?)
+                  null
+                  (xml-attrs [disabled "disabled"]))))))
 
 ; Classes ----------------------------------------
 (define disableable-element%
