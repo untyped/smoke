@@ -32,8 +32,8 @@
 
 ; request symbol -> (U string #f)
 (define (request-binding-ref request key)
-  (or (request-get-binding-ref request key)
-      (request-post-binding-ref request key)))
+  (or (request-post-binding-ref request key)
+      (request-get-binding-ref request key)))
 
 ; request symbol -> (U string #f)
 (define (request-get-binding-ref request key)
