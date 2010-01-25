@@ -168,7 +168,7 @@
           (parameterize ([current-page this])
             (when push-frame?
               (resume-from-here))
-            (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
+            (send/suspend/dispatch (make-response-generator #:forward? forward?) #:push-frame? push-frame?))))
       
       (unless (current-request)
         (error "No current HTTP request to respond to."))
@@ -206,7 +206,7 @@
     (define/public (on-ajax-response)
       (void))
     
-    ; -> (embed-url -> response)
+    ; [#:forward? boolean] -> (embed-url -> response)
     ;
     ; Makes a response-generator for use with send/suspend/dispatch. The response type varies 
     ; according to the type of request being handled:
@@ -221,9 +221,9 @@
     ; displayed or changed. This is useful for, for example, showing a message to the user or
     ; performing some update action. The script is executed after all other script execution and
     ; content rendering.
-    (define/override (make-response-generator)
+    (define/override (make-response-generator #:forward? [forward? #f])
       (if (ajax-request? (current-request))
-          (if (equal? (ajax-request-page-id (current-request)) (get-component-id))
+          (if (and (not forward?) (equal? (ajax-request-page-id (current-request)) (get-component-id)))
               (make-ajax-response-generator)
               (make-ajax-redirect-response-generator))
           (if (post-request? (current-request))
