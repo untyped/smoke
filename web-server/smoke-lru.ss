@@ -58,7 +58,7 @@
                                 (make-js-response 
                                  #:code    200
                                  #:message "Expired continuation (AJAX response)"
-                                 (js (= (!dot window location) ,(url->initial-url (request-uri request)))))
+                                 (js (= (!dot window location href) ,(url->initial-url (request-uri request)))))
                                 (make-redirect-response 
                                  (url->initial-url (request-uri request))
                                  #:code    301
