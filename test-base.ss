@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (planet schematics/schemeunit:3)
          (planet schematics/schemeunit:3/text-ui)

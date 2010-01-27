@@ -1,9 +1,8 @@
-#lang scheme/base
+#lang web-server
 
 (require (only-in srfi/1 list-index)
-         scheme/class
-         scheme/contract
          srfi/26
+         "scheme/class.ss"
          "../web-server/web-cell.ss")
 
 ; Interfaces -------------------------------------
@@ -41,12 +40,8 @@
     ; raises exn:fail if called in the root web frame where changes
     ; cannot have been made.
     (define/public (dirty?)
-      (define frame (current-frame))
-      (unless (frame-parent frame)
-        (error "Cannot call dirty? in the root web frame."))
       (ormap (lambda (cell)
-               (and (web-cell-set? cell frame)
-                    (web-cell-changed? cell)))
+               (web-cell-changed? cell))
              web-cell-fields))
     
     ; cell -> void

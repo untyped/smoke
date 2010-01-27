@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require scheme/contract
          (prefix-in json: (planet dherman/json:1/json)))

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require file/md5
          scheme/contract

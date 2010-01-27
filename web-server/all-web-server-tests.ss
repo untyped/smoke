@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require "../test-base.ss"
          "continuation-url-test.ss"

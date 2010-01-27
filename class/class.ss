@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require "class-internal.ss"
          "syntax.ss")

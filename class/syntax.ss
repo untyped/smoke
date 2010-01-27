@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang web-server
 
 (require (for-syntax scheme/base
                      (only-in srfi/13 string-filter)
                      (planet untyped/unlib:3/debug)
                      (planet untyped/unlib:3/syntax)
                      "syntax-internal.ss")
-         scheme/class)
+         "scheme/class.ss")
 
 (define inferred-id-prefix
   (make-parameter "smoke"))
@@ -70,7 +70,7 @@
 
 ; Provide statements -----------------------------
 
-(provide (except-out (all-from-out scheme/class) new)
+(provide (except-out (all-from-out "scheme/class.ss") new)
          (rename-out [new/inferred-id new])
          class/cells
          mixin/cells

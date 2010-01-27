@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang scheme
 
 (require "../test-base.ss"
          "class-internal-test.ss"

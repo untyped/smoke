@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require srfi/26/cut
          "../test-base.ss"

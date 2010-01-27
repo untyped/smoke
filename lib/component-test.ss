@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (only-in srfi/13/string string-trim-both)
          "../lib-base.ss"

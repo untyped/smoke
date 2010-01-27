@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (planet untyped/unlib:3/bytes)
          "../lib-base.ss"
@@ -17,14 +17,15 @@
 
 (define page-mixin
   (mixin/cells (component<%>) (page<%>)
-    
-    (inherit on-request)
-    
-    ; Fields -------------------------------------
 
+    (inherit on-request)
+
+    ; Fields -------------------------------------
+    
     ; (cell integer)
     (init-cell http-code 200 #:accessor #:mutator)
     
+    #|
     ; (cell string)
     (init-cell http-status "OK" #:accessor #:mutator)
     
@@ -53,8 +54,7 @@
     ; Response generation ------------------------
     
     ; [#:forward? boolean] -> any
-    (define/public (respond #:forward? [forward? #f])
-      (when forward? (clear-continuation-table!))
+    (define/public (respond)
       (send/suspend/dispatch (make-response-generator)))
     
     ; -> ((procedure -> string) -> response)
@@ -66,7 +66,9 @@
          (get-http-status)
          (get-http-timestamp)
          (ensure-bytes (get-content-type))
-         (list "Under construction."))))))
+         (list "Under construction."))))
+|#
+    ))
 
 ; Procedures -------------------------------------
 
@@ -77,5 +79,5 @@
 ; Provide statements -----------------------------
 
 (provide page<%>
-         page-mixin
+         #;page-mixin
          page?)

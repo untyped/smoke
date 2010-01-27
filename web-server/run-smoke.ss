@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require net/sendurl
          net/ssl-tcp-unit

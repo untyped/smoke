@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require "../../lib-base.ss"
          "text-field.ss")

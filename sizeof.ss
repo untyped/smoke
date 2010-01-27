@@ -1,4 +1,4 @@
-#lang scheme
+#lang web-server
 
 (require (planet schematics/schemeunit:3)
          "web-server/web-cell.ss")

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (planet untyped/smoke:1/lib/html/browser-util)
          (planet untyped/unlib:3/string)

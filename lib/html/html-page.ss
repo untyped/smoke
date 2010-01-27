@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (for-syntax scheme/base)
          (only-in srfi/1 delete delete-duplicates)

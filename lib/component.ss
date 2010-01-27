@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (planet untyped/unlib:3/symbol)
          "../lib-base.ss")

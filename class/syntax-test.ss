@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang scheme
 
 (require (planet untyped/unlib:3/hash)
          "../test-base.ss"

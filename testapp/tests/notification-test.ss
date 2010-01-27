@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require srfi/13/string
          "../../test-base.ss")

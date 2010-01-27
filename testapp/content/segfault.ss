@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (for-syntax scheme/base)
          scheme/runtime-path

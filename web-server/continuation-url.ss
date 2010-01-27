@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require net/url
          scheme/contract
@@ -112,4 +112,3 @@
  [continuation-url->codes (-> url? (or/c (list/c natural? natural? natural?) false/c))]
  [url-path-base           (-> (listof path/param?) (listof path/param?))]
  [url-path-extension      (-> (listof path/param?) (or/c (listof path/param?) #f))])
-

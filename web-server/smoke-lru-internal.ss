@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 (require mzlib/plt-match
          mzlib/contract)
 (require web-server/managers/manager

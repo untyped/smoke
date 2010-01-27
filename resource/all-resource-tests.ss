@@ -1,4 +1,4 @@
-#lang scheme
+#lang web-server
 
 (require "../test-base.ss"
          "render-test.ss"

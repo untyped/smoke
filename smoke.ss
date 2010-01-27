@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (planet untyped/mirrors:2)
          "base.ss" ; not reprovided in its entirety

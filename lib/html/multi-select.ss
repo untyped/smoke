@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require (only-in srfi/1 delete)
          "../../lib-base.ss"

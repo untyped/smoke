@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang web-server
 
 (require mzlib/md5
          srfi/19

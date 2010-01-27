@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang scheme
 
 (require scheme/contract
          web-server/servlet)
@@ -18,8 +18,9 @@
 (define (ajax-request-requested-with request)
   ; (U string #f)
   (ormap (lambda (pair)
-           (or (equal? (car pair) 'x-requested-with)
-               (equal? (car pair) 'X-Requested-With)))
+           (and (or (equal? (car pair) 'x-requested-with)
+                    (equal? (car pair) 'X-Requested-With))
+                (cdr pair)))
          (request-headers request)))
 
 ; request -> (U symbol #f)
@@ -31,25 +32,9 @@
                 (string->symbol (cdr pair))))
          (request-headers request)))
 
-; request -> boolean
-(define (request-redirected-from-expired-instance? request)
-  (ormap (lambda (pair)
-           (or (equal? (car pair) 'x-smoke-expired-instance)
-               (equal? (car pair) 'X-Smoke-Expired-Instance)))
-         (request-headers request)))
-
-; request -> boolean
-(define (request-redirected-from-expired-continuation? request)
-  (ormap (lambda (pair)
-           (or (equal? (car pair) 'x-smoke-expired-continuation)
-               (equal? (car pair) 'X-Smoke-Expired-Continuation)))
-         (request-headers request)))
-
 ; Provide statements -----------------------------
 
 (provide/contract
- [ajax-request?                                 (-> any/c boolean?)]
- [ajax-request-requested-with                   (-> request? (or/c string? #f))]
- [ajax-request-page-id                          (-> request? (or/c symbol? #f))]
- [request-redirected-from-expired-instance?     (-> request? boolean?)]
- [request-redirected-from-expired-continuation? (-> request? boolean?)])
+ [ajax-request?               (-> any/c boolean?)]
+ [ajax-request-requested-with (-> request? (or/c string? #f))]
+ [ajax-request-page-id        (-> request? (or/c symbol? #f))])
