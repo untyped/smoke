@@ -1,23 +1,18 @@
-#lang web-server
+#lang scheme
 
-(require (planet schematics/schemeunit:3)
-         "web-server/web-cell.ss")
-
-(require/expose "web-server/web-cell.ss"
-  (frame-namespace))
+(require (planet schematics/schemeunit:3))
 
 (define cache (make-parameter #f))
 
 (define (sizeof/top x)
   (parameterize ([cache (make-hasheq)])
-    (sizeof x)))
+    (sizeof/struct x)))
 
 (define (sizeof x)
   (if (hash-has-key? (cache) x)
       (begin 0)
       (begin (hash-set! (cache) x #t)
-             (cond [(frame?     x)   (sizeof/frame       x)]
-                   [(string?    x)   (sizeof/string      x)]
+             (cond [(string?    x)   (sizeof/string      x)]
                    [(symbol?    x)   (sizeof/symbol      x)]
                    [(bytes?     x)   (sizeof/bytes       x)]
                    [(number?    x)   (sizeof/number      x)]
@@ -42,12 +37,6 @@
 ; objects are n+3 words for a class with n fields, 
 ; classes are n+2 words for n methods, 
 ; some of those "+1"s could be "+2"s (or +2s being +3s, etc).
-
-(define (sizeof/frame frame)
-  (+ 4 ; struct descriptor
-     (sizeof (frame-id frame))
-     4 ; reference to parent
-     (sizeof (frame-namespace frame))))
 
 (define (sizeof/string str)
   (+ 4 ; length

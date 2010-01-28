@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require (only-in srfi/1 list-index)
          "submit-button.ss"

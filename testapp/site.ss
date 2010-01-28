@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require "base.ss")
 
@@ -29,12 +29,6 @@
    [("/tab")                          tab]
    [("/tooltip")                      tooltip])
   #:requestless? #t)
-
-(default-controller-wrapper
-  (lambda (controller . args)
-    (init-smoke
-     (lambda ()
-       (apply plain-controller-wrapper controller args)))))
 
 ; Controllers ------------------------------------
 

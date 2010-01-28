@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require (planet untyped/unlib:3/require))
 
@@ -7,7 +7,7 @@
          web-server/servlet-env
          (planet untyped/delirium:3)
          "all-smoke-tests.ss"
-         "smoke.ss"
+         "main.ss"
          (except-in "testapp/content-base.ss" focus)
          "testapp/content/content.ss")
 

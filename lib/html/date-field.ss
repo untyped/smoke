@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme
 
 (require srfi/19
          (planet untyped/unlib:3/time)

@@ -1,10 +1,11 @@
-#lang web-server
+#lang scheme/base
 
 (require (for-template scheme/base
-                       "scheme/class.ss"
-                       (planet untyped/unlib:3/debug)
-                       "../web-server/web-cell.ss")
-         (planet untyped/unlib:3/debug)
+                       scheme/class
+                       "../core/web-cell.ss")
+         scheme/contract
+         scheme/match
+         srfi/26
          (planet untyped/unlib:3/syntax))
 
 ; Seed structure ---------------------------------
@@ -146,33 +147,31 @@
     [() seed]
     [(kw other ...)
      (call-with-values
-      (lambda ()
-        (match (syntax->datum #'kw)
-          ['#:child             (expand-child-keyword           id-stx #'(other ...) cell? seed)]
-          ['#:children          (expand-children-keyword        id-stx #'(other ...) cell? seed)]
-          ['#:child-transform   (expand-child-transform-keyword id-stx #'(other ...) cell? seed)]
-          ['#:optional-child    (expand-optional-child-keyword  id-stx #'(other ...) cell? seed)]
-          ['#:accessor          (expand-accessor-keyword        id-stx #'(other ...) cell? #f seed)]
-          ['#:mutator           (expand-mutator-keyword         id-stx #'(other ...) cell? #f seed)]
-          ['#:override-accessor (expand-accessor-keyword        id-stx #'(other ...) cell? #t seed)]
-          ['#:override-mutator  (expand-mutator-keyword         id-stx #'(other ...) cell? #t seed)]
-          [other                (error (format "Expected keyword, received ~s" other))]))
-      (lambda (rest-stx seed)
-        (expand-keywords id-stx rest-stx cell? seed)))]))
+      (cut match (syntax->datum #'kw)
+           ['#:child             (expand-child-keyword           id-stx #'(other ...) cell? seed)]
+           ['#:children          (expand-children-keyword        id-stx #'(other ...) cell? seed)]
+           ['#:child-transform   (expand-child-transform-keyword id-stx #'(other ...) cell? seed)]
+           ['#:optional-child    (expand-optional-child-keyword  id-stx #'(other ...) cell? seed)]
+           ['#:accessor          (expand-accessor-keyword        id-stx #'(other ...) cell? #f seed)]
+           ['#:mutator           (expand-mutator-keyword         id-stx #'(other ...) cell? #f seed)]
+           ['#:override-accessor (expand-accessor-keyword        id-stx #'(other ...) cell? #t seed)]
+           ['#:override-mutator  (expand-mutator-keyword         id-stx #'(other ...) cell? #t seed)]
+           [other                (error (format "Expected keyword, received ~s" other))])
+      (cut expand-keywords id-stx <> cell? <>))]))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-child-keyword id-stx other-stx cell? seed)
   (with-syntax ([transform #'list])
-    (syntax-case other-stx ()
-      [(other ...)
-       (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
+     (syntax-case other-stx ()
+       [(other ...)
+        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-children-keyword id-stx other-stx cell? seed)
   (with-syntax ([transform #'(lambda (x) x)])
-    (syntax-case other-stx ()
-      [(other ...)
-       (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
+     (syntax-case other-stx ()
+       [(other ...)
+        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-child-transform-keyword id-stx other-stx cell? seed)
@@ -199,41 +198,35 @@
 
 ; syntax syntax boolean boolean seed -> syntax seed
 (define (expand-accessor-keyword id-stx other-stx cell? override? seed)
-  (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
-    (with-syntax ([define/whatever (if override?
-                                       #'define/override
-                                       #'define/public)]
-                  [accessor-body   (if cell? 
-                                       #'(web-cell-ref cell-id)
-                                       #'id)])
-      (syntax-case other-stx ()
-        [(accessor-id other ...)
-         (identifier? #'accessor-id)
-         (values #'(other ...) (add-body seed #`(define/whatever (accessor-id) accessor-body)))]
-        [(other ...)    
-         (with-syntax ([accessor-id (make-id id-stx 'get- id-stx)])
-           (values other-stx (add-body seed #`(define/whatever (accessor-id) accessor-body))))]))))
+  (with-syntax ([define/whatever (if override?
+                                     #'define/override
+                                     #'define/public)]
+                [accessor-body   (if cell? 
+                                     #`(web-cell-ref #,(make-cell-id id-stx))
+                                     id-stx)])
+    (syntax-case other-stx ()
+      [(accessor-id other ...)
+       (identifier? #'accessor-id)
+       (values #'(other ...) (add-body seed #`(define/whatever (accessor-id) accessor-body)))]
+      [(other ...)    
+       (with-syntax ([accessor-id (make-id id-stx 'get- id-stx)])
+         (values other-stx (add-body seed #`(define/whatever (accessor-id) accessor-body))))])))
 
 ; syntax syntax boolean boolean seed -> syntax seed
 (define (expand-mutator-keyword id-stx other-stx cell? override? seed)
-  (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
-    (with-syntax ([define/whatever (if override?
-                                       #'define/override
-                                       #'define/public)]
-                  [mutator-body    (if cell? 
-                                       #'(web-cell-set! cell-id val)
-                                       #'(set! id val))])
-      (syntax-case other-stx ()
-        [(mutator-id other ...)
-         (identifier? #'mutator-id)
-         (values #'(other ...) (add-body seed #'(define/whatever (mutator-id val)
-                                                  (debug-location (symbol->string 'mutator-id))
-                                                  mutator-body)))]
-        [(other ...)    
-         (with-syntax ([mutator-id (make-id id-stx 'set- id-stx '!)])
-           (values #'(other ...) (add-body seed #'(define/whatever (mutator-id val)
-                                                    (debug-location (symbol->string 'mutator-id))
-                                                    mutator-body))))]))))
+  (with-syntax ([define/whatever (if override?
+                                     #'define/override
+                                     #'define/public)]
+                [mutator-body    (if cell? 
+                                     #`(web-cell-set! #,(make-cell-id id-stx) val)
+                                     #`(set! #,id-stx val))])
+    (syntax-case other-stx ()
+      [(mutator-id other ...)
+       (identifier? #'mutator-id)
+       (values #'(other ...) (add-body seed #`(define/whatever (mutator-id val) mutator-body)))]
+      [(other ...)    
+       (with-syntax ([mutator-id (make-id id-stx 'set- id-stx '!)])
+         (values other-stx (add-body seed #`(define/whatever (mutator-id val) mutator-body))))])))
 
 ; syntax seed -> seed
 (define (expand-method-clause clause-stx seed)
@@ -245,7 +238,7 @@
        (cond [(equal? key-datum '#:callback)
               (add-foot (add-body seed #'(define/whatever (id arg ...) expr ...))
                         #'(send this register-callback! 'id (lambda args (id . args)) #t))]
-             [(equal? key-datum '#:callback/return)
+             [(equal? key-datum '#:callback*)
               (add-foot (add-body seed #'(define/whatever (id arg ...) expr ...))
                         #'(send this register-callback! 'id (lambda args (id . args)) #f))]
              [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)]))]
@@ -256,7 +249,7 @@
        (cond [(equal? key-datum '#:callback)
               (add-foot (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
                         #'(send this register-callback! 'id (lambda args (id . args)) #t))]
-             [(equal? key-datum '#:callback/return)
+             [(equal? key-datum '#:callback*)
               (add-foot (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
                         #'(send this register-callback! 'id (lambda args (id . args)) #f))]
              [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)]))]

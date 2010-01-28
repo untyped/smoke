@@ -1,7 +1,7 @@
-#lang web-server
+#lang scheme/base
 
 (require "../../test-base.ss"
-         "../../smoke.ss")
+         "../../main.ss")
 
 ; Tests ------------------------------------------
 

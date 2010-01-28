@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme
 
 (require "../../lib-base.ss"
          "../component.ss")
@@ -83,8 +83,7 @@
     ;   - attach scripts from all subtree components *in the current web frame*.
     (define/public (get-on-refresh seed)
       (define id (send this get-component-id))
-      (js (try ,(call-with-frame (frame-parent (current-frame))
-                  (cut get-on-detach seed))
+      (js (try ,(with-old-web-frame (get-on-detach seed))
                (catch exn (!dot Smoke (badDetach exn))))
           (try ,(get-on-render seed)
                (catch exn (!dot Smoke (badRender exn))))

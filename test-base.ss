@@ -1,11 +1,11 @@
-#lang web-server
+#lang scheme/base
 
 (require (planet schematics/schemeunit:3)
          (planet schematics/schemeunit:3/text-ui)
          (planet schematics/schemeunit:3/util)
          (planet untyped/delirium:3)
          "lib-base.ss"
-         "smoke.ss"
+         "main.ss"
          (except-in "testapp/site.ss" focus))
 
 ; Provide statements -----------------------------
@@ -15,5 +15,5 @@
                        (planet schematics/schemeunit:3/util)
                        (planet untyped/delirium:3)
                        "lib-base.ss"
-                       "smoke.ss"
+                       "main.ss"
                        "testapp/site.ss"))

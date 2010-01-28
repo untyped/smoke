@@ -1,17 +1,12 @@
-#lang scheme/base
+#lang scheme
 
-(require scheme/contract
-         scheme/list
-         scheme/match
-         scheme/pretty
-         scheme/runtime-path
+(require scheme/runtime-path
          srfi/26
          (planet untyped/unlib:3/debug)
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/exn)
          (planet untyped/unlib:3/log)
-         "class/class.ss"
-         "web-server/servlet.ss")
+         "class/class.ss")
 
 ; Configuration --------------------------------
 
@@ -42,17 +37,12 @@
 
 ; Provide statements --------------------------- 
 
-(provide (all-from-out scheme/contract
-                       scheme/list
-                       scheme/match
-                       scheme/pretty
-                       srfi/26
+(provide (all-from-out srfi/26
                        (planet untyped/mirrors:2)
                        (planet untyped/unlib:3/debug)
                        (planet untyped/unlib:3/exn)
                        (planet untyped/unlib:3/log)
-                       "class/class.ss"
-                       "web-server/servlet.ss"))
+                       "class/class.ss"))
 
 (provide/contract
  [dev?                                           (parameter/c boolean?)]

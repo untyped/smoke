@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme
 
 (require "../../lib-base.ss")
 

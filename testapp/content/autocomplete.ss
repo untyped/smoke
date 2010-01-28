@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require srfi/13
          "../content-base.ss")

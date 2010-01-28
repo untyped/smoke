@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require (for-syntax scheme/base)
          scheme/contract
@@ -9,8 +9,7 @@
          (planet untyped/dispatch:3)
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/debug)
-         "../dispatch.ss"
-         "../smoke.ss")
+         "../main.ss")
 
 ; path
 (define-runtime-path testapp-htdocs-path "htdocs")
@@ -24,8 +23,7 @@
                        (planet untyped/dispatch:3)
                        (planet untyped/mirrors:2)
                        (planet untyped/unlib:3/debug)
-                       "../dispatch.ss"
-                       "../smoke.ss"))
+                       "../main.ss"))
 
 (provide/contract
  [testapp-htdocs-path path?])

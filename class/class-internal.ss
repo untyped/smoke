@@ -1,9 +1,10 @@
-#lang web-server
+#lang scheme/base
 
 (require (only-in srfi/1 list-index)
+         scheme/class
+         scheme/contract
          srfi/26
-         "scheme/class.ss"
-         "../web-server/web-cell.ss")
+         "../core/web-cell.ss")
 
 ; Interfaces -------------------------------------
 
@@ -34,15 +35,9 @@
     ; -> boolean
     ;
     ; Returns #t if this component has changed and/or needs refreshing.
-    ;
-    ; The default implementation returns #t if any of the component's
-    ; web cell content (including child web cells) has changed, and
-    ; raises exn:fail if called in the root web frame where changes
-    ; cannot have been made.
     (define/public (dirty?)
-      (ormap (lambda (cell)
-               (web-cell-changed? cell))
-             web-cell-fields))
+      (for/or ([cell (in-list web-cell-fields)])
+        (web-cell-changed? cell)))
     
     ; cell -> void
     (define/public (register-web-cell-field! cell)

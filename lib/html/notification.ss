@@ -1,9 +1,8 @@
-#lang web-server
+#lang scheme/base
 
 (require srfi/13
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
-         "../../web-server/session-cell.ss"
          "browser-util.ss"
          "html-element.ss"
          "jquery-ui-util.ss")

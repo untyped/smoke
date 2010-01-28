@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme
 
 (require srfi/13
          (planet untyped/unlib:3/for)
@@ -85,8 +85,7 @@
      ;   - attach scripts from all subtree components *in the current web frame*.
      (define/override (get-on-refresh seed)
        (let ([id (get-id)])
-         (js (try ,(call-with-frame (frame-parent (current-frame))
-                                    (cut get-on-detach seed))
+         (js (try ,(with-old-web-frame (get-on-detach seed))
                   (catch exn (!dot Smoke (badDetach exn ,id))))
              (try ,(get-on-render seed)
                   (catch exn (!dot Smoke (badRender exn ,id))))

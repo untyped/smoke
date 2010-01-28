@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require (only-in web-server/managers/manager manager?)
          web-server/managers/lru

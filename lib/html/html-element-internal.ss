@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require (for-syntax scheme/base
                      "../../class/class.ss"

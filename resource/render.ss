@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require net/url
          srfi/13

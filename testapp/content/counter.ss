@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require "../content-base.ss")
 
@@ -24,12 +24,10 @@
     ; seed -> xml
     (define/augment (render seed)
       (xml (p "Counter: " (span (@ [id 'counter]) ,(get-counter)) " "
-              (a (@ [id "full-add1"] [href ,(embed seed (cut on-increment))]) "[Full add1]") " "
-              (a (@ [id "full-sub1"] [href ,(embed seed (cut on-decrement))]) "[Full sub1]") " "
-              (a (@ [id "ajax-add1"] [onclick ,(embed/ajax seed (cut on-increment))]) "[AJAX add1]") " "
-              (a (@ [id "ajax-sub1"] [onclick ,(embed/ajax seed (cut on-decrement))]) "[AJAX sub1]") " "
-              (a (@ [id "callback-add1"] [onclick ,(embed/ajax seed (callback on-increment))]) "[Callback add1]") " "
-              (a (@ [id "callback-sub1"] [onclick ,(embed/ajax seed (callback on-decrement))]) "[Callback sub1]"))))
+              (a (@ [id "full-add1"] [href    ,(embed seed (callback on-increment))]) "[Full add1]") " "
+              (a (@ [id "full-sub1"] [href    ,(embed seed (callback on-decrement))]) "[Full sub1]") " "
+              (a (@ [id "ajax-add1"] [onclick ,(embed/ajax seed (callback on-increment))]) "[AJAX add1]") " "
+              (a (@ [id "ajax-sub1"] [onclick ,(embed/ajax seed (callback on-decrement))]) "[AJAX sub1]"))))
       
     ; -> void
     (define/public #:callback (on-increment)

@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require srfi/13/string
          "../../lib-base.ss"
@@ -11,24 +11,24 @@
     
     ; Fields -------------------------------------
     
-    ; (cell boolean)
-    (init-cell refresh? #f #:accessor)
+    ; (cell (thread-cell boolean))
+    (field refresh-cell (make-thread-cell #f))
+    
+    ; Constructor --------------------------------
+    
+    (init [refresh? #f])
+    
+    (when refresh? (refresh!))
     
     ; Methods ------------------------------------
     
     ; -> void
     (define/public (refresh!)
-      (web-cell-set! refresh?-cell #t))
+      (thread-cell-set! refresh-cell #t))
     
     ; -> boolean
     (define/override (dirty?)
-      (or (for/fold ([ans #f])
-                    ([frame (in-frames)])
-                    (or (begin0
-                          (and (web-cell-set? refresh?-cell frame)
-                               (web-cell-ref refresh?-cell frame))
-                          (web-cell-unset! refresh?-cell frame))
-                        ans))
+      (or (thread-cell-ref refresh-cell)
           (super dirty?)))))
 
 ; Provide statements -----------------------------

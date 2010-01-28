@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme
 
 (require (only-in srfi/13 string-pad)
          srfi/19

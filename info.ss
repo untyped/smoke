@@ -10,7 +10,7 @@
     (ul (li "Initial release."))))
 
 (define primary-file
-  "smoke.ss")
+  "main.ss")
 
 (define url "http://svn.untyped.com/smoke/")
 

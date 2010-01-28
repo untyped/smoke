@@ -1,9 +1,7 @@
-#lang web-server
+#lang scheme
 
-(require scheme/contract
-         srfi/26
-         "current-request.ss"
-         "session.ss")
+(require "env.ss"
+         #;"session.ss")
 
 ; Structure types --------------------------------
 
@@ -18,20 +16,23 @@
 
 ; sesion-cell -> any
 (define (session-cell-ref cell)
+  (printf "session-cell-ref needs to be implemented properly~n")
   (hash-ref (session-cell-hash cell)
-            (request-session-id (current-request))
+            'abc123 #;(request-session-id (current-request))
             (session-cell-default cell)))
 
 ; sesion-cell any -> void
 (define (session-cell-set! cell val)
+  (printf "session-cell-set! needs to be implemented properly~n")
   (hash-set! (session-cell-hash cell)
-             (request-session-id (current-request))
+             'abc123 #;(request-session-id (current-request))
              val))
 
 ; sesion-cell -> void
 (define (session-cell-unset! cell)
+  (printf "session-cell-unset! needs to be implemented properly~n")
   (hash-remove! (session-cell-hash cell)
-                (request-session-id (current-request))))
+                'abc123 #;(request-session-id (current-request))))
 
 ; Provide statements -----------------------------
 

@@ -1,15 +1,12 @@
-#lang web-server
+#lang scheme
 
-(require (for-syntax scheme/base)
-         (only-in srfi/1 delete delete-duplicates)
+(require (only-in srfi/1 delete delete-duplicates)
          (only-in (planet schematics/schemeunit:3/text-ui) display-exn)
          (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "../../sizeof.ss"
-         "../../web-server/expired-continuation.ss"
-         "../../web-server/resume.ss"
          "../page.ss"
          "browser-util.ss"
          "html-component.ss"
@@ -43,7 +40,7 @@
   (let ([log (frame-size-logger)])
     (when log
       (log (request-uri (current-request))
-           (sizeof (current-frame))))))
+           (sizeof (capture-web-frame))))))
 
 (define-syntax-rule (log-response-time type expr ...)
   (let ([body (lambda () expr ...)]
@@ -108,9 +105,6 @@
     ; (cell string)
     (init-cell generator "Smoke by Untyped" #:accessor #:mutator)
     
-    ; (cell (U (list integer integer integer) #f))
-    (cell callback-codes #f #:accessor #:mutator)
-    
     ; (cell (listof (U xml (seed -> xml))))
     (cell current-html-requirements null #:accessor #:mutator)
     
@@ -159,44 +153,25 @@
                smoke-styles
                (inner null get-html-requirements))))
     
-    ;  [#:forward? boolean] -> any
+    ;  [#:forward? boolean] -> response
     (define/override (respond #:forward? [forward? #f])
-      (define (actually-respond)
-        (let ([push-frame? (and (not (ajax-request? (current-request)))
-                                (not (post-request? (current-request))))])
-          (when forward? (clear-continuation-table!))
-          (parameterize ([current-page this])
-            (when push-frame?
-              (resume-from-here))
-            (send/suspend/dispatch (make-response-generator) #:push-frame? push-frame?))))
-      
       (unless (current-request)
         (error "No current HTTP request to respond to."))
       
-      (when (expired-continuation-type)
-        (notifications-add! (expired-continuation-xml (expired-continuation-type)))
-        (expired-continuation-type-reset!))
+      ;(when (expired-continuation-type)
+      ;  (notifications-add! (expired-continuation-xml (expired-continuation-type)))
+      ;  (expired-continuation-type-reset!))
       
-      (if (resume-available?)
-          (actually-respond)
-          (send/suspend/dispatch
-           (lambda (embed-url)
-             (let* ([url0 (request-uri (current-request))]
-                    [url1 (string->url (embed-url actually-respond))])
-               (make-redirect-response
-                (make-url (url-scheme url1)
-                          (url-user url1)
-                          (url-host url1)
-                          (url-port url1)
-                          (url-path-absolute? url1)
-                          (url-path url1)
-                          (url-query url0)
-                          (url-fragment url0))))))))
+      (when forward?
+        (clear-history!))
+      
+      (current-page-set! this)
+      (make-response))
     
     ; expired-continuation-type -> xml
-    (define/public (expired-continuation-xml type)
-      (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
-           "If you were in the process of making changes, please check to make sure they have been saved correctly."))
+    ;(define/public (expired-continuation-xml type)
+    ;  (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
+    ;       "If you were in the process of making changes, please check to make sure they have been saved correctly."))
     
     ; -> void
     (define/public (on-full-response)
@@ -206,7 +181,7 @@
     (define/public (on-ajax-response)
       (void))
     
-    ; -> (embed-url -> response)
+    ; -> -> response
     ;
     ; Makes a response-generator for use with send/suspend/dispatch. The response type varies 
     ; according to the type of request being handled:
@@ -221,28 +196,26 @@
     ; displayed or changed. This is useful for, for example, showing a message to the user or
     ; performing some update action. The script is executed after all other script execution and
     ; content rendering.
-    (define/override (make-response-generator)
+    (define/public (make-response)
       (if (ajax-request? (current-request))
           (if (equal? (ajax-request-page-id (current-request)) (get-component-id))
-              (make-ajax-response-generator)
-              (make-ajax-redirect-response-generator))
+              (make-ajax-response)
+              (make-ajax-redirect-response))
           (if (post-request? (current-request))
-              (make-full-redirect-response-generator)
-              (make-full-response-generator))))
+              (make-full-redirect-response)
+              (make-full-response))))
     
-    ; -> (embed-url -> response)
+    ; -> response
     ;
     ; Makes a response-generator that creates a complete XHTML response for this page.
-    (define/public (make-full-response-generator)
-      (lambda (embed-url)
-        (on-full-response)
-        (log-frame-size)
-        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (log-response-time
-           (smoke-response-types full)
-           ; seed
-           (define seed (make-seed this embed-url))
-           (set-callback-codes! (make-callback-codes seed))
+    (define/public (make-full-response)
+      (on-full-response)
+      (log-frame-size)
+      (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
+        (log-response-time
+         (smoke-response-types full)
+         ; seed
+         (let ([seed (make-seed)])
            ; Store the initial requirements for the page:
            (set-current-html-requirements! (delete-duplicates (get-html-requirements/fold)))
            (set-current-js-requirements! (delete-duplicates (get-js-requirements/fold)))
@@ -283,19 +256,17 @@
                                        (!raw "\n// ]]>\n")))
                          (body (@ ,@(core-html-attributes seed)) ,content)))))))))
     
-    ; -> (embed-url -> response)
+    ; -> response
     ;
-    ; Makes a response-generator that creates an AJAX Javascript response that 
-    ; refreshes appropriate parts of this page.
-    (define/public (make-ajax-response-generator)
-      (lambda (embed-url)
-        (on-ajax-response)
-        (log-frame-size)
-        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (log-response-time
-           (smoke-response-types ajax)
-           ; seed
-           (define seed (make-seed this embed-url))
+    ; Makes an AJAX Javascript response that refreshes appropriate parts of this page.
+    (define/public (make-ajax-response)
+      (on-ajax-response)
+      (log-frame-size)
+      (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
+        (log-response-time
+         (smoke-response-types ajax)
+         ; seed
+         (let ([seed (make-seed)])
            ; response
            (with-handlers ([exn? (lambda (exn)
                                    (display-exn exn)
@@ -319,45 +290,47 @@
                               (get-dirty-components)))
                      jQuery)))))))))
     
-    ; -> (embed-url -> response)
+    ; -> response
     ;
     ; This response is sent as the first response from any page. It sets up
     ; a top web frame and makes sure that any AJAX operations the user performs
     ; aren't lost if they hit Reload.
-    (define/public (make-full-redirect-response-generator)
-      (lambda (embed-url)
-        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (log-response-time
-           (smoke-response-types full-redirect)
-           ; seed
-           (define seed (make-seed this embed-url))
+    (define/public (make-full-redirect-response)
+      (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
+        (log-response-time
+         (smoke-response-types full-redirect)
+         ; seed
+         (let ([seed (make-seed)])
            (make-html-response
             #:code      301 
             #:message   "Moved Permanently"
             #:mime-type #"text/html"
-            #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/thunk seed (cut respond))))
+            #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/full seed (callback on-refresh))))
                               no-cache-http-headers)
             (xml))))))
     
-    ; -> (embed-url -> response)
+    ; -> response
     ;
-    ; Makes a response-generator that redirects the browser to this page.
+    ; Makes a response that redirects the browser to this page.
     ;
     ; When this procedure is called, the current frame should be a child of
     ; the AJAX frame of the page. The rendering seed is set up to use the
     ; AJAX frame as the base frame for subsequent requests. The current frame
     ; is squeezed into the AJAX frame right before the response is sent.
-    (define/public (make-ajax-redirect-response-generator)
-      (lambda (embed-url)
-        (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
-          (log-response-time
-           (smoke-response-types ajax-redirect)
-           ; seed
-           (define seed (make-seed this embed-url))
+    (define/public (make-ajax-redirect-response)
+      (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
+        (log-response-time
+         (smoke-response-types ajax-redirect)
+         ; seed
+         (let ([seed (make-seed)])
            ; response
            (make-js-response 
             (js (= (!dot window location)
-                   ,(embed/thunk seed (cut respond)))))))))
+                   ,(embed/full seed (callback on-refresh)))))))))
+    
+    ; -> void
+    (define/public #:callback (on-refresh)
+      (void))
     
     ; seed -> xml
     (define/public (render-head seed)

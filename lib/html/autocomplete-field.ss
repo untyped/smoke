@@ -1,4 +1,4 @@
-#lang web-server
+#lang scheme/base
 
 (require srfi/13
          (planet untyped/unlib:3/list)
@@ -80,18 +80,18 @@
                           binding))))))
     
     ; -> void
-    (define/public #:callback (on-popup)
+    (define/public #:callback* (on-popup)
       (define prefix  (request-binding-ref (current-request) 'prefix))
       (define options (get-options prefix))
-      (send/back (make-js-response 
-                  (js ((function ()
-                         ; autocomplete.js is written as if all autocompletes are
-                         ; multi-column, so return an arrayOf(arrayOf(string)):
-                         (return ,(apply js:array 
-                                         (map (if (get-multi-column?)
-                                                  (cut apply js:array <>)
-                                                  js:array)
-                                              options)))))))))
+      (make-js-response 
+       (js ((function ()
+              ; autocomplete.js is written as if all autocompletes are
+              ; multi-column, so return an arrayOf(arrayOf(string)):
+              (return ,(apply js:array 
+                              (map (if (get-multi-column?)
+                                       (cut apply js:array <>)
+                                       js:array)
+                                   options))))))))
     
     ; string (U string #f) -> boolean
     (define (option+column-matches? option prefix)

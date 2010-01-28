@@ -1,12 +1,8 @@
-#lang web-server
+#lang scheme/base
 
-(require (planet untyped/unlib:3/require))
-
-(require scheme/cmdline
-         "content-base.ss"
-         "content/content.ss")
+(require "content-base.ss"
+         "content/counter.ss")
 
 (serve/smoke
- (lambda ()
-   (site-dispatch test-site (current-request)))
+ (new application% [page counter-page])
  #:htdocs-paths (list testapp-htdocs-path))

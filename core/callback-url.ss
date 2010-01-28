@@ -1,26 +1,18 @@
-#lang scheme/base
+#lang scheme
 
 (require net/url
-         scheme/contract
-         (only-in srfi/1 drop-right)
-         srfi/13
+         srfi/26
+         web-server/http
          (planet untyped/unlib:3/debug)
-         "base.ss"
-         "json.ss"
-         "class/class.ss")
+         "callback.ss"
+         "env.ss"
+         "interfaces.ss"
+         "json.ss")
 
-; Structure types --------------------------------
-
-; (struct page<%> (thunk -> string))
-(define-struct seed (page embed-url) #:transparent)
-
-; (struct html-component<%> symbol (listof json-serializable))
-(define-struct callback (component callback-id args) #:transparent)
-
-; Variables --------------------------------------
-
-; (parameter (U html-page<%> #f))
-(define current-page (make-parameter #f))
+(define-syntax-rule (debug-path msg fn arg ...)
+  (let ([p (fn arg ...)])
+    (debug msg (map path/param-path p))
+    p))
 
 ; Procedures -------------------------------------
 
@@ -28,13 +20,11 @@
 (define (callback-url seed callback)
   (url->string
    (make-url #f #f #f #f #t
-             (append (url-path-base (url-path (request-uri (current-request))))
+             (append (url-path-base (request-uri (current-request)))
                      (map (cut make-path/param <> null)
                           (list* "_"
                                  (symbol->string (send (callback-component callback) get-component-id))
-                                 (symbol->string (send (callback-component callback)
-                                                       verify-callback-id
-                                                       (callback-callback-id callback)))
+                                 (symbol->string (send (callback-component callback) verify-callback-id (callback-callback-id callback)))
                                  (map (lambda (arg)
                                         (if (symbol? arg)
                                             (if (memq arg '(true false null))
@@ -46,7 +36,7 @@
 
 ; request page -> (U callback #f)
 (define (request->callback request page)
-  (match (url-path-extension (url-path (request-uri request)))
+  (match (url-path-extension (request-uri request))
     [(list component-id-element ; path/param
            callback-id-element  ; path/param
            arg-elements ...)    ; (listof path/param)
@@ -62,11 +52,32 @@
                       args))]
     [#f #f]))
 
+; (listof path/param) -> (listof path/param)
+(define (url-path-base url)
+  (if (url-path-absolute? url)
+      (match (map path/param-path (url-path url))
+        [(list "") null]
+        [(or (list base ... "_" _ ...)
+             (list base ...))
+         (for/list ([str (in-list base)])
+           (make-path/param str null))])
+      (raise-type-error 'url-path-base "absolute-url" url)))
+
+; (listof path/param) -> (U (listof path/param) #f)
+(define (url-path-extension url)
+  (if (url-path-absolute? url)
+      (match (map path/param-path (url-path url))
+        [(list "") null]
+        [(list _ ... "_" ext ...)
+         (for/list ([str (in-list ext)])
+           (make-path/param str null))]
+        [_ null])
+      (raise-type-error 'url-path-extension "absolute-url" url)))
+
 ; Provide statements -----------------------------
 
 (provide/contract
- [struct seed            ([page any/c] [embed-url procedure?])]
- [struct callback        ([component any/c] [callback-id symbol?] [args (listof (or/c symbol? json-serializable?))])]
- [current-page           parameter?]
- [callback-url           (-> seed? callback? string?)]
- [request->callback      (-> request? any/c (or/c callback? false/c))])
+ [callback-url       (-> seed? callback? string?)]
+ [request->callback  (-> request? (is-a?/c page<%>) (or/c callback? #f))]
+ [url-path-base      (-> (listof path/param?) (listof path/param?))]
+ [url-path-extension (-> (listof path/param?) (or/c (listof path/param?) #f))])

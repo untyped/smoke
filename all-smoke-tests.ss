@@ -1,6 +1,6 @@
-#lang web-server
+#lang scheme/base
 
-(require "smoke.ss"
+(require "main.ss"
          "test-base.ss"
          "class/all-class-tests.ss"
          #;"resource/all-resource-tests.ss"

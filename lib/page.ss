@@ -1,31 +1,19 @@
-#lang web-server
+#lang scheme/base
 
 (require (planet untyped/unlib:3/bytes)
          "../lib-base.ss"
          "component.ss")
 
-(define page<%>
-  (interface ()
-    get-http-code             ; -> integer
-    get-http-headers          ; -> (listof header)
-    get-http-status           ; -> string
-    get-content-type          ; -> string
-    get-http-timestamp        ; -> integer
-    handle-request            ; (-> any) -> any
-    respond                   ; [#:forward? boolean] -> void
-    make-response-generator)) ; web-server-embed-url -> string
-
 (define page-mixin
   (mixin/cells (component<%>) (page<%>)
-
+    
     (inherit on-request)
-
+    
     ; Fields -------------------------------------
     
     ; (cell integer)
     (init-cell http-code 200 #:accessor #:mutator)
     
-    #|
     ; (cell string)
     (init-cell http-status "OK" #:accessor #:mutator)
     
@@ -55,20 +43,12 @@
     
     ; [#:forward? boolean] -> any
     (define/public (respond)
-      (send/suspend/dispatch (make-response-generator)))
-    
-    ; -> ((procedure -> string) -> response)
-    (define/public (make-response-generator)
-      (lambda (embed-url)
-        (define seed (make-seed this embed-url))
-        (make-response/full
-         (get-http-code)
-         (get-http-status)
-         (get-http-timestamp)
-         (ensure-bytes (get-content-type))
-         (list "Under construction."))))
-|#
-    ))
+      (make-plain-response
+       #:code      (get-http-code)
+       #:status    (get-http-status)
+       #:seconds   (get-http-timestamp)
+       #:mime-type (ensure-bytes (get-content-type))
+       (list "Under construction.")))))
 
 ; Procedures -------------------------------------
 
@@ -78,6 +58,6 @@
 
 ; Provide statements -----------------------------
 
-(provide page<%>
-         #;page-mixin
+(provide #;page<%>
+         page-mixin
          page?)
