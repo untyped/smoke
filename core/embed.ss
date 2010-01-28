@@ -12,7 +12,7 @@
 (define (embed/full seed handler)
   (match handler
     [(? string?)   handler]
-    [(? callback?) (callback-url seed handler)]))
+    [(? callback?) (callback->url seed handler)]))
 
 ; seed (U string (-> void) callback) -> string
 (define embed embed/full)
@@ -29,8 +29,14 @@
 ; (_ id #:arg-name json-serializable ...)
 (define-syntax callback
   (syntax-rules ()
-    [(_ [obj method] arg ...) (make-callback obj  (send obj  verify-callback-id 'method) (list arg ...))]
-    [(_ method arg ...)       (make-callback this (send this verify-callback-id 'method) (list arg ...))]))
+    [(_ [obj method] arg ...)
+     (make-callback (send obj  get-component-id)
+                    (send obj  verify-callback-id 'method)
+                    (list arg ...))]
+    [(_ method arg ...)
+     (make-callback (send this get-component-id)
+                    (send this verify-callback-id 'method)
+                    (list arg ...))]))
 
 ; Provide statements -----------------------------
 

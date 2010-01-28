@@ -3,18 +3,6 @@
 (require (planet untyped/unlib:3/symbol)
          "../lib-base.ss")
 
-; Interfaces -------------------------------------
-
-(define component<%>
-  (interface (object/cells<%>)
-    get-component-id       ; -> symbol
-    on-request             ; request -> void
-    render                 ; seed -> content
-    get-child-components   ; -> (listof component<%>)
-    get-all-components     ; -> (listof component<%>)
-    get-dirty-components   ; -> (listof component<%>)
-    custom-print))         ; output-port boolean (U symbol #f) -> void
-
 ; Classses ---------------------------------------
 
 (define component%
@@ -29,7 +17,10 @@
     
     ; (cell (alistof symbol (-> (listof component<%>)))
     (cell child-registry null)
-        
+    
+    ; (hasheqof symbol callback-metadata)
+    (field callback-metadata-cache (make-hasheq))
+    
     ; Request handling ---------------------------
     
     ; There are two methods involved here:
@@ -52,45 +43,41 @@
     
     ; Rendering ----------------------------------
     
-    ; seed -> content
-    ;
     ; Returns the visible content for this component and its subtree.
     ; Must be overridden in subclasses of component%.
+    ; seed -> content
     (define/public (render seed)
       (error "render: must be overridden in a subclass of component%."))
     
     ; Children -----------------------------------
     
-    ; -> (listof component<%>)
-    ;
     ; Returns a list of all child components, whether they are attached or not.
+    ; -> (listof component<%>)
     (define/public (get-child-components)
       (append-map (match-lambda
                     [(list-rest field-name thunk)
-                     (with-handlers
-                         ([exn? (lambda (exn)
-                                  (raise (make-exn:fail
-                                          (format "Bad child field: ~a: ~a" field-name (exn-message exn))
-                                          (exn-continuation-marks exn))))])
+                     (with-handlers ([exn? (lambda (exn)
+                                             (error (format "bad child field: ~a" (exn-message exn))
+                                                    field-name))])
                        (let ([children (thunk)])
                          (if (component-list? children)
                              children
-                             (error (format "Expected (listof component<%>), received ~s" children)))))])
-                  (with-handlers
-                      ([exn? (lambda (exn)
-                               (error "No child registry found: " this))])
+                             (raise-type-error
+                              (string->symbol (format "~a.~a" this field-name))
+                              "(listof component<%>)"
+                              children))))])
+                  (with-handlers ([exn? (lambda (exn)
+                                          (error "no child registry found: " this))])
                     (web-cell-ref child-registry-cell))))
     
     ; symbol -> (U component<%> #f)
-    (define/public (find-component/id id)
+    (define/public (find-component id)
       (or (and (eq? id (get-component-id)) this)
-          (ormap (cut send <> find-component/id id)
+          (ormap (cut send <> find-component id)
                  (get-child-components))))
     
+    ; Returns a list of all components in this subtree.
     ; -> (listof component<%>)
-    ;
-    ; Returns a list of all components in the subtree of this component
-    ; (attached or unattached; including this component itself).
     (define/public (get-all-components)
       (cons this (append-map (cut send <> get-all-components)
                              (get-child-components))))
@@ -101,26 +88,52 @@
                      (cons (cons field-name thunk) 
                            (web-cell-ref child-registry-cell))))
     
-    ; Dirtiness ----------------------------------
-    
-    ; -> (listof component)
-    ;
     ; Returns a list of subtree components for whom (send x dirty?) returns #t.
+    ; -> (listof component)
     (define/public (get-dirty-components)
       (if (dirty?)
           (list this)
           (append-map (cut send <> get-dirty-components)
                       (get-child-components))))
     
+    ; Callbacks ----------------------------------
+    
+    ; symbol -> callback-metadata
+    (define/public (get-callback-metadata id)
+      (hash-ref callback-metadata-cache id
+                (cut error (format "~a: no such callback: ~a"
+                                   (class-name (object-class this))
+                                   id))))
+    
+    ; symbol -> symbol
+    (define/public (verify-callback-id id)
+      ; Can't verify the ID if we're still constructing the object:
+      (if (hash? callback-metadata-cache)
+          (and (get-callback-metadata id) id)
+          id))
+    
+    ; symbol list -> any
+    (define/public (call-callback id args)
+      ; callback-metadata
+      (define meta (get-callback-metadata id))
+      (if (callback-metadata-respond? meta)
+          (begin (apply (callback-metadata-procedure meta) args)
+                 (send (current-page) respond))
+          (begin (apply (callback-metadata-procedure meta) args))))
+    
+    ; symbol (any ... -> void) boolean -> void
+    (define/public (register-callback! id proc respond?)
+      (hash-set! callback-metadata-cache id (make-callback-metadata proc respond?)))
+    
     ; Printing -----------------------------------
     
     ; output-port -> void
     (define/public (custom-write out)
-      (custom-print out write (get-class-name this)))
+      (custom-print out write (infer-class-name this)))
     
     ; output-port -> void
     (define/public (custom-display out)
-      (custom-print out display (get-class-name this)))
+      (custom-print out display (infer-class-name this)))
     
     ; output-port (any output-post -> void) (U symbol #f) -> void
     (define/public (custom-print out print class-name)
@@ -129,10 +142,10 @@
                        (get-component-id)))
              out))))
 
-; Procedures -------------------------------------
+; Helpers ----------------------------------------
 
 ; -> (U symbol #f)
-(define (get-class-name obj)
+(define (infer-class-name obj)
   (define-values (class object-skipped?)
     (object-info obj))
   (define-values (class-name field-count field-name-list field-accessor field-mutator super-class class-skipped?) 
@@ -142,18 +155,17 @@
   class-name)
 
 ; any -> boolean
-(define (component? item)
-  (is-a? item component<%>))
-
-; any -> boolean
 (define (component-list? item)
   (or (null? item)
       (and (pair? item)
-           (component? (car item))
+           (is-a? (car item) component<%>)
            (component-list? (cdr item)))))
+
+; Helpers ----------------------------------------
+
+; (struct (any ... -> void) boolean)
+(define-struct callback-metadata (procedure respond?) #:transparent)
 
 ; Provide statements -----------------------------
 
-(provide component<%>
-         component%
-         component?)
+(provide component%)

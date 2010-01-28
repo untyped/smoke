@@ -3,11 +3,6 @@
 (require "../../lib-base.ss"
          "../component.ss")
 
-; Structure types --------------------------------
-
-; (struct (any ... -> void) boolean)
-(define-struct callback-metadata (procedure respond?) #:transparent)
-
 ; Interfaces -------------------------------------
 
 (define html-component<%>
@@ -29,11 +24,6 @@
     (inherit get-component-id
              get-child-components
              get-all-components)
-    
-    ; Fields -------------------------------------
-    
-    ; (hasheqof symbol callback-metadata)
-    (field callback-metadata-cache (make-hasheq))
     
     ; Rendering and scripts ----------------------
     
@@ -131,36 +121,7 @@
     (define/public (get-on-detach/fold seed)
       (js ,@(map (cut send <> get-on-detach seed)
                  (get-child-components))
-          ,(inner (js) get-on-detach seed)))
-    
-    ; Callbacks ----------------------------------
-    
-    ; symbol -> callback-metadata
-    (define/public (get-callback-metadata id)
-      (hash-ref callback-metadata-cache id
-                (cut error (format "~a: no such callback: ~a"
-                                   (class-name (object-class this))
-                                   id))))
-    
-    ; symbol -> symbol
-    (define/public (verify-callback-id id)
-      ; Can't verify the ID if we're still constructing the object:
-      (if (hash? callback-metadata-cache)
-          (and (get-callback-metadata id) id)
-          id))
-    
-    ; symbol list -> any
-    (define/public (call-callback id args)
-      ; callback-metadata
-      (define meta (get-callback-metadata id))
-      (if (callback-metadata-respond? meta)
-          (begin (apply (callback-metadata-procedure meta) args)
-                 (send (current-page) respond))
-          (begin (apply (callback-metadata-procedure meta) args))))
-    
-    ; symbol (any ... -> void) boolean -> void
-    (define/public (register-callback! id proc respond?)
-      (hash-set! callback-metadata-cache id (make-callback-metadata proc respond?)))))
+          ,(inner (js) get-on-detach seed)))))
 
 (define html-component%
   (class/cells (html-component-mixin component%) ()))

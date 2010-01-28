@@ -16,41 +16,44 @@
 
 ; Procedures -------------------------------------
 
-; seed callback -> string
-(define (callback-url seed callback)
-  (url->string
-   (make-url #f #f #f #f #t
-             (append (url-path-base (request-uri (current-request)))
-                     (map (cut make-path/param <> null)
-                          (list* "_"
-                                 (symbol->string (send (callback-component callback) get-component-id))
-                                 (symbol->string (send (callback-component callback) verify-callback-id (callback-callback-id callback)))
-                                 (map (lambda (arg)
-                                        (if (symbol? arg)
-                                            (if (memq arg '(true false null))
-                                                (error "Cannot serialize the symbols 'true, 'false or 'null in a callback URL.")
-                                                (symbol->string arg))
-                                            (scheme->json arg)))
-                                      (callback-args callback)))))
-             null #f)))
+; url -> boolean
+(define (callback-url? url)
+  (and (url-path-absolute? url)
+       (match (map path/param-path (url-path url))
+         [(list _ ... "_" _ ...) #t]
+         [_ #f])))
 
-; request page -> (U callback #f)
-(define (request->callback request page)
-  (match (url-path-extension (request-uri request))
-    [(list component-id-element ; path/param
-           callback-id-element  ; path/param
-           arg-elements ...)    ; (listof path/param)
-     (let ([component-id (string->symbol (path/param-path component-id-element))]
-           [callback-id  (string->symbol (path/param-path callback-id-element))]
-           [args         (map (lambda (path/param)
-                                (let ([path (path/param-path path/param)])
-                                  (with-handlers ([exn? (lambda _ (string->symbol path))])
-                                    (json->scheme path))))
-                              arg-elements)])
-       (make-callback (send page find-component/id component-id)
-                      callback-id
-                      args))]
-    [#f #f]))
+; seed callback -> string
+(define (callback->url seed callback)
+  (url->string
+   (make-url
+    #f #f #f #f #t
+    (append (url-path-base (request-uri (current-request)))
+            (map (cut make-path/param <> null)
+                 (list* "_"
+                        (symbol->string (callback-component-id callback))
+                        (symbol->string (callback-method-id    callback))
+                        (map (lambda (arg)
+                               (if (symbol? arg)
+                                   (if (memq arg '(true false null))
+                                       (error "Cannot serialize the symbols 'true, 'false or 'null in a callback URL.")
+                                       (symbol->string arg))
+                                   (scheme->json arg)))
+                             (callback-args callback)))))
+    null #f)))
+
+; url application<%> -> callback
+(define (url->callback url app)
+  (match (map path/param-path (url-path-extension url))
+    [(list (app string->symbol component-id)
+           (app string->symbol method-id)
+           args ...)
+       (make-callback
+        component-id
+        method-id
+        (for/list ([arg (in-list args)])
+          (with-handlers ([exn? (lambda _ (string->symbol arg))])
+            (json->scheme arg))))]))
 
 ; (listof path/param) -> (listof path/param)
 (define (url-path-base url)
@@ -67,17 +70,17 @@
 (define (url-path-extension url)
   (if (url-path-absolute? url)
       (match (map path/param-path (url-path url))
-        [(list "") null]
         [(list _ ... "_" ext ...)
          (for/list ([str (in-list ext)])
            (make-path/param str null))]
-        [_ null])
+        [_ #f])
       (raise-type-error 'url-path-extension "absolute-url" url)))
 
 ; Provide statements -----------------------------
 
 (provide/contract
- [callback-url       (-> seed? callback? string?)]
- [request->callback  (-> request? (is-a?/c page<%>) (or/c callback? #f))]
- [url-path-base      (-> (listof path/param?) (listof path/param?))]
- [url-path-extension (-> (listof path/param?) (or/c (listof path/param?) #f))])
+ [callback-url?      (-> url? boolean?)]
+ [callback->url      (-> seed? callback? string?)]
+ [url->callback      (-> url? (is-a?/c application<%>) callback?)]
+ [url-path-base      (-> url? (listof path/param?))]
+ [url-path-extension (-> url? (or/c (listof path/param?) #f))])
