@@ -3,40 +3,39 @@
 (require "../../lib-base.ss"
          "html-element.ss")
 
-(define html-dialog%
-  (class/cells html-element% ()
-    
-    (inherit core-html-attributes
-             get-id)
-    
-    ; Fields -------------------------------------
-    
-    ; (U html-page% #f)
-    (cell page #f #:accessor #:mutator)
-    
-    ; Constructor --------------------------------
-    
-    ; (listof symbol)
-    (init [classes null])
-    
-    (super-new [classes (cons 'smoke-dialog classes)])
-    
-    ; Methods ------------------------------------
-    
-    ; -> (listof (U js (seed -> js)))
-    (define/augment (get-js-requirements)
-      (list* html-dialog-script
-             (inner null get-js-requirements)))
-    
-    ; seed -> xml
-    (define/overment (render seed)
-      (xml (div (@ [class "smoke-dialog-background"])
-                (div (@ ,@(core-html-attributes seed))
-                     ,(inner (xml "Insert dialog content here.") render seed)))))
-    
-    ; seed -> js
-    (define/augride (get-on-attach seed)
-      (js (!dot Smoke (showDialog Smoke (findById ,(get-id))))))))
+(define-class html-dialog% html-element% ()
+  
+  (inherit core-html-attributes
+           get-id)
+  
+  ; Fields -------------------------------------
+  
+  ; (U html-page% #f)
+  (cell page #f #:accessor #:mutator)
+  
+  ; Constructor --------------------------------
+  
+  ; (listof symbol)
+  (init [classes null])
+  
+  (super-new [classes (cons 'smoke-dialog classes)])
+  
+  ; Methods ------------------------------------
+  
+  ; -> (listof (U js (seed -> js)))
+  (define/augment (get-js-requirements)
+    (list* html-dialog-script
+           (inner null get-js-requirements)))
+  
+  ; seed -> xml
+  (define/overment (render seed)
+    (xml (div (@ [class "smoke-dialog-background"])
+              (div (@ ,@(core-html-attributes seed))
+                   ,(inner (xml "Insert dialog content here.") render seed)))))
+  
+  ; seed -> js
+  (define/augride (get-on-attach seed)
+    (js (!dot Smoke (showDialog Smoke (findById ,(get-id)))))))
 
 ; Javascript resources ---------------------------
 

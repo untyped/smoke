@@ -12,8 +12,7 @@
 
 ; Mixins -----------------------------------------
 
-(define disableable-element-mixin
-  (mixin/cells (html-element<%>) (disableable-element<%>)
+(define-mixin disableable-element-mixin (html-element<%>) (disableable-element<%>)
     
     (inherit get-id get-classes get-style get-tooltip)
     
@@ -40,11 +39,11 @@
                      #:tooltip title)
               (if (get-enabled?)
                   null
-                  (xml-attrs [disabled "disabled"]))))))
+                  (xml-attrs [disabled "disabled"])))))
 
 ; Classes ----------------------------------------
-(define disableable-element%
-  (class/cells (disableable-element-mixin html-element%) ()))
+
+(define-class disableable-element% (disableable-element-mixin html-element%) ())
 
 ; Provide statements -----------------------------
 

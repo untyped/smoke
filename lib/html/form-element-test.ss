@@ -137,48 +137,47 @@
 
 (send radio-group set-value! 'radio2)
 
-(define test-page
-  (singleton/cells html-page% ()
-    
-    ; Fields -------------------------------------
-    
-    ; (listof form-element%)
-    (field controls
-      `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
-        ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
-        ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
-        ,(new check-box% [id 'check-box] [value #t] [label "Label"])
-        ,(new combo-box% [id 'combo-box] [value 'b] [options '((1  . "Option 1") 
-                                                               (2  . "Option 2")
-                                                               (a  . "Option 3")
-                                                               (b  . "Option 4")
-                                                               (#t . "Option 5")
-                                                               (#f . "Option 6"))])
-        ,(new file-field% [id 'file-field] [size 20])
-        ,radio-group
-        ,@radio-buttons
-        ,(new submit-button% [id 'submit-button] [action (callback on-submit)] [label "Okay"]))
-      #:children #:accessor #:mutator)
-    
-    ; Constructor --------------------------------
-    
-    (super-new [title "Form elements"])
-    
-    ; Methods ------------------------------------
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml (table (tr (th "ID")
-                      (th "Widget")
-                      (th "Value"))
-                  ,@(map (lambda (control)
-                           (xml (tr (th ,(send control get-id))
-                                    (td ,(send control render seed))
-                                    (td ,(if (is-a? control submit-button%)
-                                             (xml)
-                                             (xml (span (@ [id ,(symbol-append (send control get-id) '-value)])
-                                                        ,(send control get-value))))))))
-                         controls))))))
+(define-singleton test-page html-page% ()
+  
+  ; Fields -------------------------------------
+  
+  ; (listof form-element%)
+  (field controls
+    `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
+      ,(new text-field% [id 'text-field] [value "Initial"] [size 20] [max-length 10])
+      ,(new text-area% [id 'text-area] [value "Initial"] [rows 10] [cols 20])
+      ,(new check-box% [id 'check-box] [value #t] [label "Label"])
+      ,(new combo-box% [id 'combo-box] [value 'b] [options '((1  . "Option 1") 
+                                                             (2  . "Option 2")
+                                                             (a  . "Option 3")
+                                                             (b  . "Option 4")
+                                                             (#t . "Option 5")
+                                                             (#f . "Option 6"))])
+      ,(new file-field% [id 'file-field] [size 20])
+      ,radio-group
+      ,@radio-buttons
+      ,(new submit-button% [id 'submit-button] [action (callback on-submit)] [label "Okay"]))
+    #:children #:accessor #:mutator)
+  
+  ; Constructor --------------------------------
+  
+  (super-new [title "Form elements"])
+  
+  ; Methods ------------------------------------
+  
+  ; seed -> xml
+  (define/override (render seed)
+    (xml (table (tr (th "ID")
+                    (th "Widget")
+                    (th "Value"))
+                ,@(map (lambda (control)
+                         (xml (tr (th ,(send control get-id))
+                                  (td ,(send control render seed))
+                                  (td ,(if (is-a? control submit-button%)
+                                           (xml)
+                                           (xml (span (@ [id ,(symbol-append (send control get-id) '-value)])
+                                                      ,(send control get-value))))))))
+                       controls)))))
 
 ; Provide statements -----------------------------
 

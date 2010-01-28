@@ -15,33 +15,32 @@
     ; (U xml (seed -> xml) #f) -> void
     set-label!))
 
-(define labelled-element-mixin
-  (mixin/cells (html-element<%>) (labelled-element<%>)
-    
-    (inherit get-id)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell (U xml (seed -> xml) #f)
-    (init-cell label #f #:accessor #:mutator)
-    
-    ; Methods ------------------------------------
-    
-    ; seed -> xml
-    (define/public (render-label-content seed)
-      (let ([label (get-label)])
-        (if (procedure? label)
-            (label seed)
-            label)))
-    
-    ; seed -> xml
-    (define/public (render-label seed)
-      (let ([id (get-id)])
-        (opt-xml (get-label)
-          ,(if (is-a? this form-element<%>)
-               (xml (label (@ [for ,id])
-                           ,(render-label-content seed)))
-               (render-label-content seed)))))))
+(define-mixin labelled-element-mixin (html-element<%>) (labelled-element<%>)
+  
+  (inherit get-id)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell (U xml (seed -> xml) #f)
+  (init-cell label #f #:accessor #:mutator)
+  
+  ; Methods ------------------------------------
+  
+  ; seed -> xml
+  (define/public (render-label-content seed)
+    (let ([label (get-label)])
+      (if (procedure? label)
+          (label seed)
+          label)))
+  
+  ; seed -> xml
+  (define/public (render-label seed)
+    (let ([id (get-id)])
+      (opt-xml (get-label)
+        ,(if (is-a? this form-element<%>)
+             (xml (label (@ [for ,id])
+                         ,(render-label-content seed)))
+             (render-label-content seed))))))
 
 ; Provide statements -----------------------------
 

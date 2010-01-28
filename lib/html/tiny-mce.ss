@@ -14,80 +14,78 @@
 
 ; Mixins -----------------------------------------
 
-(define tiny-mce-options-mixin
-  (mixin/cells (html-page<%> html-element<%>) (tiny-mce-options<%>)
-    
-    ; Constructor --------------------------------
-    
-    (super-new)
-    
-    ; Methods ------------------------------------
-    
-    ; seed -> xml
-    ;
-    ; This has to be a (define ...) rather than a (define/foo ...).
-    ;
-    ; We want make-tiny-mce-options to be a simple statically bound procedure
-    ; rather than a method, because we want it to remain constant across calls
-    ; to get-html-requirements.
-    (define (make-tiny-mce-options-script seed)
-      (xml (script (@ [type "text/javascript"])
-                   (!raw "\n// <![CDATA[\n")
-                   (!raw ,(js ((function ()
-                                 (var [tinyMCEOptions ,(send this get-tiny-mce-options seed)])
-                                 (= (!dot tinyMCEOptions mode) "none")
-                                 (!dot tinyMCE (init tinyMCEOptions))))))
-                   (!raw "\n// ]]>\n"))))
-    
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (list* tiny-mce-script
-             make-tiny-mce-options-script
-             (inner null get-html-requirements)))
-    
-    ; seed -> javascript
-    (define/public (get-tiny-mce-options seed)
-      (js (!object [mode "none"])))))
+(define-mixin tiny-mce-options-mixin (html-page<%> html-element<%>) (tiny-mce-options<%>)
+  
+  ; Constructor --------------------------------
+  
+  (super-new)
+  
+  ; Methods ------------------------------------
+  
+  ; seed -> xml
+  ;
+  ; This has to be a (define ...) rather than a (define/foo ...).
+  ;
+  ; We want make-tiny-mce-options to be a simple statically bound procedure
+  ; rather than a method, because we want it to remain constant across calls
+  ; to get-html-requirements.
+  (define (make-tiny-mce-options-script seed)
+    (xml (script (@ [type "text/javascript"])
+                 (!raw "\n// <![CDATA[\n")
+                 (!raw ,(js ((function ()
+                               (var [tinyMCEOptions ,(send this get-tiny-mce-options seed)])
+                               (= (!dot tinyMCEOptions mode) "none")
+                               (!dot tinyMCE (init tinyMCEOptions))))))
+                 (!raw "\n// ]]>\n"))))
+  
+  ; -> (listof (U xml (seed -> xml)))
+  (define/augment (get-html-requirements)
+    (list* tiny-mce-script
+           make-tiny-mce-options-script
+           (inner null get-html-requirements)))
+  
+  ; seed -> javascript
+  (define/public (get-tiny-mce-options seed)
+    (js (!object [mode "none"]))))
 
 ; Classes ----------------------------------------
 
-(define tiny-mce%
-  (class/cells simple-text-area% ()
-    
-    (inherit get-id)
-    
-    ; Constructor --------------------------------
-    
-    ; (listof symbol)
-    (init [classes null])
-    (super-new [classes (cons 'smoke-tiny-mce classes)])
-    
-    ; Public methods -----------------------------
-    
-    ; -> (listof (U xml (seed -> xml)))
-    (define/augment (get-html-requirements)
-      (if (is-a? (current-page) tiny-mce-options<%>)
-          (list* tiny-mce-script
-                 (inner null get-html-requirements))
-          (list* tiny-mce-script
-                 default-tiny-mce-options-script
-                 (inner null get-html-requirements))))
-    
-    ; seed -> javascript
-    (define/augment (get-on-attach seed)
-      (let ([id (get-id)])
-        (js (!dot tinyMCE (execCommand "mceAddControl" #f ,id)))))
-    
-    ; seed -> javascript
-    (define/augment (get-on-detach seed)
-      (let ([id (get-id)])
-        (js (!dot tinyMCE (execCommand "mceRemoveControl" #f ,id)))))
-    
-    ; seed -> (U javascript #f)
-    ;
-    ; Don't use the on-change event from text-area%.
-    (define/override (get-on-change seed)
-      #f)))
+(define-class tiny-mce% simple-text-area% ()
+  
+  (inherit get-id)
+  
+  ; Constructor --------------------------------
+  
+  ; (listof symbol)
+  (init [classes null])
+  (super-new [classes (cons 'smoke-tiny-mce classes)])
+  
+  ; Public methods -----------------------------
+  
+  ; -> (listof (U xml (seed -> xml)))
+  (define/augment (get-html-requirements)
+    (if (is-a? (current-page) tiny-mce-options<%>)
+        (list* tiny-mce-script
+               (inner null get-html-requirements))
+        (list* tiny-mce-script
+               default-tiny-mce-options-script
+               (inner null get-html-requirements))))
+  
+  ; seed -> javascript
+  (define/augment (get-on-attach seed)
+    (let ([id (get-id)])
+      (js (!dot tinyMCE (execCommand "mceAddControl" #f ,id)))))
+  
+  ; seed -> javascript
+  (define/augment (get-on-detach seed)
+    (let ([id (get-id)])
+      (js (!dot tinyMCE (execCommand "mceRemoveControl" #f ,id)))))
+  
+  ; seed -> (U javascript #f)
+  ;
+  ; Don't use the on-change event from text-area%.
+  (define/override (get-on-change seed)
+    #f))
 
 ; Helpers ----------------------------------------
 

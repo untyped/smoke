@@ -45,53 +45,51 @@
 
 ; Test classes -----------------------------------
 
-(define node%
-  (class/cells html-element% ()
-    
-    ; -> symbol
-    (inherit core-html-attributes
-             get-component-id)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell (listof html-component<%>))
-    (init-cell children null #:children #:accessor #:mutator)
-    
-    (super-new [style "border: 1px solid #aaa; padding: 2px; margin: 4px"])
-    
-    ; Methods ------------------------------------
-    
-    ; request -> void
-    (define/augment (on-request request)
-      (set! request-list (cons (get-component-id) request-list)))
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml (div (@ ,@(core-html-attributes seed))
-                ,(get-component-id)
-                ,(super render seed))))
-    
-    ; -> (listof (U js (seed -> js)))
-    (define/augment (get-js-requirements)
-      (list* attach/detach-script
-             (inner null get-js-requirements)))
-    
-    ; seed -> js
-    (define/augride (get-on-attach seed)
-      (js (attach ,(get-component-id))))
-    
-    ; seed -> js
-    (define/augride (get-on-detach seed)
-      (js (detach ,(get-component-id))))))
+(define-class node% html-element% ()
+  
+  ; -> symbol
+  (inherit core-html-attributes
+           get-component-id)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell (listof html-component<%>))
+  (init-cell children null #:children #:accessor #:mutator)
+  
+  (super-new [style "border: 1px solid #aaa; padding: 2px; margin: 4px"])
+  
+  ; Methods ------------------------------------
+  
+  ; request -> void
+  (define/augment (on-request request)
+    (set! request-list (cons (get-component-id) request-list)))
+  
+  ; seed -> xml
+  (define/override (render seed)
+    (xml (div (@ ,@(core-html-attributes seed))
+              ,(get-component-id)
+              ,(super render seed))))
+  
+  ; -> (listof (U js (seed -> js)))
+  (define/augment (get-js-requirements)
+    (list* attach/detach-script
+           (inner null get-js-requirements)))
+  
+  ; seed -> js
+  (define/augride (get-on-attach seed)
+    (js (attach ,(get-component-id))))
+  
+  ; seed -> js
+  (define/augride (get-on-detach seed)
+    (js (detach ,(get-component-id)))))
 
-(define modified-node%
-  (class/cells node% ()
-    
-    ; -> (listof (U js (seed -> js)))
-    (define/augment (get-js-requirements)
-      (list* attach/detach-script
-             modified-node-script
-             (inner null get-js-requirements)))))
+(define-class modified-node% node% ()
+  
+  ; -> (listof (U js (seed -> js)))
+  (define/augment (get-js-requirements)
+    (list* attach/detach-script
+           modified-node-script
+           (inner null get-js-requirements))))
 
 ; Test components --------------------------------
 
@@ -104,29 +102,28 @@
 (define n2 (new node% [component-id 'n2] [children (list n3 n4)]))
 (define n1 (new node% [component-id 'n1] [children (list n2 n5)]))
 
-(define n0
-  (singleton/cells (html-page-mixin (page-mixin node%)) ()
-    
-    (super-new [component-id 'n0]
-               [title        "Script test"]
-               [children     (list n1)])
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml ,(super render seed)
-           (div (a (@ [href ,(embed seed void)]) "FULL refresh") " "
-                (a (@ [href "#"] [onclick ,(embed/ajax seed void)]) "AJAX refresh") " "
-                (a (@ [href "#"] [onclick ,(embed/ajax seed (cut update))]) "AJAX update") " "
-                (a (@ [href "#"] [onclick ,(embed/ajax seed (cut init-script-update))]) "AJAX init script update"))))
-    
-    ; seed -> xml
-    (define/public (update)
-      (send n2 set-children! (list n3))
-      (send n7 set-children! (list n4)))
-    
-    ; seed -> xml
-    (define/public (init-script-update)
-      (send n1 set-children! (list n8)))))
+(define-singleton n0 (html-page-mixin (page-mixin node%)) ()
+  
+  (super-new [component-id 'n0]
+             [title        "Script test"]
+             [children     (list n1)])
+  
+  ; seed -> xml
+  (define/override (render seed)
+    (xml ,(super render seed)
+         (div (a (@ [href ,(embed seed void)]) "FULL refresh") " "
+              (a (@ [href "#"] [onclick ,(embed/ajax seed void)]) "AJAX refresh") " "
+              (a (@ [href "#"] [onclick ,(embed/ajax seed (cut update))]) "AJAX update") " "
+              (a (@ [href "#"] [onclick ,(embed/ajax seed (cut init-script-update))]) "AJAX init script update"))))
+  
+  ; seed -> xml
+  (define/public (update)
+    (send n2 set-children! (list n3))
+    (send n7 set-children! (list n4)))
+  
+  ; seed -> xml
+  (define/public (init-script-update)
+    (send n1 set-children! (list n8))))
 
 ; Test init scripts ------------------------------
 

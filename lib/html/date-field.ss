@@ -13,109 +13,108 @@
     get-time-utc
     get-time-tai))
 
-(define date-field%
-  (class/cells text-field% (date-field<%>)    
-    
-    (inherit get-enabled?
-             get-id
-             get-placeholder)
-    
-    ; Fields -------------------------------------    
-    
-    ; (cell string)
-    (init-cell date-format
-      "~d/~m/~Y ~H:~M"
-      #:accessor #:mutator)
-    
-    ; (cell boolean)
-    (init-cell show-date-label? #f
-      #:accessor #:mutator)
-    
-    ; (cell (U string #f))
-    (init-cell date-picker-format
-      (date-format->jquery-ui-date-format date-format)
-      #:accessor #:mutator)
-    
-    ; Constructor --------------------------------
-    
-    (init [classes     null]
-          [max-length  (date-format->max-length date-format)]
-          [size        max-length]
-          [placeholder (date-format->placeholder date-format)])
-    
-    (super-new [classes     (list* 'smoke-date-field classes)]
-               [size        size]
-               [max-length  max-length]
-               [placeholder placeholder])
-    
-    ; Methods ------------------------------------
-    
-    ; -> string
-    (define/public (get-date-format-example)
-      (date->string (current-date) (get-date-format)))
-    
-    ; -> (U date #f)
-    (define/override (get-value)
-      (get-date))
-    
-    ; -> (U date #f)
-    (define/public (get-date)
-      (let ([val (super get-value)]
-            [fmt (get-date-format)])
-        (with-handlers ([exn:fail? (lambda (exn)
-                                     (raise-exn exn:smoke:form 
-                                       (format "Value must be in the format: ~a"
-                                               (or (get-placeholder)
-                                                   (get-date-format-example)))
-                                       this))])
-          (and val (string->date val fmt)))))
-    
-    ; -> (U time-utc #f)
-    (define/public (get-time-utc)
-      (let ([val (get-date)])
-        (and val (date->time-utc val))))
-    
-    ; -> (U time-tai #f)
-    (define/public (get-time-tai)
-      (let ([val (get-date)])
-        (and val (date->time-tai val))))
-    
-    ; date -> void
-    (define/override (set-value! val)
-      (let ([date (cond [(not val)       val]
-                        [(date? val)     val]
-                        [(time-tai? val) (time-tai->date val)]
-                        [(time-utc? val) (time-utc->date val)]
-                        [else            (raise-type-error 'set-value! "(U date time-utc time-tai #f)" val)])])
-        (super set-value! (and date (date->string date (get-date-format))))))
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml ,(super render seed)
-           ,(opt-xml (get-show-date-label?)
-              " example: " ,(get-date-format-example))))
-    
-    ; seed -> js
-    (define/augment (get-on-attach seed)
-      (let ([fmt (get-date-picker-format)])
-        (js ,(opt-js fmt
-               (!dot ($ ,(format "#~a" (get-id)))
-                     (datepicker (!object [dateFormat      ,fmt]
-                                          [showOn          "button"]
-                                          [buttonImage     "/images/jquery-ui/calendar.gif"]
-                                          [buttonImageOnly #t])))
-               ,(opt-js (not (get-enabled?))
-                  (!dot ($ ,(format "#~a" (get-id)))
-                        (datepicker "disable"))))
-            ,(inner (js) get-on-attach seed))))
-    
-    ; seed -> js
-    (define/augment (get-on-detach seed)
-      (let ([fmt (get-date-picker-format)])
-        (js ,(opt-js fmt
-               (!dot ($ ,(format "#~a" (get-id)))
-                     (datepicker "destroy")))
-            ,(inner (js) get-on-detach seed))))))
+(define-class date-field% text-field% (date-field<%>)    
+  
+  (inherit get-enabled?
+           get-id
+           get-placeholder)
+  
+  ; Fields -------------------------------------    
+  
+  ; (cell string)
+  (init-cell date-format
+    "~d/~m/~Y ~H:~M"
+    #:accessor #:mutator)
+  
+  ; (cell boolean)
+  (init-cell show-date-label? #f
+    #:accessor #:mutator)
+  
+  ; (cell (U string #f))
+  (init-cell date-picker-format
+    (date-format->jquery-ui-date-format date-format)
+    #:accessor #:mutator)
+  
+  ; Constructor --------------------------------
+  
+  (init [classes     null]
+        [max-length  (date-format->max-length date-format)]
+        [size        max-length]
+        [placeholder (date-format->placeholder date-format)])
+  
+  (super-new [classes     (list* 'smoke-date-field classes)]
+             [size        size]
+             [max-length  max-length]
+             [placeholder placeholder])
+  
+  ; Methods ------------------------------------
+  
+  ; -> string
+  (define/public (get-date-format-example)
+    (date->string (current-date) (get-date-format)))
+  
+  ; -> (U date #f)
+  (define/override (get-value)
+    (get-date))
+  
+  ; -> (U date #f)
+  (define/public (get-date)
+    (let ([val (super get-value)]
+          [fmt (get-date-format)])
+      (with-handlers ([exn:fail? (lambda (exn)
+                                   (raise-exn exn:smoke:form 
+                                     (format "Value must be in the format: ~a"
+                                             (or (get-placeholder)
+                                                 (get-date-format-example)))
+                                     this))])
+        (and val (string->date val fmt)))))
+  
+  ; -> (U time-utc #f)
+  (define/public (get-time-utc)
+    (let ([val (get-date)])
+      (and val (date->time-utc val))))
+  
+  ; -> (U time-tai #f)
+  (define/public (get-time-tai)
+    (let ([val (get-date)])
+      (and val (date->time-tai val))))
+  
+  ; date -> void
+  (define/override (set-value! val)
+    (let ([date (cond [(not val)       val]
+                      [(date? val)     val]
+                      [(time-tai? val) (time-tai->date val)]
+                      [(time-utc? val) (time-utc->date val)]
+                      [else            (raise-type-error 'set-value! "(U date time-utc time-tai #f)" val)])])
+      (super set-value! (and date (date->string date (get-date-format))))))
+  
+  ; seed -> xml
+  (define/override (render seed)
+    (xml ,(super render seed)
+         ,(opt-xml (get-show-date-label?)
+            " example: " ,(get-date-format-example))))
+  
+  ; seed -> js
+  (define/augment (get-on-attach seed)
+    (let ([fmt (get-date-picker-format)])
+      (js ,(opt-js fmt
+             (!dot ($ ,(format "#~a" (get-id)))
+                   (datepicker (!object [dateFormat      ,fmt]
+                                        [showOn          "button"]
+                                        [buttonImage     "/images/jquery-ui/calendar.gif"]
+                                        [buttonImageOnly #t])))
+             ,(opt-js (not (get-enabled?))
+                (!dot ($ ,(format "#~a" (get-id)))
+                      (datepicker "disable"))))
+          ,(inner (js) get-on-attach seed))))
+  
+  ; seed -> js
+  (define/augment (get-on-detach seed)
+    (let ([fmt (get-date-picker-format)])
+      (js ,(opt-js fmt
+             (!dot ($ ,(format "#~a" (get-id)))
+                   (datepicker "destroy")))
+          ,(inner (js) get-on-detach seed)))))
 
 ; Helpers ----------------------------------------
 

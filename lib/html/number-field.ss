@@ -4,41 +4,40 @@
          "../../lib-base.ss"
          "text-field.ss")
 
-(define number-field%
-  (class/cells text-field% ()
-    
-    (inherit get-allow-blank?
-             set-raw!)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell (U number #f))
-    (init-field min-value #f #:accessor #:mutator)
-    
-    ; (cell (U number #f))
-    (init-field max-value #f #:accessor #:mutator)
-    
-    ; Public methods -----------------------------
-    
-    ; -> (U string #f)
-    (define/override (get-value)
-      (define str    (super get-value))
-      (define num    (and str (string->number str)))
-      (define blank? (get-allow-blank?))
-      (define min    (get-min-value))
-      (define max    (get-max-value))
-      (cond [(not str)             #f]
-            [(not num)             (raise-value-exn this blank? min max)]
-            [(not (number? num))   (raise-value-exn this blank? min max)]
-            [(and min (< num min)) (raise-value-exn this blank? min max)]
-            [(and max (> num max)) (raise-value-exn this blank? min max)]
-            [else                  num]))
-    
-    ; (U string #f) -> void
-    (define/override (set-value! val)
-      (set-raw! (cond [(not val)      ""]
-                      [(number? val) (number->string val)]
-                      [else           (raise-type-error 'set-value! "(U number #f)" val)])))))
+(define-class number-field% text-field% ()
+  
+  (inherit get-allow-blank?
+           set-raw!)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell (U number #f))
+  (init-field min-value #f #:accessor #:mutator)
+  
+  ; (cell (U number #f))
+  (init-field max-value #f #:accessor #:mutator)
+  
+  ; Public methods -----------------------------
+  
+  ; -> (U string #f)
+  (define/override (get-value)
+    (define str    (super get-value))
+    (define num    (and str (string->number str)))
+    (define blank? (get-allow-blank?))
+    (define min    (get-min-value))
+    (define max    (get-max-value))
+    (cond [(not str)             #f]
+          [(not num)             (raise-value-exn this blank? min max)]
+          [(not (number? num))   (raise-value-exn this blank? min max)]
+          [(and min (< num min)) (raise-value-exn this blank? min max)]
+          [(and max (> num max)) (raise-value-exn this blank? min max)]
+          [else                  num]))
+  
+  ; (U string #f) -> void
+  (define/override (set-value! val)
+    (set-raw! (cond [(not val)      ""]
+                    [(number? val) (number->string val)]
+                    [else           (raise-type-error 'set-value! "(U number #f)" val)]))))
 
 ; Helpers ----------------------------------------
 

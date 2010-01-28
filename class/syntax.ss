@@ -68,6 +68,38 @@
              #'(new/inferred-id (let ([class-id (class/cells superclass (interface ...) clause ...)]) class-id)))
            #'(new/inferred-id (class/cells superclass (interface ...) clause ...))))]))
 
+(define-syntax (define-class stx)
+  (syntax-case stx ()
+    [(_ id superclass (interface ...) clause ...)
+     (let ([seed (foldl expand-clause (make-seed) (syntax->list #'(clause ...)))])
+       (quasisyntax/loc stx
+         (define-serializable-class* id superclass (interface ...)
+           #,@(reverse (seed-body-clause-stxs seed))
+           #,@(if (seed-has-super-new? seed)
+                  null
+                  (list #'(super-new)))
+           #,@(reverse (seed-foot-clause-stxs seed))
+           #,@(if (seed-has-inspector? seed)
+                  null
+                  (list #'(inspect #f))))))]))
+
+(define-syntax (define-mixin stx)
+  (syntax-case stx ()
+    [(_ id (interface-in ...) (interface-out ...) clause ...)
+     (quasisyntax/loc stx
+       (define id
+         (mixin/cells (interface-in ...) (interface-out ...)
+           clause ...)))]))
+
+(define-syntax (define-singleton stx)
+  (syntax-case stx ()
+    [(_ id superclass (interface ...) clause ...)
+     (with-syntax ([class-id (make-id #'id #'id '%)])
+       (quasisyntax/loc stx
+         (begin
+           (define-class class-id superclass (interface ...) clause ...)
+           (define id (new class)))))]))
+
 ; Provide statements -----------------------------
 
 (provide (except-out (all-from-out scheme/class) new)
@@ -75,4 +107,7 @@
          class/cells
          mixin/cells
          singleton/cells
-         inferred-id-prefix)
+         inferred-id-prefix
+         define-class
+         define-mixin
+         define-singleton)

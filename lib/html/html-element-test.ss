@@ -77,47 +77,46 @@
 (define on-submit-opt-arg 'undefined)
 (define on-submit-rest-arg 'undefined)
 
-(define test-page
-  (singleton/cells html-page% ()
-    
-    ; Constructor --------------------------------
-    
-    (super-new [id 'page] [title "HTML element tests"] [component-id 'page])
-    
-    ; Fields -------------------------------------
-    
-    ; button%
-    (field thunk-button
-      (new button%
-           [id       'thunk-button]
-           [label    "Thunk button"]
-           [on-click (cut on-submit 123)])
-      #:child #:accessor)
-    
-    ; button%
-    (field callback-button
-      (new button%
-           [id       'callback-button]
-           [label    "Callback button"]
-           [on-click (callback on-submit 321 "str" '(1 2 3) #hasheq((key . "val")))])
-      #:child #:accessor)
-    
-    ; combo-box~%
-    (field combo-box
-      (new combo-box% 
-           [id        'combo-box]
-           [value     'a]
-           [options   '((a . "a") (b . "b") (c . "c"))]
-           [on-change (callback on-submit 1000)])
-      #:child #:accessor)
-    
-    ; Methods ------------------------------------
-    
-    ; json-serializable -> (U js void)
-    (define/override #:callback (on-submit arg [opt-arg #f] . rest-arg)
-      (set! on-submit-arg arg)
-      (set! on-submit-opt-arg opt-arg)
-      (set! on-submit-rest-arg rest-arg))))
+(define-singleton test-page html-page% ()
+  
+  ; Constructor --------------------------------
+  
+  (super-new [id 'page] [title "HTML element tests"] [component-id 'page])
+  
+  ; Fields -------------------------------------
+  
+  ; button%
+  (field thunk-button
+    (new button%
+         [id       'thunk-button]
+         [label    "Thunk button"]
+         [on-click (cut on-submit 123)])
+    #:child #:accessor)
+  
+  ; button%
+  (field callback-button
+    (new button%
+         [id       'callback-button]
+         [label    "Callback button"]
+         [on-click (callback on-submit 321 "str" '(1 2 3) #hasheq((key . "val")))])
+    #:child #:accessor)
+  
+  ; combo-box~%
+  (field combo-box
+    (new combo-box% 
+         [id        'combo-box]
+         [value     'a]
+         [options   '((a . "a") (b . "b") (c . "c"))]
+         [on-change (callback on-submit 1000)])
+    #:child #:accessor)
+  
+  ; Methods ------------------------------------
+  
+  ; json-serializable -> (U js void)
+  (define/override #:callback (on-submit arg [opt-arg #f] . rest-arg)
+    (set! on-submit-arg arg)
+    (set! on-submit-opt-arg opt-arg)
+    (set! on-submit-rest-arg rest-arg)))
 
 ; Provide statements -----------------------------
 

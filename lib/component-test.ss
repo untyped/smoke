@@ -9,14 +9,14 @@
 
 (define component-tests
   (test-suite "component.ss"
-
+    
     (test-exn "dirty? : root frame"
       exn:fail?
       ; The current frame may or may not be the root,
       ; depending on which tests have run before this one:
       (cut call-with-frame (frame-root (current-frame))
            (send n1 dirty?)))
-
+    
     (test-case "dirty? : no changes"
       (call-with-frame (push-frame)
         (lambda ()
@@ -46,19 +46,18 @@
 
 ; Helpers ----------------------------------------
 
-(define node%
-  (class/cells component% ()
-    
-    ; -> symbol
-    (inherit get-component-id)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell boolean)
-    (init-cell always-dirty? #f #:accessor #:mutator)
-    
-    ; (cell (listof component<%>))
-    (init-cell children null #:children #:accessor #:mutator)))
+(define-class node% component% ()
+  
+  ; -> symbol
+  (inherit get-component-id)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell boolean)
+  (init-cell always-dirty? #f #:accessor #:mutator)
+  
+  ; (cell (listof component<%>))
+  (init-cell children null #:children #:accessor #:mutator))
 
 (define n7 (new node% [component-id 'n7]))
 (define n6 (new node% [component-id 'n6]))

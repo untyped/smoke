@@ -134,55 +134,54 @@ ENDXML
 
 ; Helpers ----------------------------------------
 
-(define node%
-  (class/cells html-component% ()
-    
-    ; -> symbol
-    (inherit get-component-id)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell boolean)
-    (init-cell always-dirty? #f #:accessor #:mutator)
-    
-    ; (cell (listof html-component<%>))
-    (init-cell children null #:children #:accessor #:mutator)
-    
-    ; Methods ------------------------------------
-    
-    ; -> boolean
-    (define/override (dirty?)
-      (or (web-cell-ref always-dirty?-cell)
-          (super dirty?)))
-    
-    ; seed -> xml
-    (define/override (render seed)
-      (xml (node (@ [id ,(get-component-id)]) 
-                 ,(super render seed))))
-    
-    ; seed -> js
-    (define/augride (get-on-attach seed)
-      (js (attach ,(get-component-id))))
-    
-    ; seed -> js
-    (define/override (get-on-render seed)
-      (js (render ,(get-component-id))))
-    
-    ; seed -> js
-    (define/augride (get-on-detach seed)
-      (js (detach ,(get-component-id))))
-    
-    (define/public #:callback (on-noop/0)
-      null)
-    
-    (define/public #:callback (on-noop/1 arg)
-      (list arg))
-    
-    (define/public #:callback (on-noop/1-2 arg1 [arg2 #f])
-      (list arg1 arg2))
-    
-    (define/public #:callback (on-noop/n . args)
-      args)))
+(define-class node% html-component% ()
+  
+  ; -> symbol
+  (inherit get-component-id)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell boolean)
+  (init-cell always-dirty? #f #:accessor #:mutator)
+  
+  ; (cell (listof html-component<%>))
+  (init-cell children null #:children #:accessor #:mutator)
+  
+  ; Methods ------------------------------------
+  
+  ; -> boolean
+  (define/override (dirty?)
+    (or (web-cell-ref always-dirty?-cell)
+        (super dirty?)))
+  
+  ; seed -> xml
+  (define/override (render seed)
+    (xml (node (@ [id ,(get-component-id)]) 
+               ,(super render seed))))
+  
+  ; seed -> js
+  (define/augride (get-on-attach seed)
+    (js (attach ,(get-component-id))))
+  
+  ; seed -> js
+  (define/override (get-on-render seed)
+    (js (render ,(get-component-id))))
+  
+  ; seed -> js
+  (define/augride (get-on-detach seed)
+    (js (detach ,(get-component-id))))
+  
+  (define/public #:callback (on-noop/0)
+    null)
+  
+  (define/public #:callback (on-noop/1 arg)
+    (list arg))
+  
+  (define/public #:callback (on-noop/1-2 arg1 [arg2 #f])
+    (list arg1 arg2))
+  
+  (define/public #:callback (on-noop/n . args)
+    args))
 
 (define n7 (new node% [component-id 'n7]))
 (define n6 (new node% [component-id 'n6]))

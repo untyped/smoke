@@ -5,149 +5,148 @@
 
 ; Classses ---------------------------------------
 
-(define component%
-  (class/cells object/cells% (component<%> printable<%>)
-    
-    (inherit dirty?)
-    
-    ; Fields -------------------------------------
-    
-    ; (cell symbol)
-    (init-field component-id (gensym/interned (inferred-id-prefix)) #:accessor)
-    
-    ; (cell (alistof symbol (-> (listof component<%>)))
-    (cell child-registry null)
-    
-    ; (hasheqof symbol callback-metadata)
-    (field callback-metadata-cache (make-hasheq))
-    
-    ; Request handling ---------------------------
-    
-    ; There are two methods involved here:
-    ;
-    ; handle-request calls on-request and then recurses down the tree.
-    ; Override this if you don't want the standard recursion behaviour.
-    ; 
-    ; on-request does whatever is appropriate for this component.
-    ; Override this in most cases (when the recursion behaviour is fine).
-    
-    ; request -> void
-    (define/pubment (on-request request)
-      (on-request/fold request))
-    
-    ; request -> void
-    (define/public (on-request/fold request)
-      (inner (void) on-request request)
-      (for-each (cut send <> on-request request)
-                (get-child-components)))
-    
-    ; Rendering ----------------------------------
-    
-    ; Returns the visible content for this component and its subtree.
-    ; Must be overridden in subclasses of component%.
-    ; seed -> content
-    (define/public (render seed)
-      (error "render: must be overridden in a subclass of component%."))
-    
-    ; Children -----------------------------------
-    
-    ; Returns a list of all child components, whether they are attached or not.
-    ; -> (listof component<%>)
-    (define/public (get-child-components)
-      (append-map (match-lambda
-                    [(list-rest field-name children)
-                     (with-handlers ([exn? (lambda (exn)
-                                             (error (format "bad child field: ~a" (exn-message exn))
-                                                    field-name))])
-                       (let ([children (if (procedure? children)
-                                           (children)
-                                           children)])
-                         (if (component-list? children)
-                             children
-                             (raise-type-error
-                              (string->symbol (format "~a.~a" this field-name))
-                              "(listof component<%>)"
-                              children))))])
-                  (with-handlers ([exn? (lambda _ (error "no child registry found" this))])
-                    (web-cell-ref child-registry-cell))))
-    
-    ; symbol -> (U component<%> #f)
-    (define/public (find-component id)
-      (or (and (eq? id (get-component-id)) this)
-          (ormap (cut send <> find-component id)
-                 (get-child-components))))
-    
-    ; Returns a list of all components in this subtree.
-    ; -> (listof component<%>)
-    (define/public (get-all-components)
-      (cons this (append-map (cut send <> get-all-components)
-                             (get-child-components))))
-    
-    ; symbol (listof component<%>) -> void
-    (define/public (register-children! field-name children)
-      (web-cell-set! child-registry-cell 
-                     (cons (cons field-name children) 
-                           (web-cell-ref child-registry-cell))))
-    
-    ; symbol (-> (listof component<%>)) -> void
-    (define/public (register-children-thunk! field-name thunk)
-      (web-cell-set! child-registry-cell 
-                     (cons (cons field-name thunk) 
-                           (web-cell-ref child-registry-cell))))
-    
-    ; Returns a list of subtree components for whom (send x dirty?) returns #t.
-    ; -> (listof component)
-    (define/public (get-dirty-components)
-      (if (dirty?)
-          (list this)
-          (append-map (cut send <> get-dirty-components)
-                      (get-child-components))))
-    
-    ; Callbacks ----------------------------------
-    
-    ; symbol -> callback-metadata
-    (define/public (get-callback-metadata id)
-      (hash-ref callback-metadata-cache id
-                (cut error (format "~a: no such callback: ~a"
-                                   (class-name (object-class this))
-                                   id))))
-    
-    ; symbol -> symbol
-    (define/public (verify-callback-id id)
-      ; Can't verify the ID if we're still constructing the object:
-      (if (hash? callback-metadata-cache)
-          (and (get-callback-metadata id) id)
-          id))
-    
-    ; symbol list -> any
-    (define/public (call-callback id args)
-      ; callback-metadata
-      (define meta (get-callback-metadata id))
-      (if (callback-metadata-respond? meta)
-          (begin (apply (callback-metadata-procedure meta) args)
-                 (send (current-page) respond))
-          (begin (apply (callback-metadata-procedure meta) args))))
-    
-    ; symbol (any ... -> void) boolean -> void
-    (define/public (register-callback! id proc respond?)
-      (hash-set! callback-metadata-cache id (make-callback-metadata proc respond?)))
-    
-    ; Printing -----------------------------------
-    
-    ; output-port -> void
-    (define/public (custom-write out)
-      (custom-print out write (infer-class-name this)))
-    
-    ; output-port -> void
-    (define/public (custom-display out)
-      (custom-print out display (infer-class-name this)))
-    
-    ; output-port (any output-post -> void) (U symbol #f) -> void
-    (define/public (custom-print out print class-name)
-      (print (vector (or class-name 'unknown-component)
-                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
-                       (get-component-id)))
-             out))))
+(define-class component% object/cells% (component<%> printable<%>)
+  
+  (inherit dirty?)
+  
+  ; Fields -------------------------------------
+  
+  ; (cell symbol)
+  (init-field component-id (gensym/interned (inferred-id-prefix)) #:accessor)
+  
+  ; (cell (alistof symbol (-> (listof component<%>)))
+  (cell child-registry null)
+  
+  ; (hasheqof symbol callback-metadata)
+  (field callback-metadata-cache (make-hasheq))
+  
+  ; Request handling ---------------------------
+  
+  ; There are two methods involved here:
+  ;
+  ; handle-request calls on-request and then recurses down the tree.
+  ; Override this if you don't want the standard recursion behaviour.
+  ; 
+  ; on-request does whatever is appropriate for this component.
+  ; Override this in most cases (when the recursion behaviour is fine).
+  
+  ; request -> void
+  (define/pubment (on-request request)
+    (on-request/fold request))
+  
+  ; request -> void
+  (define/public (on-request/fold request)
+    (inner (void) on-request request)
+    (for-each (cut send <> on-request request)
+              (get-child-components)))
+  
+  ; Rendering ----------------------------------
+  
+  ; Returns the visible content for this component and its subtree.
+  ; Must be overridden in subclasses of component%.
+  ; seed -> content
+  (define/public (render seed)
+    (error "render: must be overridden in a subclass of component%."))
+  
+  ; Children -----------------------------------
+  
+  ; Returns a list of all child components, whether they are attached or not.
+  ; -> (listof component<%>)
+  (define/public (get-child-components)
+    (append-map (match-lambda
+                  [(list-rest field-name children)
+                   (with-handlers ([exn? (lambda (exn)
+                                           (error (format "bad child field: ~a" (exn-message exn))
+                                                  field-name))])
+                     (let ([children (if (procedure? children)
+                                         (children)
+                                         children)])
+                       (if (component-list? children)
+                           children
+                           (raise-type-error
+                            (string->symbol (format "~a.~a" this field-name))
+                            "(listof component<%>)"
+                            children))))])
+                (with-handlers ([exn? (lambda _ (error "no child registry found" this))])
+                  (web-cell-ref child-registry-cell))))
+  
+  ; symbol -> (U component<%> #f)
+  (define/public (find-component id)
+    (or (and (eq? id (get-component-id)) this)
+        (ormap (cut send <> find-component id)
+               (get-child-components))))
+  
+  ; Returns a list of all components in this subtree.
+  ; -> (listof component<%>)
+  (define/public (get-all-components)
+    (cons this (append-map (cut send <> get-all-components)
+                           (get-child-components))))
+  
+  ; symbol (listof component<%>) -> void
+  (define/public (register-children! field-name children)
+    (web-cell-set! child-registry-cell 
+                   (cons (cons field-name children) 
+                         (web-cell-ref child-registry-cell))))
+  
+  ; symbol (-> (listof component<%>)) -> void
+  (define/public (register-children-thunk! field-name thunk)
+    (web-cell-set! child-registry-cell 
+                   (cons (cons field-name thunk) 
+                         (web-cell-ref child-registry-cell))))
+  
+  ; Returns a list of subtree components for whom (send x dirty?) returns #t.
+  ; -> (listof component)
+  (define/public (get-dirty-components)
+    (if (dirty?)
+        (list this)
+        (append-map (cut send <> get-dirty-components)
+                    (get-child-components))))
+  
+  ; Callbacks ----------------------------------
+  
+  ; symbol -> callback-metadata
+  (define/public (get-callback-metadata id)
+    (hash-ref callback-metadata-cache id
+              (cut error (format "~a: no such callback: ~a"
+                                 (class-name (object-class this))
+                                 id))))
+  
+  ; symbol -> symbol
+  (define/public (verify-callback-id id)
+    ; Can't verify the ID if we're still constructing the object:
+    (if (hash? callback-metadata-cache)
+        (and (get-callback-metadata id) id)
+        id))
+  
+  ; symbol list -> any
+  (define/public (call-callback id args)
+    ; callback-metadata
+    (define meta (get-callback-metadata id))
+    (if (callback-metadata-respond? meta)
+        (begin (apply (callback-metadata-procedure meta) args)
+               (send (current-page) respond))
+        (begin (apply (callback-metadata-procedure meta) args))))
+  
+  ; symbol (any ... -> void) boolean -> void
+  (define/public (register-callback! id proc respond?)
+    (hash-set! callback-metadata-cache id (make-callback-metadata proc respond?)))
+  
+  ; Printing -----------------------------------
+  
+  ; output-port -> void
+  (define/public (custom-write out)
+    (custom-print out write (infer-class-name this)))
+  
+  ; output-port -> void
+  (define/public (custom-display out)
+    (custom-print out display (infer-class-name this)))
+  
+  ; output-port (any output-post -> void) (U symbol #f) -> void
+  (define/public (custom-print out print class-name)
+    (print (vector (or class-name 'unknown-component)
+                   (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                     (get-component-id)))
+           out)))
 
 ; Helpers ----------------------------------------
 
