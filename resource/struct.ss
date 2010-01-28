@@ -87,7 +87,7 @@
          (->* (string?)
               ((listof web-resource?)
                #:media      (listof string?)
-               #:ie-version (or/c string? false/c))
+               #:ie-version (or/c string? #f))
               css-resource?)]
  [rename create-compound-resource make-compound-resource
          (-> string? (listof web-resource?) compound-resource?)])

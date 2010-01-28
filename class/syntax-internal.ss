@@ -2,6 +2,7 @@
 
 (require (for-template scheme/base
                        scheme/class
+                       "undefined.ss"
                        "../core/web-cell.ss")
          scheme/contract
          scheme/match
@@ -97,7 +98,8 @@
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body seed #'(field [cell-id (make-web-cell value)]))
+                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix (string->symbol (format "~a.~a" 'id 'cell-id))])
+                                                                     (make-web-cell value))]))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
      (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
@@ -125,9 +127,11 @@
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (make-web-cell #f)]))
-                                                      #'(init [id value]))
-                                            #'(web-cell-set! cell-id id))
+                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
+                                                                                         (make-web-cell value))]))
+                                                      #'(init [id undefined]))
+                                            #'(unless (undefined? id)
+                                                (web-cell-set! cell-id id)))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
      (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
@@ -136,7 +140,8 @@
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (make-web-cell #f)]))
+                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
+                                                                                         (make-web-cell #f))]))
                                                       #'(init id))
                                             #'(web-cell-set! cell-id id))
                                   #'(send this register-web-cell-field! cell-id))))]))
@@ -161,17 +166,25 @@
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-child-keyword id-stx other-stx cell? seed)
-  (with-syntax ([transform #'list])
-     (syntax-case other-stx ()
-       [(other ...)
-        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
+  (syntax-case other-stx ()
+    [(other ...)
+     (values #'(other ...)
+             (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
+               (add-foot seed #`(send this register-children! 'id
+                                      #,(if cell?
+                                            #`(list (web-cell-ref cell-id))
+                                            #`(list id))))))]))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-children-keyword id-stx other-stx cell? seed)
-  (with-syntax ([transform #'(lambda (x) x)])
-     (syntax-case other-stx ()
-       [(other ...)
-        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
+  (syntax-case other-stx ()
+    [(other ...)
+     (values #'(other ...)
+             (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
+               (add-foot seed #`(send this register-children! 'id
+                                      #,(if cell?
+                                            #`(web-cell-ref cell-id)
+                                            #`id)))))]))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-child-transform-keyword id-stx other-stx cell? seed)

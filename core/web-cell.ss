@@ -1,74 +1,127 @@
 #lang scheme
 
-(require web-server/servlet/web-cells
-         (planet untyped/unlib:3/debug)
-         (planet untyped/unlib:3/exn))
+(require scheme/serialize
+         srfi/26)
 
-; Struct types -----------------------------------
+; Frames -----------------------------------------
+
+; (struct (hasheqof symbol any))
+(define-serializable-struct web-frame (env) #:transparent)
+
+(define empty
+  (make-web-frame #hasheq()))
+
+; (thread-cell web-frame)
+(define new-frame (make-thread-cell empty #t))
+(define old-frame (make-thread-cell empty #t))
 
 ; (parameter boolean)
-(define use-old-web-frame?
-  (make-parameter #f))
+(define use-old-web-frame? (make-parameter #f))
 
 ; (_ expr ...)
 (define-syntax-rule (with-old-web-frame expr ...)
   (parameterize ([use-old-web-frame? #t])
     expr ...))
 
-; (struct web-cell (thread-cell (cons boolean any)))
-(define-struct wrapper (data changed) #:transparent)
+; thread-cell web-cell -> boolean
+(define (frame-set? frame cell)
+  (hash-has-key? (web-frame-env (thread-cell-ref frame))
+                 (web-cell-id cell)))
 
-; Procedures -------------------------------------
+; thread-cell web-cell any -> void
+(define (frame-ref frame cell default)
+  (hash-ref (web-frame-env (thread-cell-ref frame))
+            (web-cell-id cell)
+            default))
 
-; any -> wrapper
-(define (create-wrapper default)
-  (make-wrapper (make-web-cell default)
-                (make-thread-cell (cons #f #f))))
+; thread-cell web-cell any -> void
+(define (frame-set! frame cell val)
+  (thread-cell-set!
+   frame
+   (make-web-frame
+    (hash-set (web-frame-env (thread-cell-ref frame))
+              (web-cell-id cell)
+              val))))
 
-; wrapper -> any
-(define (wrapper-ref cell)
+; thread-cell web-cell -> void
+(define (frame-unset! frame cell)
+  (thread-cell-set!
+   frame
+   (make-web-frame
+    (hash-remove (web-frame-env (thread-cell-ref frame))
+                 (web-cell-id cell)))))
+
+; -> web-frame
+(define (capture-web-frame)
+  (thread-cell-ref new-frame))
+
+; web-frame -> void
+(define (update-web-frame! frame)
+  (thread-cell-set! new-frame frame)
+  (thread-cell-set! old-frame empty))
+
+; Cells ------------------------------------------
+
+; (struct web-cell any)
+(define-serializable-struct web-cell (id default) #:transparent)
+
+; (parameter symbol)
+(define web-cell-id-prefix (make-parameter 'cell))
+
+; any -> web-cell
+(define (create-web-cell default)
+  (make-web-cell (gensym (web-cell-id-prefix))
+                 default))
+
+; web-cell -> any
+(define (web-cell-ref cell)
   (if (use-old-web-frame?)
-      (wrapper-old cell)
-      (wrapper-new cell)))
+      (web-cell-old cell)
+      (web-cell-new cell)))
 
-; wrapper any -> void
-(define (wrapper-set! cell val)
-  (thread-cell-set! (wrapper-changed cell) #t)
-  (web-cell-shadow (wrapper-data cell) val))
+; web-cell any -> void
+(define (web-cell-set! cell val)
+  (web-cell-backup! cell val)
+  (if (equal? val (web-cell-default cell))
+      (frame-unset! new-frame cell)
+      (frame-set! new-frame cell val)))
 
-; wrapper -> boolean
-(define (wrapper-set? cell)
-  (with-handlers ([exn:fail? (lambda _ #f)])
-    (web-cell-ref (wrapper-data cell))
-    #t))
+; web-cell -> boolean
+(define (web-cell-changed? cell)
+  (frame-set? old-frame cell))
 
-; wrapper -> any
-(define (wrapper-new cell)
-  (web-cell-ref (wrapper-data cell)))
+; Helpers --------------------------------------
 
-; wrapper -> any
-(define (wrapper-old cell)
-  (let ([pair (thread-cell-ref (wrapper-changed cell))])
-    (if (car pair)
-        (cdr pair)
-        (wrapper-new cell))))
+; web-cell -> any
+(define (web-cell-new cell)
+  (frame-ref new-frame cell (cut web-cell-default cell)))
 
-; wrapper -> any
-(define (wrapper-changed? cell)
-  (let ([pair (thread-cell-ref (wrapper-changed cell))])
-    (car pair)))
+; web-cell -> any
+(define (web-cell-old cell)
+  (frame-ref old-frame cell (cut web-cell-new cell)))
+
+; web-cell any -> void
+(define (web-cell-backup! cell val)
+  (let ([new (web-cell-new cell)])
+    (unless (equal? val new)
+      (let ([old (web-cell-old cell)])
+        (if (equal? val old)
+            (frame-unset! old-frame cell)
+            (unless (frame-set? old-frame cell)
+              (frame-set! old-frame cell new)))))))
 
 ; Provide statements ---------------------------
 
-(provide (rename-out [web-cell-set?         web-frame?]
-                     [capture-web-cell-set  capture-web-frame]
-                     [restore-web-cell-set! restore-web-frame!])
-         with-old-web-frame)
+(provide with-old-web-frame
+         web-cell-id-prefix
+         web-cell?
+         web-frame?)
 
 (provide/contract
- [rename create-wrapper   make-web-cell     (-> any/c wrapper?)]
- [rename wrapper?         web-cell?         (-> any/c boolean?)]
- [rename wrapper-ref      web-cell-ref      (-> wrapper? any)]
- [rename wrapper-set!     web-cell-set!     (-> wrapper? any/c void?)]
- [rename wrapper-set?     web-cell-set?     (-> wrapper? boolean?)]
- [rename wrapper-changed? web-cell-changed? (-> wrapper? boolean?)])
+ [capture-web-frame                    (-> web-frame?)]
+ [update-web-frame!                    (-> web-frame? void?)]
+ [rename create-web-cell make-web-cell (-> any/c web-cell?)]
+ [web-cell-id                          (-> web-cell? symbol?)]
+ [web-cell-ref                         (-> web-cell? any)]
+ [web-cell-set!                        (-> web-cell? any/c void?)]
+ [web-cell-changed?                    (-> web-cell? boolean?)])

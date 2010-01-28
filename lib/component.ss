@@ -55,19 +55,20 @@
     ; -> (listof component<%>)
     (define/public (get-child-components)
       (append-map (match-lambda
-                    [(list-rest field-name thunk)
+                    [(list-rest field-name children)
                      (with-handlers ([exn? (lambda (exn)
                                              (error (format "bad child field: ~a" (exn-message exn))
                                                     field-name))])
-                       (let ([children (thunk)])
+                       (let ([children (if (procedure? children)
+                                           (children)
+                                           children)])
                          (if (component-list? children)
                              children
                              (raise-type-error
                               (string->symbol (format "~a.~a" this field-name))
                               "(listof component<%>)"
                               children))))])
-                  (with-handlers ([exn? (lambda (exn)
-                                          (error "no child registry found: " this))])
+                  (with-handlers ([exn? (lambda _ (error "no child registry found" this))])
                     (web-cell-ref child-registry-cell))))
     
     ; symbol -> (U component<%> #f)
@@ -81,6 +82,12 @@
     (define/public (get-all-components)
       (cons this (append-map (cut send <> get-all-components)
                              (get-child-components))))
+    
+    ; symbol (listof component<%>) -> void
+    (define/public (register-children! field-name children)
+      (web-cell-set! child-registry-cell 
+                     (cons (cons field-name children) 
+                           (web-cell-ref child-registry-cell))))
     
     ; symbol (-> (listof component<%>)) -> void
     (define/public (register-children-thunk! field-name thunk)

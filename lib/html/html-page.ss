@@ -1,6 +1,6 @@
 #lang scheme
 
-(require (only-in srfi/1 delete delete-duplicates)
+(require scheme/serialize
          (only-in (planet schematics/schemeunit:3/text-ui) display-exn)
          (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/list)
@@ -96,10 +96,10 @@
     ; (cell (U string #f))
     (init-cell title #f #:accessor #:mutator)
     
-    ; (cell string)
+    ; (cell (U string #f))
     (init-cell description #f #:accessor #:mutator)
     
-    ; (cell string)
+    ; (cell (U string #f))
     (init-cell keywords #f #:accessor #:mutator)
     
     ; (cell string)
@@ -158,6 +158,8 @@
       (unless (current-request)
         (error "No current HTTP request to respond to."))
       
+      (current-page-set! this)
+      
       ;(when (expired-continuation-type)
       ;  (notifications-add! (expired-continuation-xml (expired-continuation-type)))
       ;  (expired-continuation-type-reset!))
@@ -165,8 +167,10 @@
       (when forward?
         (clear-history!))
       
-      (current-page-set! this)
-      (make-response))
+      (begin0
+        (make-response)
+        (debug "frame" (capture-web-frame))
+        (debug "serialized" (serialize (capture-web-frame)))))
     
     ; expired-continuation-type -> xml
     ;(define/public (expired-continuation-xml type)
@@ -217,15 +221,15 @@
          ; seed
          (let ([seed (make-seed)])
            ; Store the initial requirements for the page:
-           (set-current-html-requirements! (delete-duplicates (get-html-requirements/fold)))
-           (set-current-js-requirements! (delete-duplicates (get-js-requirements/fold)))
+           (set-current-html-requirements! (remove-duplicates (get-html-requirements/fold)))
+           (set-current-js-requirements! (remove-duplicates (get-js-requirements/fold)))
            ; Call render before get-on-attach for consistency with AJAX responses:
-           (let ([code      (get-http-code)]
-                 [message   (get-http-status)]
-                 [seconds   (get-http-timestamp)]
-                 [headers   (get-http-headers)]
-                 [mime-type (get-content-type)]
-                 [content   (render seed)])
+           (let/debug ([code      (get-http-code)]
+                       [message   (get-http-status)]
+                       [seconds   (get-http-timestamp)]
+                       [headers   (get-http-headers)]
+                       [mime-type (get-content-type)]
+                       [content   (render seed)])
              ; response
              (make-xml-response
               #:code      code

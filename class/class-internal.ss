@@ -35,6 +35,11 @@
     ; -> boolean
     ;
     ; Returns #t if this component has changed and/or needs refreshing.
+    ;
+    ; The default implementation returns #t if any of the component's
+    ; web cell content (including child web cells) has changed, and
+    ; raises exn:fail if called in the root web frame where changes
+    ; cannot have been made.
     (define/public (dirty?)
       (for/or ([cell (in-list web-cell-fields)])
         (web-cell-changed? cell)))
