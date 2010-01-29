@@ -223,12 +223,12 @@
          (set-current-html-requirements! (remove-duplicates (get-html-requirements/fold)))
          (set-current-js-requirements! (remove-duplicates (get-js-requirements/fold)))
          ; Call render before get-on-attach for consistency with AJAX responses:
-         (let/debug ([code      (get-http-code)]
-                     [message   (get-http-status)]
-                     [seconds   (get-http-timestamp)]
-                     [headers   (get-http-headers)]
-                     [mime-type (get-content-type)]
-                     [content   (render seed)])
+         (let ([code      (get-http-code)]
+               [message   (get-http-status)]
+               [seconds   (get-http-timestamp)]
+               [headers   (get-http-headers)]
+               [mime-type (get-content-type)]
+               [content   (render seed)])
            ; response
            (make-xml-response
             #:code      code

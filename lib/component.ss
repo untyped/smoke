@@ -16,10 +16,7 @@
   
   ; (cell (alistof symbol (-> (listof component<%>)))
   (cell child-registry null)
-  
-  ; (hasheqof symbol callback-metadata)
-  (field callback-metadata-cache (make-hasheq))
-  
+    
   ; Request handling ---------------------------
   
   ; There are two methods involved here:
@@ -101,35 +98,6 @@
         (list this)
         (append-map (cut send <> get-dirty-components)
                     (get-child-components))))
-  
-  ; Callbacks ----------------------------------
-  
-  ; symbol -> callback-metadata
-  (define/public (get-callback-metadata id)
-    (hash-ref callback-metadata-cache id
-              (cut error (format "~a: no such callback: ~a"
-                                 (class-name (object-class this))
-                                 id))))
-  
-  ; symbol -> symbol
-  (define/public (verify-callback-id id)
-    ; Can't verify the ID if we're still constructing the object:
-    (if (hash? callback-metadata-cache)
-        (and (get-callback-metadata id) id)
-        id))
-  
-  ; symbol list -> any
-  (define/public (call-callback id args)
-    ; callback-metadata
-    (define meta (get-callback-metadata id))
-    (if (callback-metadata-respond? meta)
-        (begin (apply (callback-metadata-procedure meta) args)
-               (send (current-page) respond))
-        (begin (apply (callback-metadata-procedure meta) args))))
-  
-  ; symbol (any ... -> void) boolean -> void
-  (define/public (register-callback! id proc respond?)
-    (hash-set! callback-metadata-cache id (make-callback-metadata proc respond?)))
   
   ; Printing -----------------------------------
   

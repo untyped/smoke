@@ -2,6 +2,7 @@
 
 (require (for-template scheme/base
                        scheme/class
+                       "callback-registry.ss"
                        "undefined.ss"
                        "../core/web-cell.ss")
          scheme/contract
@@ -15,37 +16,61 @@
 ;
 ; Records the accumulation of syntax as a (class/cells ...) or
 ; (mixin/cells ...) form is built up.
-(define-struct seed (body-clause-stxs foot-clause-stxs has-super-new? has-inspector?) #:transparent)
+(define-struct seed
+  (class-id-stx
+   body-clause-stxs
+   foot-clause-stxs
+   post-clause-stxs
+   has-super-new?
+   has-inspector?)
+  #:transparent)
 
 ; -> seed
-(define (create-seed)
-  (make-seed null null #f #f))
+(define (create-seed class-id-stx)
+  (make-seed class-id-stx null null null #f #f))
 
 ; seed syntax -> seed
 (define (add-body seed stx)
-  (make-seed (cons stx (seed-body-clause-stxs seed))
+  (make-seed (seed-class-id-stx seed)
+             (cons stx (seed-body-clause-stxs seed))
              (seed-foot-clause-stxs seed)
+             (seed-post-clause-stxs seed)
              (seed-has-super-new? seed)
              (seed-has-inspector? seed)))
 
 ; seed syntax -> seed
 (define (add-foot seed stx)
-  (make-seed (seed-body-clause-stxs seed)
+  (make-seed (seed-class-id-stx seed)
+             (seed-body-clause-stxs seed)
              (cons stx (seed-foot-clause-stxs seed))
+             (seed-post-clause-stxs seed)
+             (seed-has-super-new? seed)
+             (seed-has-inspector? seed)))
+
+; seed syntax -> seed
+(define (add-post seed stx)
+  (make-seed (seed-class-id-stx seed)
+             (seed-body-clause-stxs seed)
+             (seed-foot-clause-stxs seed)
+             (cons stx (seed-post-clause-stxs seed))
              (seed-has-super-new? seed)
              (seed-has-inspector? seed)))
 
 ; seed syntax -> seed
 (define (record-super-new seed)
-  (make-seed (seed-body-clause-stxs seed)
+  (make-seed (seed-class-id-stx seed)
+             (seed-body-clause-stxs seed)
              (seed-foot-clause-stxs seed)
+             (seed-post-clause-stxs seed)
              #t
              (seed-has-inspector? seed)))
 
 ; seed syntax -> seed
 (define (record-inspector seed)
-  (make-seed (seed-body-clause-stxs seed)
+  (make-seed (seed-class-id-stx seed)
+             (seed-body-clause-stxs seed)
              (seed-foot-clause-stxs seed)
+             (seed-post-clause-stxs seed)
              (seed-has-super-new? seed)
              #t))
 
@@ -245,27 +270,32 @@
 (define (expand-method-clause clause-stx seed)
   (syntax-case clause-stx ()
     [(define/whatever key (id arg ...) expr ...)
-     (and (identifier? #'id)
-          (keyword? (syntax->datum #'key)))
-     (let ([key-datum (syntax->datum #'key)])
-       (cond [(equal? key-datum '#:callback)
-              (add-foot (add-body seed #'(define/whatever (id arg ...) expr ...))
-                        #'(send this register-callback! 'id (lambda args (id . args)) #t))]
-             [(equal? key-datum '#:callback*)
-              (add-foot (add-body seed #'(define/whatever (id arg ...) expr ...))
-                        #'(send this register-callback! 'id (lambda args (id . args)) #f))]
-             [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)]))]
+     (and (identifier? #'id) (keyword? (syntax->datum #'key)))
+     (with-syntax ([class-id (seed-class-id-stx seed)]
+                   [respond? (match (syntax->datum #'key)
+                               ['#:callback  #t]
+                               ['#:callback* #f]
+                               [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
+       (add-post (add-body seed #'(define/whatever (id arg ...) expr ...))
+                 #'(register-callback! class-id 'id (generic class-id id) respond?)))]
     [(define/whatever key (id arg ... . rest) expr ...)
-     (and (identifier? #'id)
-          (keyword? (syntax->datum #'key)))
-     (let ([key-datum (syntax->datum #'key)])
-       (cond [(equal? key-datum '#:callback)
-              (add-foot (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
-                        #'(send this register-callback! 'id (lambda args (id . args)) #t))]
-             [(equal? key-datum '#:callback*)
-              (add-foot (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
-                        #'(send this register-callback! 'id (lambda args (id . args)) #f))]
-             [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)]))]
+     (and (identifier? #'id) (keyword? (syntax->datum #'key)))
+     (with-syntax ([class-id (seed-class-id-stx seed)]
+                   [respond? (match (syntax->datum #'key)
+                               ['#:callback  #t]
+                               ['#:callback* #f]
+                               [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
+       (add-post (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
+                 #'(register-callback! class-id 'id (generic class-id id) respond?)))]
+    [(define/whatever key id expr)
+     (and (identifier? #'id) (keyword? (syntax->datum #'key)))
+     (with-syntax ([class-id (seed-class-id-stx seed)]
+                   [respond? (match (syntax->datum #'key)
+                               ['#:callback  #t]
+                               ['#:callback* #f]
+                               [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
+       (add-post (add-body seed #'(define/whatever id expr))
+                 #'(register-callback! class-id 'id (generic class-id id) respond?)))]
     [other (add-body seed clause-stx)]))
 
 ; Helpers ----------------------------------------
@@ -279,5 +309,5 @@
 (provide (except-out (struct-out seed) make-seed))
 
 (provide/contract
- [rename create-seed make-seed (-> seed?)]
+ [rename create-seed make-seed (-> identifier? seed?)]
  [expand-clause                (-> syntax? seed? seed?)]) 

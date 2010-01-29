@@ -2,6 +2,7 @@
 
 (require net/url
          web-server/http
+         web-server/lang/serial-lambda
          "base.ss"
          "class/class.ss"
          (except-in "core/callback.ss" callback)
@@ -18,6 +19,7 @@
 
 (provide (all-from-out net/url
                        web-server/http
+                       web-server/lang/serial-lambda
                        "base.ss"
                        "class/class.ss"
                        "core/callback.ss"

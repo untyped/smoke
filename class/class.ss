@@ -1,10 +1,12 @@
 #lang scheme/base
 
-(require "class-internal.ss"
+(require "callback-registry.ss"
+         "class-internal.ss"
          "syntax.ss")
 
 ; Provide statements ---------------------------
 
-(provide (all-from-out "class-internal.ss"
+(provide (all-from-out "callback-registry.ss"
+                       "class-internal.ss"
                        "syntax.ss"))
 

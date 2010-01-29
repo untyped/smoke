@@ -1,6 +1,6 @@
 #lang scheme
 
-(require "../class/class.ss")
+(require "../class/class-internal.ss")
 
 ; Interfaces -------------------------------------
 

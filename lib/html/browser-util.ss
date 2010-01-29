@@ -104,12 +104,15 @@
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.slide.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.transfer.js"]))))
 
-(define (jquery-ui-styles seed)
-  (xml (link (@ [type "text/css"]
-                [href ,(current-jquery-ui-stylesheet)]
-                [rel  "stylesheet"]))))
+(define jquery-ui-styles
+  (serial-lambda (seed)
+    (xml (link (@ [type "text/css"]
+                  [href ,(current-jquery-ui-stylesheet)]
+                  [rel  "stylesheet"])))))
 
 ; Provide statements -----------------------------
+
+(provide jquery-ui-styles)
 
 (provide/contract
  [jquery-script/dev               xml?]
@@ -124,5 +127,4 @@
  [current-jquery-ui-stylesheet    (parameter/c string?)]
  [jquery-ui-script/min            xml?]
  [jquery-ui-script/dev            xml?]
- [jquery-ui-styles                (-> any/c xml?)]
  [default-tiny-mce-options-script xml?])

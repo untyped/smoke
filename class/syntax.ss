@@ -5,6 +5,7 @@
                      (planet untyped/unlib:3/debug)
                      (planet untyped/unlib:3/syntax)
                      "syntax-internal.ss")
+         (for-template "callback-registry.ss")
          scheme/class)
 
 (define inferred-id-prefix
@@ -19,32 +20,42 @@
 (define-syntax (class/cells stx)
   (syntax-case stx ()
     [(_ superclass (interface ...) clause ...)
-     (let ([seed (foldl expand-clause (make-seed) (syntax->list #'(clause ...)))])
-       (quasisyntax/loc stx
-         (class* superclass (interface ...)
-           #,@(reverse (seed-body-clause-stxs seed))
-           #,@(if (seed-has-super-new? seed)
-                  null
-                  (list #'(super-new)))
-           #,@(reverse (seed-foot-clause-stxs seed))
-           #,@(if (seed-has-inspector? seed)
-                  null
-                  (list #'(inspect #f))))))]))
+     (with-syntax ([class-id (or (syntax-local-name) 'class%)])
+       (let ([seed (foldl expand-clause (make-seed #'class-id) (syntax->list #'(clause ...)))])
+         (quasisyntax/loc stx
+           (let ([class-id (class* superclass (interface ...)
+                             #,@(reverse (seed-body-clause-stxs seed))
+                             #,@(if (seed-has-super-new? seed)
+                                    null
+                                    (list #'(super-new)))
+                             #,@(reverse (seed-foot-clause-stxs seed))
+                             #,@(if (seed-has-inspector? seed)
+                                    null
+                                    (list #'(inspect #f))))])
+             #,@(reverse (seed-post-clause-stxs seed))
+             class-id))))]))
 
 (define-syntax (mixin/cells stx)
   (syntax-case stx ()
     [(_ (interface-in ...) (interface-out ...) clause ...)
-     (let ([seed (foldl expand-clause (make-seed) (syntax->list #'(clause ...)))])
-       (quasisyntax/loc stx
-         (mixin (interface-in ...) (interface-out ...)
-           #,@(reverse (seed-body-clause-stxs seed))
-           #,@(if (seed-has-super-new? seed)
-                  null
-                  (list #'(super-new)))
-           #,@(reverse (seed-foot-clause-stxs seed))
-           #,@(if (seed-has-inspector? seed)
-                  null
-                  (list #'(inspect #f))))))]))
+     (with-syntax ([class1 (if (syntax-local-name)
+                               (make-id #f (syntax-local-name) '-mixed%)
+                               'mixed%)])
+       (let ([seed (foldl expand-clause (make-seed #'class1) (syntax->list #'(clause ...)))])
+         (quasisyntax/loc stx
+           (lambda (class0)
+             (let ([class1 ((mixin (interface-in ...) (interface-out ...)
+                              #,@(reverse (seed-body-clause-stxs seed))
+                              #,@(if (seed-has-super-new? seed)
+                                     null
+                                     (list #'(super-new)))
+                              #,@(reverse (seed-foot-clause-stxs seed))
+                              #,@(if (seed-has-inspector? seed)
+                                     null
+                                     (list #'(inspect #f))))
+                            class0)])
+               #,@(reverse (seed-post-clause-stxs seed))
+               class1)))))]))
 
 (define-syntax (new/inferred-id stx)
   (syntax-case stx ()
@@ -71,17 +82,19 @@
 (define-syntax (define-class stx)
   (syntax-case stx ()
     [(_ id superclass (interface ...) clause ...)
-     (let ([seed (foldl expand-clause (make-seed) (syntax->list #'(clause ...)))])
+     (let ([seed (foldl expand-clause (make-seed #'id) (syntax->list #'(clause ...)))])
        (quasisyntax/loc stx
-         (define-serializable-class* id superclass (interface ...)
-           #,@(reverse (seed-body-clause-stxs seed))
-           #,@(if (seed-has-super-new? seed)
-                  null
-                  (list #'(super-new)))
-           #,@(reverse (seed-foot-clause-stxs seed))
-           #,@(if (seed-has-inspector? seed)
-                  null
-                  (list #'(inspect #f))))))]))
+         (begin
+           (define-serializable-class* id superclass (interface ...)
+             #,@(reverse (seed-body-clause-stxs seed))
+             #,@(if (seed-has-super-new? seed)
+                    null
+                    (list #'(super-new)))
+             #,@(reverse (seed-foot-clause-stxs seed))
+             #,@(if (seed-has-inspector? seed)
+                    null
+                    (list #'(inspect #f))))
+           #,@(reverse (seed-post-clause-stxs seed)))))]))
 
 (define-syntax (define-mixin stx)
   (syntax-case stx ()

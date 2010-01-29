@@ -1,6 +1,7 @@
 #lang scheme
 
-(require "json.ss")
+(require "json.ss"
+         "../class/class.ss")
 
 ; (struct)
 (define-struct seed () #:transparent)
