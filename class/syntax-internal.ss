@@ -8,6 +8,7 @@
          scheme/contract
          scheme/match
          srfi/26
+         (planet cce/scheme:6/syntax)
          (planet untyped/unlib:3/syntax))
 
 ; Seed structure ---------------------------------
@@ -37,6 +38,12 @@
              (seed-post-clause-stxs seed)
              (seed-has-super-new? seed)
              (seed-has-inspector? seed)))
+
+; seed syntax ... -> seed
+(define (add-body* seed . stxs)
+  (if (null? stxs)
+      seed
+      (apply add-body* (add-body seed (car stxs)) (cdr stxs))))
 
 ; seed syntax -> seed
 (define (add-foot seed stx)
@@ -121,9 +128,11 @@
   (syntax-case clause-stx ()
     [(_ [id value] kw ...)
      (identifier? #'id)
-     (with-syntax ([cell-id (make-cell-id #'id)])
+     (with-syntax* ([class-id  (seed-class-id-stx seed)]
+                    [cell-id   (make-cell-id #'id)]
+                    [prefix-id (make-prefix-id #'class-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix (string->symbol (format "~a.~a" 'id 'cell-id))])
+                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'prefix-id])
                                                                      (make-web-cell value))]))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
@@ -150,25 +159,31 @@
   (syntax-case clause-stx ()
     [(_ [id value] kw ...) 
      (identifier? #'id)
-     (with-syntax ([cell-id (make-cell-id #'id)])
+     (with-syntax* ([class-id  (seed-class-id-stx seed)]
+                    [cell-id   (make-cell-id #'id)]
+                    [prefix-id (make-prefix-id #'class-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
-                                                                                         (make-web-cell value))]))
-                                                      #'(init [id undefined]))
-                                            #'(unless (undefined? id)
-                                                (web-cell-set! cell-id id)))
+                        (add-foot (add-body* seed
+                                             #'(field [cell-id (parameterize ([web-cell-id-prefix 'prefix-id])
+                                                                 (make-web-cell value))])
+                                             #'(init [id undefined])
+                                             #'(unless (undefined? id)
+                                                 (web-cell-set! cell-id id)))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
      (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
      (expand-init-cell-clause #'(_ [id value] kw ...) seed)]
     [(_ id kw ...)
      (identifier? #'id)
-     (with-syntax ([cell-id (make-cell-id #'id)])
+     (with-syntax* ([class-id  (seed-class-id-stx seed)]
+                    [cell-id   (make-cell-id #'id)]
+                    [prefix-id (make-prefix-id #'class-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body (add-body (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
-                                                                                         (make-web-cell #f))]))
-                                                      #'(init id))
-                                            #'(web-cell-set! cell-id id))
+                        (add-foot (add-body* seed
+                                             #'(field [cell-id (parameterize ([web-cell-id-prefix 'prefix-id])
+                                                                 (make-web-cell #f))])
+                                             #'(init id)
+                                             #'(web-cell-set! cell-id id))
                                   #'(send this register-web-cell-field! cell-id))))]))
 
 ; syntax syntax boolean seed -> seed
@@ -284,7 +299,7 @@
                    [respond? (match (syntax->datum #'key)
                                ['#:callback  #t]
                                ['#:callback* #f]
-                               [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
+                               [_ (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
        (add-post (add-body seed #'(define/whatever (id arg ... . rest) expr ...))
                  #'(register-callback! class-id 'id (generic class-id id) respond?)))]
     [(define/whatever key id expr)
@@ -293,7 +308,7 @@
                    [respond? (match (syntax->datum #'key)
                                ['#:callback  #t]
                                ['#:callback* #f]
-                               [else (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
+                               [_ (raise-syntax-error #f "bad method keyword:" clause-stx #'key)])])
        (add-post (add-body seed #'(define/whatever id expr))
                  #'(register-callback! class-id 'id (generic class-id id) respond?)))]
     [other (add-body seed clause-stx)]))
@@ -303,6 +318,10 @@
 ; syntax -> syntax
 (define (make-cell-id id-stx)
   (make-id id-stx id-stx '-cell))
+
+; syntax syntax -> syntax
+(define (make-prefix-id class-id-stx id-stx)
+  (make-id #f class-id-stx '|.| id-stx))
 
 ; Provide statements -----------------------------
 

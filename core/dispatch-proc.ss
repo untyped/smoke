@@ -23,11 +23,12 @@
     (current-connection-set! conn)
     (current-request-set! req)
     (parameterize ([current-custodian (make-servlet-custodian)])
-      (with-handlers ([(lambda (exn) #t) error-handler])
-        (output-response/method
-         conn
-         (proc)
-         (request-method req))))))
+      (with-new-web-frame
+       (with-handlers ([exn? error-handler])
+         (output-response/method
+          conn
+          (proc)
+          (request-method req)))))))
 
 ; Provides ---------------------------------------
 

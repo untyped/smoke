@@ -1,6 +1,7 @@
 #lang scheme
 
-(require "../lib-base.ss"
+(require (only-in web-server/dispatchers/dispatch next-dispatcher)
+         "../lib-base.ss"
          "component.ss")
 
 (define-class application% component% (application<%>)
@@ -19,18 +20,16 @@
   
   ; callback -> response
   (define/public (dispatch-callback callback)
-    (debug "callback" callback)
     (let-values ([(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
-      (send comp call-callback
-            (callback-method-id callback)
-            (callback-args callback))))
+      (send-callback comp (callback-method-id callback) (callback-args callback))))
   
   ; url -> response
   (define/public (dispatch-initial url)
-    (debug "initial" (url->string url))
-    (current-page-set! page)
-    (send page respond))
+    (match (url-path-base url)
+      [(list) (current-page-set! page)
+              (send page respond)]
+      [_      (next-dispatcher)]))
   
   ; symbol -> (U page<%> #f) (U component<%> #f)
   (define/public (find-page+component id)

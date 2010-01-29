@@ -36,7 +36,7 @@
     (error (format "callback ~s not registered" id) object+class)))
 
 ; object symbol (listof any) -> any
-(define (invoke-callback object id args)
+(define (send-callback object id args)
   (let ([hash (hash-ref callback-registry (object-class object))])
     (if hash
         (let ([generic+respond? (hash-ref hash id)])
@@ -54,4 +54,4 @@
  [register-callback!   (-> class? symbol? generic? boolean? void?)]
  [callback-registered? (-> (or/c class? object?) symbol? boolean?)]
  [verify-callback      (-> (or/c class? object?) symbol? void?)]
- [invoke-callback      (-> object? symbol? list? any)])
+ [send-callback        (-> object? symbol? list? any)])
