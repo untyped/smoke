@@ -71,6 +71,11 @@
   (thread-cell-set! new-frame frame)
   (thread-cell-set! old-frame empty))
 
+; -> void
+(define (clear-web-frame!)
+  (thread-cell-set! new-frame empty)
+  (thread-cell-set! old-frame empty))
+
 ; Cells ------------------------------------------
 
 ; (struct web-cell any)
@@ -146,6 +151,7 @@
 (provide/contract
  [capture-web-frame                    (-> web-frame?)]
  [update-web-frame!                    (-> web-frame? void?)]
+ [clear-web-frame!                     (-> void?)]
  [rename create-web-cell make-web-cell (-> any/c web-cell?)]
  [web-cell-id                          (-> web-cell? symbol?)]
  [web-cell-ref                         (-> web-cell? any)]

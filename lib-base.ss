@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require net/url
+         scheme/serialize
          web-server/http
          web-server/lang/serial-lambda
          "base.ss"
@@ -18,6 +19,7 @@
 ; Provide statements -----------------------------
 
 (provide (all-from-out net/url
+                       scheme/serialize
                        web-server/http
                        web-server/lang/serial-lambda
                        "base.ss"
