@@ -67,10 +67,6 @@
 
 ; jQuery UI --------------------------------------
 
-; (parameter string)
-(define current-jquery-ui-stylesheet
-  (make-parameter "/styles/jquery-ui/ui-lightness/jquery-ui-1.7.2.custom.css"))
-
 (define jquery-ui-script/min
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/jquery-ui/jquery-ui-1.7.1.custom.min.js"]))))
@@ -105,14 +101,11 @@
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.transfer.js"]))))
 
 (define jquery-ui-styles
-  (serial-lambda (seed)
-    (xml (link (@ [type "text/css"]
-                  [href ,(current-jquery-ui-stylesheet)]
-                  [rel  "stylesheet"])))))
+  (xml (link (@ [type "text/css"]
+                [href "/styles/jquery-ui/ui-lightness/jquery-ui-1.7.2.custom.css"]
+                [rel  "stylesheet"]))))
 
 ; Provide statements -----------------------------
-
-(provide jquery-ui-styles)
 
 (provide/contract
  [jquery-script/dev               xml?]
@@ -124,7 +117,7 @@
  [rollover-script                 xml?]
  [excanvas-script                 xml?]
  [firebug-script                  xml?]
- [current-jquery-ui-stylesheet    (parameter/c string?)]
  [jquery-ui-script/min            xml?]
  [jquery-ui-script/dev            xml?]
- [default-tiny-mce-options-script xml?])
+ [default-tiny-mce-options-script xml?]
+ [jquery-ui-styles                xml?])

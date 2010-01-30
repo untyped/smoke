@@ -198,7 +198,8 @@
   ; content rendering.
   (define/public (make-response)
     (if (ajax-request? (current-request))
-        (if (equal? (debug* "request-id" ajax-request-page-id (current-request)) (debug* "my-id" get-component-id))
+        (if (equal? (debug* "request-id" ajax-request-page-id (current-request))
+                    (debug* "my-id" get-component-id))
             (make-ajax-response)
             (make-ajax-redirect-response))
         (if (post-request? (current-request))
@@ -215,10 +216,12 @@
       (log-response-time
        (smoke-response-types full)
        ; seed
-       (let ([seed (make-seed)])
+       (let ([seed          (make-seed)]
+             [new-html-reqs (remove-duplicates (get-html-requirements/fold))]
+             [new-js-reqs   (remove-duplicates (get-js-requirements/fold))])
          ; Store the initial requirements for the page:
-         (set-current-html-requirements! (remove-duplicates (get-html-requirements/fold)))
-         (set-current-js-requirements! (remove-duplicates (get-js-requirements/fold)))
+         (set-current-html-requirements! new-html-reqs)
+         (set-current-js-requirements! new-js-reqs)
          ; Call render before get-on-attach for consistency with AJAX responses:
          (let ([code      (get-http-code)]
                [message   (get-http-status)]
@@ -274,18 +277,18 @@
                                   #:code 500
                                   #:message "Internal Error"
                                   (js (!dot Smoke (log "An error has occurred. Talk to your system administrator.")))))])
-           (let ([new-html-requirements (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
-                 [new-js-requirements   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
-             (unless (null? new-html-requirements)
-               (set-current-html-requirements! (append (get-current-html-requirements) new-html-requirements)))
-             (unless (null? new-js-requirements)
-               (set-current-js-requirements! (append (get-current-js-requirements) new-js-requirements)))
+           (let ([new-html-reqs (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
+                 [new-js-reqs   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
+             (unless (null? new-html-reqs)
+               (set-current-html-requirements! (append (get-current-html-requirements) new-html-reqs)))
+             (unless (null? new-js-reqs)
+               (set-current-js-requirements! (append (get-current-js-requirements) new-js-reqs)))
              (make-js-response
               (js ((function ($)
-                     ,(opt-js (not (null? new-html-requirements))
+                     ,(opt-js (not (null? new-html-reqs))
                         (!dot ($ (!dot Smoke documentHead))
-                              (append ,(xml->string (xml ,@(render-requirements new-html-requirements seed))))))
-                     ,@(render-requirements new-js-requirements seed)
+                              (append ,(xml->string (xml ,@(render-requirements new-html-reqs seed))))))
+                     ,@(render-requirements new-js-reqs seed)
                      ,@(map (cut send <> get-on-refresh seed)
                             (get-dirty-components)))
                    jQuery)))))))))
@@ -382,7 +385,7 @@
 (define (filter-new-requirements prev-reqs curr-reqs)
   (remove-duplicates
    (filter-map (lambda (req)
-                 (and (not (memq req prev-reqs)) req))
+                 (and (not (member req prev-reqs)) req))
                curr-reqs)))
 
 ; (listof (U any (seed -> any))) seed -> (listof any)
