@@ -9,6 +9,7 @@
          (planet untyped/unlib:3/log)
          (planet untyped/unlib:3/time)
          "env.ss"
+         "session.ss"
          "web-cell.ss")
 
 ; symbol
@@ -17,8 +18,8 @@
 ; (-> response) -> (connection request -> response)
 (define (make proc
               #:error-handler   error-handler 
-              #:session-expires [expires (void)]
-              #:session-domain  [domain #f])
+              #:session-expires [expires #f]
+              #:session-domain  [domain  #f])
   (lambda (conn req)
     (current-connection-set! conn)
     (current-request-set! req)
@@ -27,7 +28,8 @@
        (with-handlers ([exn? error-handler])
          (output-response/method
           conn
-          (proc)
+          (or (start-session #:expires expires #:domain domain)
+              (proc))
           (request-method req)))))))
 
 ; Provides ---------------------------------------
@@ -35,5 +37,5 @@
 (provide/contract
  [interface-version dispatcher-interface-version/c]
  [make              (->* ((-> response/c) #:error-handler (-> exn? response/c))
-                         (#:session-expires (or/c time-utc? void? #f) #:session-domain  (or/c string? #f))
+                         (#:session-expires (or/c time-utc? #f) #:session-domain  (or/c string? #f))
                          dispatcher/c)])

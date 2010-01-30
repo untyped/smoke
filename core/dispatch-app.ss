@@ -13,8 +13,8 @@
 ; application -> (connection request -> response)
 (define (make app
               #:error-handler   error-handler 
-              #:session-expires [expires (void)]
-              #:session-domain  [domain #f])
+              #:session-expires [expires #f]
+              #:session-domain  [domain  #f])
   (proc:make (lambda ()
                (current-application-set! app)
                (send app dispatch))
@@ -27,5 +27,5 @@
 (provide/contract
  [interface-version dispatcher-interface-version/c]
  [make              (->* ((is-a?/c application<%>) #:error-handler (-> exn? response/c))
-                         (#:session-expires (or/c time-utc? void? #f) #:session-domain  (or/c string? #f))
+                         (#:session-expires (or/c time-utc? #f) #:session-domain  (or/c string? #f))
                          dispatcher/c)])
