@@ -198,7 +198,7 @@
   ; content rendering.
   (define/public (make-response)
     (if (ajax-request? (current-request))
-        (if (equal? (ajax-request-page-id (current-request)) (get-component-id))
+        (if (equal? (debug* "request-id" ajax-request-page-id (current-request)) (debug* "my-id" get-component-id))
             (make-ajax-response)
             (make-ajax-redirect-response))
         (if (post-request? (current-request))

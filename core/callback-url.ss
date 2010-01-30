@@ -7,7 +7,9 @@
          "callback.ss"
          "env.ss"
          "interfaces.ss"
-         "json.ss")
+         "json.ss"
+         "request.ss"
+         "web-cell.ss")
 
 (define-syntax-rule (debug-path msg fn arg ...)
   (let ([p (fn arg ...)])
@@ -23,7 +25,7 @@
          [(list _ ... "_" _ ...) #t]
          [_ #f])))
 
-; seed callback -> string
+; seed callback [(alistof symbol string)] -> string
 (define (callback->url seed callback [bindings null])
   (url->string
    (make-url
@@ -40,8 +42,7 @@
                                        (symbol->string arg))
                                    (scheme->json arg)))
                              (callback-args callback)))))
-    (cons (cons '__k (send (current-application) get-web-frame-serial))
-          bindings)
+    (cons (cons '__k (web-frame-serial)) bindings)
     #f)))
 
 ; url application<%> -> callback
@@ -78,6 +79,11 @@
         [_ #f])
       (raise-type-error 'url-path-extension "absolute-url" url)))
 
+; [request] -> (U string #f)
+(define (request-serial [request (current-request)])
+  (or (request-binding-ref request '__k)
+      (error "no serial in request" request)))
+
 ; Provide statements -----------------------------
 
 (provide/contract
@@ -85,4 +91,5 @@
  [callback->url      (-> seed? callback? string?)]
  [url->callback      (-> url? (is-a?/c application<%>) callback?)]
  [url-path-base      (-> url? (listof path/param?))]
- [url-path-extension (-> url? (or/c (listof path/param?) #f))])
+ [url-path-extension (-> url? (or/c (listof path/param?) #f))]
+ [request-serial     (->* () (request?) string?)])

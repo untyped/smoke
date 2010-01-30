@@ -14,7 +14,8 @@
          "core/notification.ss"
          "core/request.ss"
          "core/session-cell.ss"
-         "core/web-cell.ss")
+         "core/web-cell.ss"
+         "core/web-cell-save.ss")
 
 ; Provide statements -----------------------------
 
@@ -32,4 +33,5 @@
                        "core/notification.ss"
                        "core/request.ss"
                        "core/session-cell.ss"
-                       "core/web-cell.ss"))
+                       "core/web-cell.ss"
+                       "core/web-cell-save.ss"))
