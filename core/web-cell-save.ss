@@ -39,11 +39,12 @@
 ; Loading and saving web frames ------------------
 
 ; Loads a web frame using the supplied serial.
-; string -> web-frame
+; string -> (U web-frame #f)
 (define (load-web-frame serial)
-  (with-input-from-file (serial->path serial)
-    (lambda ()
-      (deserialize (read)))))
+  (and (file-exists? (serial->path serial))
+       (with-input-from-file (serial->path serial)
+         (lambda ()
+           (deserialize (read))))))
 
 ; Saves the current web frame under the serial stored in the frame.
 ; -> void
@@ -51,35 +52,33 @@
   (with-output-to-file (serial->path (web-frame-serial))
     (lambda ()
       (write (serialize (capture-web-frame))))
-    #:exists (if (ajax-request? (current-request))
-                 'replace
-                 'error)))
+    #:exists 'replace))
 
 ; (_ expr ...)
 (define-syntax-rule (with-saved-web-frame expr ...)
   (let* ([request (current-request)]
          [url     (request-uri request)])
     (debug (format "===== ~a request-url ====="
-                   (if (ajax-request? request)
-                       'ajax
-                       'full))
+                   (if (ajax-request? request) 'ajax 'full))
            (url->string url))
     ; Create or restore web frame:
-    (if (callback-url? url)
-        (begin (debug "request-serial" (request-serial))
-               (update-web-frame! (load-web-frame (request-serial)))
-               (unless (ajax-request? (current-request))
-                 (web-frame-serial-set! (generate-serial))
-                 (debug "reset-serial" (web-frame-serial))))
-        (begin (clear-web-frame!)
-               (web-frame-serial-set! (generate-serial))
-               (debug "init-serial" (web-frame-serial))))
+    (cond [(and (debug* "callback?" callback-url? url)
+                (debug* "load-frame" load-web-frame (request-serial)))
+           => (lambda (saved)
+                (debug "request-serial" (request-serial))
+                (update-web-frame! saved)
+                (unless (ajax-request? request)
+                  (web-frame-serial-set! (generate-serial))
+                  (debug "reset-serial" (web-frame-serial))))]
+          [else (clear-web-frame!)
+                (web-frame-serial-set! (generate-serial))
+                (debug "init-serial" (web-frame-serial))])
     (begin0
       ; Run the body expressions:
       (begin expr ...)
       ; Save the web frame:
-      (debug "save-serial" (web-frame-serial))
-      (save-web-frame!))))
+      (save-web-frame!)
+      (debug "saved-serial" (web-frame-serial)))))
 
 ; Provides ---------------------------------------
 
