@@ -21,10 +21,23 @@
   (define/public (dispatch)
     (let* ([request (current-request)]
            [url     (request-uri request)])
+      ; Create or restore web frame:
+      (if (callback-url? url)
+          (begin (debug "request-serial" (request-serial))
+                 (update-web-frame! (load-web-frame (request-serial)))
+                 (unless (ajax-request? (current-request))
+                   (set-web-frame-serial! (generate-serial))
+                   (debug "reset-serial" (get-web-frame-serial))))
+          (begin (clear-web-frame!)
+                 (set-web-frame-serial! (generate-serial))
+                 (debug "init-serial" (get-web-frame-serial))))
       (begin0
+        ; Dispatch the request and retrieve the response:
         (if (callback-url? url)
             (dispatch-callback url)
             (dispatch-initial  url))
+        ; Save the web frame:
+        (debug "save-serial" (get-web-frame-serial))
         (save-web-frame!
          (get-web-frame-serial)
          (capture-web-frame)))))
@@ -32,21 +45,16 @@
   ; url -> response
   (define/public (dispatch-initial url)
     (match (url-path-base url)
-      [(list) (clear-web-frame!)
-              (set-web-frame-serial! (generate-serial))
-              (current-page-set! page)
+      [(list) (current-page-set! page)
               (send page respond)]
       [_      (next-dispatcher)]))
   
   ; callback -> response
   (define/public (dispatch-callback url)
-    (update-web-frame! (load-web-frame (request-serial)))
     (let*-values ([(callback)  (url->callback url this)]
                   [(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
-      (send-callback comp
-                     (callback-method-id callback)
-                     (callback-args callback))))
+      (send-callback comp (callback-method-id callback) (callback-args callback))))
   
   ; symbol -> (U page<%> #f) (U component<%> #f)
   (define/public (find-page+component id)

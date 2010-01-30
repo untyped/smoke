@@ -166,12 +166,7 @@
     (when forward?
       (clear-history!))
     
-    (begin0
-      (make-response)
-      (debug "frame" (capture-web-frame))
-      (debug "serialized" (bytes-length (let ([out (open-output-bytes)])
-                                          (write (capture-web-frame) out)
-                                          (get-output-bytes out))))))
+    (make-response))
   
   ; expired-continuation-type -> xml
   ;(define/public (expired-continuation-xml type)

@@ -3,6 +3,7 @@
 (require scheme/serialize
          srfi/26
          (planet untyped/unlib:3/enumeration)
+         (planet untyped/unlib:3/symbol)
          "../class/undefined.ss")
 
 ; Frames -----------------------------------------
@@ -86,7 +87,7 @@
 
 ; any -> web-cell
 (define (create-web-cell default)
-  (let ([cell (make-web-cell (gensym (web-cell-id-prefix)))])
+  (let ([cell (make-web-cell (gensym/interned (web-cell-id-prefix)))])
     (web-cell-set! cell default)
     cell))
 

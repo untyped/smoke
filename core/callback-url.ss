@@ -24,7 +24,7 @@
          [_ #f])))
 
 ; seed callback -> string
-(define (callback->url seed callback)
+(define (callback->url seed callback [bindings null])
   (url->string
    (make-url
     #f #f #f #f #t
@@ -40,7 +40,9 @@
                                        (symbol->string arg))
                                    (scheme->json arg)))
                              (callback-args callback)))))
-    null #f)))
+    (cons (cons '__k (send (current-application) get-web-frame-serial))
+          bindings)
+    #f)))
 
 ; url application<%> -> callback
 (define (url->callback url app)
