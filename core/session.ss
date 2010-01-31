@@ -24,7 +24,7 @@
 
 ; request -> (U session #f)
 (define (request-session request)
-  (let/debug ([session-id (request-session-id request)])
+  (let ([session-id (request-session-id request)])
     (and session-id
          (let ([session (hash-ref sessions session-id #f)])
            (when session
@@ -67,7 +67,7 @@
          #:expires     [expires     #f]
          #:domain      [domain      #f]
          #:redirect-to [redirect-to (request-uri (current-request))])
-  (cond [(debug* "session" request-session (current-request))
+  (cond [(request-session (current-request))
          => (lambda (session)
               (and (not (times-equal? expires (session-expires session)))
                    (make-cookie-response

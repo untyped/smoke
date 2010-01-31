@@ -3,4 +3,4 @@
 (require "content-base.ss"
          "content/counter.ss")
 
-(serve/smoke #:htdocs-paths (list testapp-htdocs-path))
+(serve/smoke test-site #:htdocs-paths (list testapp-htdocs-path))

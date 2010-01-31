@@ -111,7 +111,7 @@
        (quasisyntax/loc stx
          (begin
            (define-class class-id superclass (interface ...) clause ...)
-           (define id (new class)))))]))
+           (define id (new class-id)))))]))
 
 ; Provide statements -----------------------------
 

@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require (planet untyped/mirrors:2)
+(require web-server/http
+         (planet untyped/mirrors:2)
          "base.ss"
          "class/class.ss"
          "core/embed.ss"
@@ -53,7 +54,8 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet untyped/mirrors:2)
+(provide (all-from-out web-server/http
+                       (planet untyped/mirrors:2)
                        "class/class.ss"
                        "core/embed.ss"
                        "core/env.ss"

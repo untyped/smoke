@@ -5,43 +5,42 @@
 ; Site -------------------------------------------
 
 (define-site test-site site%
-  ([("")                              home]
-   [("/autocomplete")                 autocomplete]
-   [("/counter")                      counter]
-   [("/refresh-counter")              refresh-counter]
-   [("/current-request")              test-current-request]
-   [("/dialog")                       dialog]
-   [("/focus")                        focus]
-   [("/form")                         form]
-   [("/form/checked")                 checked-form]
-   [("/form/hidden")                  form/hidden]
-   [("/notification1")                notification1]
-   [("/notification2")                notification2]
-   [("/redirect")                     redirect]
-   [("/requirements")                 requirements]
-   [("/scroll")                       scroll]
-   [("/segfault")                     segfault]
-   [("/session")                      test-session-show]
-   [("/session/set/" (symbol-arg) "/" (string-arg)) test-session-set]
-   [("/session/remove/" (symbol-arg)) test-session-remove]
-   [("/session/start/" (boolean-arg)) test-session-start]
-   [("/session/end")                  test-session-end]
-   [("/tab")                          tab]
-   [("/tooltip")                      tooltip]))
+  ([()                                home-page]
+   [("/autocomplete")                 autocomplete-page]
+   [("/counter")                      counter-page]
+   [("/refresh-counter")              refresh-counter-page]
+   [("/current-request")              current-request-page]
+   [("/dialog")                       dialog-page]
+   [("/focus")                        focus-page]
+   ;[("/form")                         form-page]
+   [("/form/" (boolean-arg))          form-page]
+   [("/form/checked")                 checked-form-page]
+   [("/notification1")                notification-page1]
+   [("/notification2")                notification-page2]
+   [("/redirect")                     redirect-page]
+   [("/requirements")                 requirements-page]
+   [("/scroll")                       scroll-page]
+   ;[("/session")                      session-page]
+   ;[("/session/set/" (symbol-arg) "/" (string-arg)) session-set-page]
+   ;[("/session/remove/" (symbol-arg)) session-remove-page]
+   ;[("/session/start/" (boolean-arg)) session-start-page]
+   ;[("/session/end")                  session-end-page]
+   [("/tab")                          tab-page]
+   [("/tooltip")                      tooltip-page]))
 
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (home)
-  (make-html-response
-   (xml (html (head (title "Smoke test site"))
-              (body (h1 "Smoke test site")
-                    (ul ,@(reverse (for/list ([controller (site-controllers test-site)])
-                                     (with-handlers ([exn? (lambda _ (xml))])
-                                       (if (eq? controller home)
-                                           (xml)
-                                           (xml (li (a (@ [href ,(controller-url controller)])
-                                                       ,(controller-id controller))))))))))))))
+(define-page home-page html-page% ()
+  
+  ; seed -> xml
+  (define/augment (render seed)
+    (xml (h1 "Smoke test site")
+         (ul ,@(for/list ([page (in-list (reverse (send test-site get-pages)))])
+                 (with-handlers ([exn? (lambda _ (xml))])
+                   (opt-xml (not (eq? page home-page))
+                     (li (a (@ [href ,(controller-url page)])
+                            ,(send page get-component-id))))))))))
 
 ; Provide statements -----------------------------
 

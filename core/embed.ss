@@ -31,7 +31,7 @@
   (syntax-rules ()
     [(_ [obj method] arg ...)
      (begin (verify-callback obj 'method)
-            (make-callback (send obj get-component-id) 'method (list arg ...)))]
+            (make-callback obj 'method (list arg ...)))]
     [(_ method arg ...)
      (callback [this method] arg ...)]))
 

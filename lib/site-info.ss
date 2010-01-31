@@ -2,7 +2,8 @@
 
 (require "../lib-base.ss")
 
-(require syntax/boundmap)
+(require (for-template scheme/base)
+         syntax/boundmap)
 
 ; Info types -------------------------------------
 
@@ -24,7 +25,9 @@
   (lambda (info stx)
     (syntax-case stx ()
       [id (identifier? #'id)
-          #'(unbox (page-info-box-id page))])))
+          (with-syntax ([box-id (page-info-box-id info)])
+            (syntax/loc stx
+              (unbox box-id)))])))
 
 ; Caches -----------------------------------------
 

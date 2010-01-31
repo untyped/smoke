@@ -28,14 +28,14 @@
      (syntax/loc complete-stx
        (begin
          
-         (define page-private-id (new undefined-page% [id 'page-id]))
+         (define page-private-id (new undefined-page% [component-id 'page-id]))
          ...
          
          (define page-box-id
            (box page-private-id))
          ...
          
-         (define-syntax (page-id stx)
+         (define-syntax page-id
            (let ([certify (syntax-local-certifier #t)])
              (page-info-add!
               (make-page-info

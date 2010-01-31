@@ -3,7 +3,7 @@
 (require net/url
          srfi/19
          "../content-base.ss")
-
+#|
 ; Controllers ------------------------------------
 
 ; request -> response
@@ -72,3 +72,4 @@
                                      (xml (tr (th ,key)
                                               (td (@ [id ,key]) (pre ,(format "~s" val)))))))))))
       (xml (p "No session"))))
+|#

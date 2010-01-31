@@ -1,7 +1,8 @@
-#lang scheme/base
+#lang scheme
+
+(require "../lib-base.ss")
 
 (require (planet untyped/unlib:3/bytes)
-         "../lib-base.ss"
          "component.ss")
 
 (define-mixin page-mixin (component<%>) (page<%>)
@@ -11,7 +12,7 @@
   ; Fields -------------------------------------
   
   ; site<%>
-  (init-field site #f #:accessor)
+  (field site #f #:accessor #:mutator)
   
   ; (cell integer)
   (init-cell http-code 200 #:accessor #:mutator)
@@ -73,7 +74,21 @@
   (define/override (dispatch . args)
     (send site page-undefined this . args)))
 
+; Procedures -------------------------------------
+
+; page any ... -> string
+(define (controller-url page . args)
+  (send (send page get-site) encode-url page args))
+
+; page any ... -> string
+(define (controller-access? page . args)
+  (send/apply (send page get-site) access-allowed? args))
+
 ; Provide statements -----------------------------
 
 (provide page-mixin
          undefined-page%)
+
+(provide/contract
+ [controller-url     (->* ((is-a?/c page<%>)) () #:rest any/c string?)]
+ [controller-access? (->* ((is-a?/c page<%>)) () #:rest any/c boolean?)])
