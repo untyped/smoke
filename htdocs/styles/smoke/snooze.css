@@ -47,6 +47,12 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
   padding: 0 0 1ex .5em;
 }
 
+.smoke-entity-view td.attribute-value ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* snooze-report% ----------------------------- */
 
 .snooze-report-table { border-collapse: collapse; margin: 3px 0px; }
