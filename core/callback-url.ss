@@ -45,7 +45,7 @@
     (cons (cons '__k (web-frame-serial)) bindings)
     #f)))
 
-; url application<%> -> callback
+; url site<%> -> callback
 (define (url->callback url app)
   (match (map path/param-path (url-path-extension url))
     [(list (app string->symbol component-id)
@@ -89,7 +89,7 @@
 (provide/contract
  [callback-url?      (-> url? boolean?)]
  [callback->url      (-> seed? callback? string?)]
- [url->callback      (-> url? (is-a?/c application<%>) callback?)]
+ [url->callback      (-> url? (is-a?/c site<%>) callback?)]
  [url-path-base      (-> url? (listof path/param?))]
  [url-path-extension (-> url? (or/c (listof path/param?) #f))]
  [request-serial     (->* () (request?) string?)])

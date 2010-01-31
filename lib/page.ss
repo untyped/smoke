@@ -10,6 +10,9 @@
   
   ; Fields -------------------------------------
   
+  ; site<%>
+  (init-field site #f #:accessor)
+  
   ; (cell integer)
   (init-cell http-code 200 #:accessor #:mutator)
   
@@ -19,7 +22,7 @@
   ; (cell string)
   (init-cell content-type "text/plain" #:accessor #:mutator)
   
-  ; Methods ------------------------------------
+  ; Methods --------------------------------------
   
   ; -> integer
   (define/public (get-http-timestamp)
@@ -29,34 +32,48 @@
   (define/public (get-http-headers)
     no-cache-http-headers)
   
-  ; Request handling ---------------------------
+  ; Requests and responses -----------------------
   
-  ; request (-> any) -> any
-  ; 
-  ; Informs all components that a request has come in before calling thunk.
-  (define/public (handle-request request thunk)
-    (on-request request)
-    (thunk))
+  ; any ... -> response
+  (define/public (dispatch/top . args)
+    (if (access-allowed? . args)
+        (begin (on-request (current-request))
+               (dispatch . args))
+        (begin (access-denied . args))))
   
-  ; Response generation ------------------------
+  ; -> response
+  (define/public (dispatch . args)
+    (respond))
   
-  ; [#:forward? boolean] -> any
+  ; -> response
   (define/public (respond)
     (make-plain-response
      #:code      (get-http-code)
      #:status    (get-http-status)
      #:seconds   (get-http-timestamp)
      #:mime-type (ensure-bytes (get-content-type))
-     (list "Under construction."))))
+     (list "Under construction.")))
+  
+    ; Access permissions -------------------------
+  
+  ; page<%> any ... -> boolean
+  (define/public (access-allowed? . args)
+    (send/apply site access-allowed? this args))
+  
+  (define/public (access-denied . args)
+    (send/apply site access-denied this args)))
 
-; Procedures -------------------------------------
-
-;; any -> boolean
-(define (page? item)
-  (is-a? item page<%>))
+(define-class undefined-page% (page-mixin component%) ()
+  
+  (inherit-field site)
+  
+  ; Methods --------------------------------------
+  
+  ; -> response
+  (define/override (dispatch . args)
+    (send site page-undefined this . args)))
 
 ; Provide statements -----------------------------
 
-(provide #;page<%>
-         page-mixin
-         page?)
+(provide page-mixin
+         undefined-page%)

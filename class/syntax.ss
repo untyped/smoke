@@ -104,7 +104,7 @@
          (mixin/cells (interface-in ...) (interface-out ...)
            clause ...)))]))
 
-(define-syntax (define-singleton stx)
+(define-syntax (define-object stx)
   (syntax-case stx ()
     [(_ id superclass (interface ...) clause ...)
      (with-syntax ([class-id (make-id #'id #'id '%)])
@@ -123,4 +123,4 @@
          inferred-id-prefix
          define-class
          define-mixin
-         define-singleton)
+         define-object)

@@ -21,6 +21,10 @@
     
     ; Methods ------------------------------------
     
+    ; -> response
+    (define/override (dispatch)
+      (respond))
+    
     ; seed -> xml
     (define/augment (render seed)
       (xml (p "Counter: " (span (@ [id 'counter]) ,(get-counter)) " "

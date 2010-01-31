@@ -10,14 +10,14 @@
 ; symbol
 (define interface-version 'v1)
 
-; application -> (connection request -> response)
-(define (make app
+; site -> (connection request -> response)
+(define (make site
               #:error-handler   error-handler 
               #:session-expires [expires #f]
               #:session-domain  [domain  #f])
   (proc:make (lambda ()
-               (current-application-set! app)
-               (send app dispatch))
+               (current-site-set! site)
+               (send site dispatch/top))
              #:error-handler   error-handler 
              #:session-expires expires
              #:session-domain  domain))
@@ -26,6 +26,6 @@
 
 (provide/contract
  [interface-version dispatcher-interface-version/c]
- [make              (->* ((is-a?/c application<%>) #:error-handler (-> exn? response/c))
+ [make              (->* ((is-a?/c site<%>) #:error-handler (-> exn? response/c))
                          (#:session-expires (or/c time-utc? #f) #:session-domain  (or/c string? #f))
                          dispatcher/c)])

@@ -4,7 +4,7 @@
 
 ; Site -------------------------------------------
 
-(define-site test-site
+(define-site test-site site%
   ([("")                              home]
    [("/autocomplete")                 autocomplete]
    [("/counter")                      counter]
@@ -27,16 +27,15 @@
    [("/session/start/" (boolean-arg)) test-session-start]
    [("/session/end")                  test-session-end]
    [("/tab")                          tab]
-   [("/tooltip")                      tooltip])
-  #:requestless? #t)
+   [("/tooltip")                      tooltip]))
 
 ; Controllers ------------------------------------
 
 ; request -> response
 (define-controller (home)
   (make-html-response
-   (xml (html (head (title "Smoke test application"))
-              (body (h1 "Smoke test application")
+   (xml (html (head (title "Smoke test site"))
+              (body (h1 "Smoke test site")
                     (ul ,@(reverse (for/list ([controller (site-controllers test-site)])
                                      (with-handlers ([exn? (lambda _ (xml))])
                                        (if (eq? controller home)

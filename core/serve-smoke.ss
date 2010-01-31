@@ -22,12 +22,12 @@
          "../base.ss"
          "env.ss"
          "interfaces.ss"
-         (prefix-in app:  "dispatch-app.ss")
+         (prefix-in site: "dispatch-site.ss")
          (prefix-in proc: "dispatch-proc.ss"))
 
 ; Entry points -----------------------------------
 
-;  application<%>
+;  site<%>
 ;  [#:htdocs-path     (listof path)]
 ;  [#:port            integer]
 ;  [#:listen-ip       (U string #f)]
@@ -55,7 +55,7 @@
    #:launch-browser-url (and launch-browser? "/")))
 
 #|
-;  application<%>
+;  site<%>
 ;  schemeunit-test
 ;  [#:run-tests?      boolean]
 ;  [#:run-tests       (-> schemeunit-test any)]
@@ -145,7 +145,7 @@
         ; We can add code to increment sema, which will bring us here.
         (bye)))))
 
-;  application<%>
+;  site<%>
 ;  [#:current-directory path-string]
 ;  [#:htdocs-paths      (listof path-string)]
 ;  [#:mime-types-path   path-string]
@@ -161,7 +161,7 @@
   
   ; connection request -> void
   (apply sequencer:make
-         `(,(app:make app #:error-handler smoke-500-handler)
+         `(,(site:make app #:error-handler smoke-500-handler)
            ,@(for/list ([path (in-list htdocs-paths)])
                (files:make #:url->path       (fsmap:make-url->path path)
                            #:path->mime-type (make-path->mime-type mime-types-path)
@@ -190,7 +190,7 @@
 ; Provides ---------------------------------------
 
 (provide/contract
- [serve/smoke (->* ((is-a?/c application<%>))
+ [serve/smoke (->* ((is-a?/c site<%>))
                    (#:port natural-number/c
                            #:listen-ip       (or/c string? #f)
                            #:htdocs-paths    (listof path?)

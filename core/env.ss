@@ -33,15 +33,15 @@
 ; Current request --------------------------------
 
 ; (thread-cell (U request #f))
-(define current-application-cell (make-thread-cell #f))
+(define current-site-cell (make-thread-cell #f))
 
 ; request -> void
-(define (current-application-set! app)
-  (thread-cell-set! current-application-cell app))
+(define (current-site-set! app)
+  (thread-cell-set! current-site-cell app))
 
 ; -> (U request #f)
-(define (current-application)
-  (thread-cell-ref current-application-cell))
+(define (current-site)
+  (thread-cell-ref current-site-cell))
 
 ; Current page -----------------------------------
 
@@ -71,8 +71,8 @@
  [current-connection-set!  (-> connection? void?)]
  [current-request          (-> (or/c request? #f))]
  [current-request-set!     (-> request? void?)]
- [current-application      (-> (or/c (is-a?/c application<%>) #f))]
- [current-application-set! (-> (is-a?/c application<%>) void?)]
+ [current-site             (-> (or/c (is-a?/c site<%>) #f))]
+ [current-site-set!        (-> (is-a?/c site<%>) void?)]
  [current-page             (-> (or/c (is-a?/c page<%>) #f))]
  [current-page-set!        (-> (is-a?/c page<%>) void?)]
  [clear-history!           (-> void?)])

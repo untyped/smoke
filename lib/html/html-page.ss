@@ -27,7 +27,7 @@
 ; Logging ----------------------------------------
 
 (define-enum smoke-response-types
-  (full ajax full-redirect ajax-redirect))
+  (full ajax post-redirect ajax-redirect))
 
 ; (parameter (U (url number -> void) #f))
 (define frame-size-logger (make-parameter #f))
@@ -159,19 +159,10 @@
     
     (current-page-set! this)
     
-    ;(when (expired-continuation-type)
-    ;  (notifications-add! (expired-continuation-xml (expired-continuation-type)))
-    ;  (expired-continuation-type-reset!))
-    
     (when forward?
       (clear-history!))
     
     (make-response))
-  
-  ; expired-continuation-type -> xml
-  ;(define/public (expired-continuation-xml type)
-  ;  (xml "You have been redirected from an expired web page. You should be able to proceed as normal. "
-  ;       "If you were in the process of making changes, please check to make sure they have been saved correctly."))
   
   ; -> void
   (define/public (on-full-response)
@@ -181,34 +172,27 @@
   (define/public (on-ajax-response)
     (void))
   
-  ; -> -> response
-  ;
-  ; Makes a response-generator for use with send/suspend/dispatch. The response type varies 
-  ; according to the type of request being handled:
-  ;
+  ; The response type varies according to the type of request being handled:
   ;   - full page requests yield complete pages of XHTML;
   ;   - AJAX requests originating from event handlers in this page yield Javascript responses
   ;     that refresh appropriate parts of the page;
   ;   - AJAX requests originating from event handlers in other pages yield Javascript responses
   ;     that redirect the browser to this page (triggering a full page refresh).
   ;
-  ; #:script allows the caller to specify a block of Javascript to run after the page has been 
-  ; displayed or changed. This is useful for, for example, showing a message to the user or
-  ; performing some update action. The script is executed after all other script execution and
-  ; content rendering.
+  ; -> response
   (define/public (make-response)
     (if (ajax-request? (current-request))
-        (if (equal? (debug* "request-id" ajax-request-page-id (current-request))
-                    (debug* "my-id" get-component-id))
+        (if (equal? (ajax-request-page-id (current-request))
+                    (get-component-id))
             (make-ajax-response)
             (make-ajax-redirect-response))
         (if (post-request? (current-request))
-            (make-full-redirect-response)
+            (make-post-redirect-response)
             (make-full-response))))
   
-  ; -> response
-  ;
   ; Makes a response-generator that creates a complete XHTML response for this page.
+  ;
+  ; -> response
   (define/public (make-full-response)
     (on-full-response)
     (log-frame-size)
@@ -259,9 +243,9 @@
                                      (!raw "\n// ]]>\n")))
                        (body (@ ,@(core-html-attributes seed)) ,content)))))))))
   
-  ; -> response
-  ;
   ; Makes an AJAX Javascript response that refreshes appropriate parts of this page.
+  ;
+  ; -> response
   (define/public (make-ajax-response)
     (on-ajax-response)
     (log-frame-size)
@@ -292,16 +276,15 @@
                      ,@(map (cut send <> get-on-refresh seed)
                             (get-dirty-components)))
                    jQuery)))))))))
-  
-  ; -> response
+
+  ; Response that converts a post request into a get request after form submission.
+  ; This avoids "Would you like to resubmit your form?" messages when clicking the "Back" button.
   ;
-  ; This response is sent as the first response from any page. It sets up
-  ; a top web frame and makes sure that any AJAX operations the user performs
-  ; aren't lost if they hit Reload.
-  (define/public (make-full-redirect-response)
+  ; -> response
+  (define/public (make-post-redirect-response)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
-       (smoke-response-types full-redirect)
+       (smoke-response-types post-redirect)
        ; seed
        (let ([seed (make-seed)])
          (make-html-response
@@ -312,14 +295,9 @@
                             no-cache-http-headers)
           (xml))))))
   
-  ; -> response
-  ;
   ; Makes a response that redirects the browser to this page.
   ;
-  ; When this procedure is called, the current frame should be a child of
-  ; the AJAX frame of the page. The rendering seed is set up to use the
-  ; AJAX frame as the base frame for subsequent requests. The current frame
-  ; is squeezed into the AJAX frame right before the response is sent.
+  ; -> response
   (define/public (make-ajax-redirect-response)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
@@ -354,8 +332,8 @@
   ; seed -> js
   (define/augment (get-on-attach seed)
     (js (!dot ($ ,(format "#~a" (get-form-id)))
-              (bind "submit" (function (evt)
-                               (!dot Smoke (triggerSubmitEvent #t)))))
+              (submit (function (evt)
+                        (!dot Smoke (triggerSubmitEvent #t)))))
         ,(cond [(get-ajax-error-handler)
                 => (lambda (handler)
                      (if (procedure? handler)

@@ -15,6 +15,22 @@
     find-component         ; symbol -> (U component<%> #f)
     custom-print))         ; output-port boolean (U symbol #f) -> void
 
+; The site is the core of the Smoke application.
+; It defines default behaviours across all pages,
+; and is the first point of dispatch for HTTP requests.
+; There should be exactly one site per application,
+; defined using the define-site macro.
+
+(define site<%>
+  (interface (component<%>)
+    dispatch/top
+    access-allowed?
+    access-denied))
+
+; The page is the unit of functionality in a web application.
+; It contains methods for responding to requests, rendering HTML,
+; checking access privileges and so on.
+
 (define page<%>
   (interface (component<%>)
     get-http-code
@@ -22,17 +38,15 @@
     get-http-status
     get-content-type
     get-http-timestamp
-    respond
-    handle-request))
-
-(define application<%>
-  (interface (component<%>)
+    dispatch/top
     dispatch
-    find-page+component)) ; symbol -> (U page<%> #f) (U component<%> #f)
+    respond
+    access-allowed?
+    access-denied))
 
 ; Provides ---------------------------------------
 
 (provide/contract
- [component<%>   interface?]
- [application<%> interface?]
- [page<%>        interface?])
+ [component<%>  interface?]
+ [site<%>       interface?]
+ [page<%>       interface?])

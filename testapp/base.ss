@@ -6,7 +6,6 @@
          scheme/pretty
          scheme/runtime-path
          srfi/26
-         (planet untyped/dispatch:3)
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/debug)
          "../main.ss")
@@ -20,7 +19,6 @@
                        scheme/match
                        scheme/pretty
                        srfi/26
-                       (planet untyped/dispatch:3)
                        (planet untyped/mirrors:2)
                        (planet untyped/unlib:3/debug)
                        "../main.ss"))
