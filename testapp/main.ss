@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require "content-base.ss"
-         "content/counter.ss")
+         "content/content.ss")
 
-(serve/smoke test-site #:htdocs-paths (list testapp-htdocs-path))
+(serve/smoke test-site
+             #:htdocs-paths (list testapp-htdocs-path))

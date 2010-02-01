@@ -165,10 +165,9 @@
        (expand-keywords #'id #'(kw ...) #t 
                         (add-foot (add-body* seed
                                              #'(field [cell-id (parameterize ([web-cell-id-prefix 'prefix-id])
-                                                                 (make-web-cell value))])
-                                             #'(init [id undefined])
-                                             #'(unless (undefined? id)
-                                                 (web-cell-set! cell-id id)))
+                                                                 (make-web-cell undefined))])
+                                             #'(init [id value])
+                                             #'(web-cell-set! cell-id id))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
      (and (identifier? #'id) (not (keyword? (syntax->datum #'value))))
@@ -181,7 +180,7 @@
        (expand-keywords #'id #'(kw ...) #t 
                         (add-foot (add-body* seed
                                              #'(field [cell-id (parameterize ([web-cell-id-prefix 'prefix-id])
-                                                                 (make-web-cell #f))])
+                                                                 (make-web-cell undefined))])
                                              #'(init id)
                                              #'(web-cell-set! cell-id id))
                                   #'(send this register-web-cell-field! cell-id))))]))

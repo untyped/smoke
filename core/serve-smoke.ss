@@ -162,10 +162,13 @@
   ; connection request -> void
   (apply sequencer:make
          `(,(site:make app #:error-handler smoke-500-handler)
-           ,@(for/list ([path (in-list htdocs-paths)])
-               (files:make #:url->path       (fsmap:make-url->path path)
+           ,@(for/list ([path (in-list (debug "htdocs-paths" htdocs-paths))])
+               (let ([ans (files:make #:url->path       (fsmap:make-url->path path)
                            #:path->mime-type (make-path->mime-type mime-types-path)
-                           #:indices         (list "index.html" "index.htm")))
+                           #:indices         (list "index.html" "index.htm"))])
+                 (lambda (conn req)
+                   (debug "looking for file" (url->string (request-uri req)))
+                   (ans conn req))))
            ,(proc:make 404-handler #:error-handler smoke-500-handler))))
 
 ; -> response

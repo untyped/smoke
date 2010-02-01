@@ -38,8 +38,9 @@
     (with-handlers ([exn:fail:dispatch? (lambda _ (not-found))])
       (match (decode-url url)
         [(list-rest page args) 
-         (send/apply page dispatch/top args)]
-        [#f (not-found)])))
+         (with-saved-web-frame
+          (send/apply page dispatch/top args))]
+        [#f (next-dispatcher)])))
   
   ; callback -> response
   (define/public (dispatch-callback url)
