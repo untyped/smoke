@@ -66,21 +66,27 @@
   
   (define (create-instance expire-fn)
     (define instance-id (next-instance-id))
-    (hash-set! instances
-               instance-id
-               (make-instance (create-k-table)))
+    (create-instance/id instance-id)
     instance-id)
+  
+  (define (create-instance/id instance-id)
+    (let ([instance (make-instance (create-k-table))])
+      (hash-set! instances instance-id instance)
+      instance))
+  
   (define (adjust-timeout! instance-id secs)
     (void))
   
-  (define (instance-lookup instance-id)
+  (define (instance-lookup instance-id [create? #f])
     (define instance
       (hash-ref instances instance-id
                 (lambda ()
-                  (raise (make-exn:fail:servlet-manager:no-instance
-                          (format "No instance for id: ~a" instance-id)
-                          (current-continuation-marks)
-                          instance-expiration-handler)))))
+                  (if create?
+                      (create-instance/id instance-id)
+                      (raise (make-exn:fail:servlet-manager:no-instance
+                              (format "No instance for id: ~a" instance-id)
+                              (current-continuation-marks)
+                              instance-expiration-handler))))))
     instance)
   
   ;; Continuation table
@@ -99,7 +105,7 @@
                       (list salt #f expiration-handler count))]))]))
   
   (define (continuation-store! instance-id k expiration-handler)
-    (match (instance-lookup instance-id)
+    (match (instance-lookup instance-id #t)
       [(struct instance ((struct k-table (next-id-fn htable))))
        (define k-id (next-id-fn))
        (define salt (random 100000000))
