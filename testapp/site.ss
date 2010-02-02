@@ -12,7 +12,7 @@
    [("/current-request")              current-request-page]
    [("/dialog")                       dialog-page]
    [("/focus")                        focus-page]
-   ;[("/form")                         form-page]
+   [("/form")                         form-page]
    [("/form/" (boolean-arg))          form-page]
    [("/form/checked")                 checked-form-page]
    [("/notification1")                notification-page1]

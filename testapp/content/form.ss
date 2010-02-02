@@ -15,33 +15,31 @@
 
 (send radio-group set-value! 'radio2)
 
-(define test-autocomplete-field%
-  (class/cells autocomplete-field% ()
-    
-    (define/override (get-options prefix)
-      (for/list ([suffix (in-string "abcde")])
-        (format "~a~a" prefix suffix)))))
+(define-class test-autocomplete-field% autocomplete-field% ()
+  
+  (define/override (get-options prefix)
+    (for/list ([suffix (in-string "abcde")])
+      (format "~a~a" prefix suffix))))
 
-(define test-multi-column-autocomplete-field%
-  (class/cells autocomplete-field% ()
-    
-    (super-new [multi-column? #t])
-    
-    (define/override (get-options prefix)
-      (filter (match-lambda
-                [(list a b c d)
-                 (or (regexp-match prefix a)
-                     (regexp-match prefix b)
-                     (regexp-match prefix c)
-                     (regexp-match prefix d))])
-              (for/list ([number (in-naturals)]
-                         [letter (in-string "abcde")]
-                         [greek  (in-list (list "alpha" "beta" "gamma" "delta" "epsilon"))]
-                         [latin  (in-list (list "i" "ii" "iii" "iv" "v"))])
-                (list (format "Number ~a" number)
-                      (format "Letter ~a" letter)
-                      (format "Greek ~a" greek)
-                      (format "Latin ~a" latin)))))))
+(define-class test-multi-column-autocomplete-field% autocomplete-field% ()
+  
+  (super-new [multi-column? #t])
+  
+  (define/override (get-options prefix)
+    (filter (match-lambda
+              [(list a b c d)
+               (or (regexp-match prefix a)
+                   (regexp-match prefix b)
+                   (regexp-match prefix c)
+                   (regexp-match prefix d))])
+            (for/list ([number (in-naturals)]
+                       [letter (in-string "abcde")]
+                       [greek  (in-list (list "alpha" "beta" "gamma" "delta" "epsilon"))]
+                       [latin  (in-list (list "i" "ii" "iii" "iv" "v"))])
+              (list (format "Number ~a" number)
+                    (format "Letter ~a" letter)
+                    (format "Greek ~a" greek)
+                    (format "Latin ~a" latin))))))
 
 (define-page form-page (refreshable-mixin html-page%) ()
   

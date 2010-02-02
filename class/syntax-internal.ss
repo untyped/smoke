@@ -28,7 +28,12 @@
 
 ; -> seed
 (define (create-seed class-id-stx)
-  (make-seed class-id-stx null null null #f #f))
+  (make-seed class-id-stx
+             null
+             null
+             (list #`(init-callbacks! #,class-id-stx))
+             #f
+             #f))
 
 ; seed syntax -> seed
 (define (add-body seed stx)

@@ -10,6 +10,18 @@
 ; (weak-hasheqof class (immutable-hasheqof symbol (cons generic boolean)))
 (define callback-registry (make-weak-hasheq))
 
+(hash-set! callback-registry object/cells% #hasheq())
+
+; class symbol generic -> void
+(define (init-callbacks! class)
+  (let ([my-hash    (hash-ref callback-registry class #f)]
+        [super-hash (hash-ref callback-registry (class-superclass class) #f)])
+    (if super-hash
+        (hash-set! callback-registry class super-hash)
+        (error (format "error initialising ~a: no callbacks registered for superclass ~a"
+                       (class-name class)
+                       (class-name (class-superclass class)))))))
+
 ; class symbol generic -> void
 (define (register-callback! class id generic respond?)
   (letrec ([lookup (lambda (class)
@@ -22,15 +34,16 @@
            [hash   (lookup class)])
     (hash-set! callback-registry class (hash-set hash id (cons generic respond?)))))
 
-; (U object class) symbol -> any
+; (U object class) symbol -> boolean
 (define (callback-registered? object+class id)
   (let ([hash (hash-ref callback-registry
                         (if (object? object+class)
                             (object-class object+class)
-                            object+class))])
+                            object+class)
+                        #f)])
     (and hash (hash-has-key? hash id))))
 
-; (U object class) symbol -> any
+; (U object class) symbol -> void
 (define (verify-callback object+class id)
   (unless (callback-registered? object+class id)
     (error (format "callback ~s not registered" id) object+class)))
@@ -51,6 +64,7 @@
 ; Provides ---------------------------------------
 
 (provide/contract
+ [init-callbacks!      (-> class? void?)]
  [register-callback!   (-> class? symbol? generic? boolean? void?)]
  [callback-registered? (-> (or/c class? object?) symbol? boolean?)]
  [verify-callback      (-> (or/c class? object?) symbol? void?)]

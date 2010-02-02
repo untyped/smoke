@@ -124,12 +124,16 @@
   ; seed -> js
   (define/augride (get-on-click seed)
     (js (!dot Smoke Autocomplete
-              (onClick this evt ,(embed/full seed (callback on-popup)) ,(get-min-trigger-length)))))
+              (onClick this evt
+                       ,(embed/full seed (callback on-popup))
+                       ,(get-min-trigger-length)))))
   
   ; seed -> js
   (define/augride (get-on-key-down seed)
     (js (!dot Smoke Autocomplete
-              (onKeyDown this evt ,(embed/full seed (callback on-popup)) ,(get-min-trigger-length)))))
+              (onKeyDown this evt
+                         ,(embed/full seed (callback on-popup))
+                         ,(get-min-trigger-length)))))
   
   ; seed -> js
   (define/augride (get-on-attach seed)
