@@ -52,4 +52,5 @@
     (refresh!))
   
   (define/public #:callback (on-autocomplete-change)
+    (debug "autocomplete-value" (send autocomplete get-value))
     (set-change-count! (add1 (get-change-count)))))

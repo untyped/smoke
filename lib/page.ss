@@ -42,6 +42,11 @@
                (dispatch . args))
         (begin (access-denied . args))))
   
+  ; component<%> symbol any ... -> any
+  (define/public (dispatch/callback comp method-id . args)
+    (on-request (current-request))
+    (send-callback comp method-id args))
+  
   ; -> response
   (define/public (dispatch . args)
     (respond))

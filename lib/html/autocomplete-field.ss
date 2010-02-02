@@ -71,7 +71,7 @@
   ; request -> void
   (define/augride (on-request request)
     (when (get-enabled?)
-      (let ([binding    (request-binding-ref request (get-id))]
+      (let/debug ([binding    (request-binding-ref request (get-id))]
             [max-length (get-max-length)])
         (when binding 
           (set-raw! (if (and max-length (< max-length (string-length binding)))
@@ -80,17 +80,17 @@
   
   ; -> void
   (define/public #:callback* (on-popup)
-    (define prefix  (request-binding-ref (current-request) 'prefix))
-    (define options (get-options prefix))
-    (make-js-response 
-     (js ((function ()
-            ; autocomplete.js is written as if all autocompletes are
-            ; multi-column, so return an arrayOf(arrayOf(string)):
-            (return ,(apply js:array 
-                            (map (if (get-multi-column?)
-                                     (cut apply js:array <>)
-                                     js:array)
-                                 options))))))))
+    (let*/debug ([prefix  (request-binding-ref (current-request) 'prefix)]
+                 [options (get-options prefix)])
+      (make-js-response 
+       (js ((function ()
+              ; autocomplete.js is written as if all autocompletes are
+              ; multi-column, so return an arrayOf(arrayOf(string)):
+              (return ,(apply js:array 
+                              (map (if (get-multi-column?)
+                                       (cut apply js:array <>)
+                                       js:array)
+                                   options)))))))))
   
   ; string (U string #f) -> boolean
   (define (option+column-matches? option prefix)
@@ -111,7 +111,7 @@
           (lambda (option)
             (option+column-matches? option prefix))))
     ; (listof string)
-    (filter option-matches? (web-cell-ref options-cell)))
+    (debug* "options2" filter option-matches? (debug* "options1" web-cell-ref options-cell)))
   
   ; seed -> js
   (define/augride (get-on-focus seed)

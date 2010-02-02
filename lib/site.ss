@@ -30,7 +30,7 @@
     (let* ([request (current-request)]
            [url     (request-uri request)])
       (if (callback-url? url)
-          (dispatch-callback url)
+          (dispatch/callback url)
           (dispatch          url))))
   
   ; url -> response
@@ -43,14 +43,15 @@
         [#f (next-dispatcher)])))
   
   ; callback -> response
-  (define/public (dispatch-callback url)
+  (define/public (dispatch/callback url)
     (let*-values ([(callback)  (url->callback url this)]
                   [(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
       (with-saved-web-frame
-       (send-callback comp
-                      (callback-method-id callback)
-                      (callback-args callback)))))
+       (send/apply page dispatch/callback
+                   comp
+                   (callback-method-id callback)
+                   (callback-args callback)))))
   
   ; page<%> any ... -> response
   (define/public (access-denied page . args)
