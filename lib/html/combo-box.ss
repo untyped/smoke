@@ -81,6 +81,10 @@
     (define/public (option->id option)
       #f)
     
+    ; any -> boolean
+    (define/public (option-enabled? option)
+      #t)
+    
     ; seed -> xml
     (define/override (render seed)
       (let ([id        (get-id)]
@@ -93,7 +97,11 @@
                                 [classes    (option->classes option)]
                                 [id         (option->id option)]
                                 [class      (and classes (string-join (map string+symbol->string classes) " "))])
-                           (xml (option (@ [value ,raw-option] ,(opt-xml-attr id) ,(opt-xml-attr class) ,(opt-xml-attr selected))
+                           (xml (option (@ [value ,raw-option]
+                                           ,(opt-xml-attr id)
+                                           ,(opt-xml-attr class)
+                                           ,(opt-xml-attr selected)
+                                           ,(opt-xml-attr (not (option-enabled? option)) disabled 'disabled))
                                         ,(option->string option)))))))))
     
     ; request -> void
