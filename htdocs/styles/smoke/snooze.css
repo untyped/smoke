@@ -19,7 +19,7 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 .smoke-entity-editor td { vertical-align: top; padding: .5em; }
 .smoke-entity-editor th { white-space: nowrap; }
 
-.smoke-entity-editor .attribute-label { text-align: right; }
+.smoke-entity-editor .attribute-label { text-align: left; }
 .smoke-entity-editor .attribute-label label { display: inline; }
 
 .smoke-entity-editor .attribute-value input,
@@ -104,8 +104,8 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 
 .smoke-snooze-report .controls { position: relative; display: block; margin-bottom: 2ex; }
 .smoke-snooze-report .controls .filter  { text-align: center; }
-.smoke-snooze-report .controls .view  { float: left; }
-.smoke-snooze-report .controls .links { float: right; list-style-type: none; margin: .1em 0px; padding: 0px; }
+.smoke-snooze-report .controls .view  { position: absolute; left: 0px; }
+.smoke-snooze-report .controls .links { position: absolute; right: 0px; white-space: nowrap; list-style-type: none; margin: .1em 0px; padding: 0px; }
 
 /* Position */
 
