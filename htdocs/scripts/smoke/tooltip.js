@@ -99,7 +99,7 @@
         $(this).data("tooltip-bound", true);
       }
 
-      $(this).attr("title", null);
+      $(this).removeAttr("title");
 
       // timerID
       var delayTimer = null;
