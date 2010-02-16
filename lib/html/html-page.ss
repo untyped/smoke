@@ -18,9 +18,12 @@
 
 (define html-page<%>
   (interface (page<%>)
-    get-doctype        ; -> xml
+    get-doctype        ; -> xml+quotable
+    set-doctype!       ; xml+quotable -> void
     get-lang           ; -> string
-    get-title          ; -> frame
+    set-lang!          ; string -> void
+    get-title          ; -> xml+quotable
+    set-title!         ; xml+quotable -> void
     on-full-response   ; -> void
     on-ajax-response)) ; -> void
 
