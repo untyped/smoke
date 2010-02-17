@@ -105,10 +105,10 @@
   (init-cell generator "Smoke by Untyped" #:accessor #:mutator)
   
   ; (cell (listof (U xml (seed -> xml))))
-  (cell current-html-requirements null #:accessor #:mutator)
+  ; (cell current-html-requirements null #:accessor #:mutator)
   
   ; (cell (listof (U js (seed -> js))))
-  (cell current-js-requirements null #:accessor #:mutator)
+  ; (cell current-js-requirements null #:accessor #:mutator)
   
   ; string
   (init [content-type "text/html; charset=utf-8"])
@@ -201,11 +201,13 @@
        (smoke-response-types full)
        ; seed
        (let ([seed          (make-seed)]
-             [new-html-reqs (remove-duplicates (get-html-requirements/fold))]
-             [new-js-reqs   (remove-duplicates (get-js-requirements/fold))])
+             ; [new-html-reqs (remove-duplicates (get-html-requirements/fold))]
+             ; [new-js-reqs   (remove-duplicates (get-js-requirements/fold))]
+             [html-reqs (remove-duplicates (get-html-requirements/fold))]
+             [js-reqs   (remove-duplicates (get-js-requirements/fold))])
          ; Store the initial requirements for the page:
-         (set-current-html-requirements! new-html-reqs)
-         (set-current-js-requirements! new-js-reqs)
+         ; (set-current-html-requirements! new-html-reqs)
+         ; (set-current-js-requirements! new-js-reqs)
          ; Call render before get-on-attach for consistency with AJAX responses:
          (let ([code      (get-http-code)]
                [message   (get-http-status)]
@@ -226,7 +228,8 @@
                              ,(opt-xml (get-title)
                                 (title ,(get-title)))
                              ,(render-head seed)
-                             ,@(render-requirements (get-current-html-requirements) seed)
+                             ; ,@(render-requirements (get-current-html-requirements) seed)
+                             ,@(render-requirements html-reqs seed)
                              (script (@ [type "text/javascript"])
                                      (!raw "\n// <![CDATA[\n")
                                      (!raw ,(js ((function ($)
@@ -236,7 +239,8 @@
                                                                                           ,(get-form-id)
                                                                                           (function ()
                                                                                             ; Init scripts:
-                                                                                            ,@(render-requirements (get-current-js-requirements) seed)
+                                                                                            ; ,@(render-requirements (get-current-js-requirements) seed)
+                                                                                            ,@(render-requirements js-reqs seed)
                                                                                             ; Attach scripts:
                                                                                             ,(get-on-attach seed))))))))
                                                  jQuery)))
@@ -261,21 +265,21 @@
                                   #:code 500
                                   #:message "Internal Error"
                                   (js (!dot Smoke (log "An error has occurred. Talk to your system administrator.")))))])
-           (let ([new-html-reqs (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
-                 [new-js-reqs   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
-             (unless (null? new-html-reqs)
-               (set-current-html-requirements! (append (get-current-html-requirements) new-html-reqs)))
-             (unless (null? new-js-reqs)
-               (set-current-js-requirements! (append (get-current-js-requirements) new-js-reqs)))
-             (make-js-response
-              (js ((function ($)
-                     ,(opt-js (not (null? new-html-reqs))
-                        (!dot ($ (!dot Smoke documentHead))
-                              (append ,(xml->string (xml ,@(render-requirements new-html-reqs seed))))))
-                     ,@(render-requirements new-js-reqs seed)
-                     ,@(map (cut send <> get-on-refresh seed)
-                            (get-dirty-components)))
-                   jQuery)))))))))
+           ;(let ([new-html-reqs (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
+           ;      [new-js-reqs   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
+           ;  (unless (null? new-html-reqs)
+           ;    (set-current-html-requirements! (append (get-current-html-requirements) new-html-reqs)))
+           ;  (unless (null? new-js-reqs)
+           ;    (set-current-js-requirements! (append (get-current-js-requirements) new-js-reqs)))
+           (make-js-response
+            (js ((function ($)
+                   ;,(opt-js (not (null? new-html-reqs))
+                   ;   (!dot ($ (!dot Smoke documentHead))
+                   ;         (append ,(xml->string (xml ,@(render-requirements new-html-reqs seed))))))
+                   ;,@(render-requirements new-js-reqs seed)
+                   ,@(map (cut send <> get-on-refresh seed)
+                          (get-dirty-components)))
+                 jQuery))))))))
 
   ; Response that converts a post request into a get request after form submission.
   ; This avoids "Would you like to resubmit your form?" messages when clicking the "Back" button.
@@ -360,11 +364,11 @@
 ; Helpers ----------------------------------------
 
 ; (listof requirement) (listof requirement) -> (listof requirement)
-(define (filter-new-requirements prev-reqs curr-reqs)
-  (remove-duplicates
-   (filter-map (lambda (req)
-                 (and (not (member req prev-reqs)) req))
-               curr-reqs)))
+;(define (filter-new-requirements prev-reqs curr-reqs)
+;  (remove-duplicates
+;   (filter-map (lambda (req)
+;                 (and (not (member req prev-reqs)) req))
+;               curr-reqs)))
 
 ; (listof (U any (seed -> any))) seed -> (listof any)
 (define (render-requirements reqs seed)

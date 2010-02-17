@@ -30,7 +30,8 @@
 (define-syntax callback
   (syntax-rules ()
     [(_ [obj method] arg ...)
-     (begin (verify-callback obj 'method)
+     (begin (unless (send obj callback-registered? 'method)
+              (error (format "~a: callback not registered" (class-name (object-class obj)) 'method)))
             (make-callback obj 'method (list arg ...)))]
     [(_ method arg ...)
      (callback [this method] arg ...)]))

@@ -1,7 +1,6 @@
-#lang scheme/base
+#lang scheme
 
-(require (for-syntax scheme/base
-                     "../../class/class.ss"
+(require (for-syntax "../../class/class.ss"
                      srfi/26
                      (planet untyped/unlib:3/syntax))
          "../../lib-base.ss"
@@ -12,17 +11,17 @@
 ; A component that is rendered as a single HTML element (and its contents).
 (define html-element<%>
   (interface/events (html-component<%>)
-    get-id                 ; -> symbol
-    set-id!                ; symbol -> void
-    get-classes            ; -> (listof symbol)
-    set-classes!           ; (listof symbol) -> void
-    get-style              ; -> string
-    set-style!             ; string -> void
-    get-tooltip            ; -> string
-    set-tooltip!           ; string -> void
-    get-visible?           ; -> boolean
-    set-visible?!          ; boolean -> void
-    core-html-attributes)) ; -> (alistof symbol (U string symbol number boolean (-> any)))
+                    get-id                 ; -> symbol
+                    set-id!                ; symbol -> void
+                    get-classes            ; -> (listof symbol)
+                    set-classes!           ; (listof symbol) -> void
+                    get-style              ; -> string
+                    set-style!             ; string -> void
+                    get-tooltip            ; -> string
+                    set-tooltip!           ; string -> void
+                    get-visible?           ; -> boolean
+                    set-visible?!          ; boolean -> void
+                    core-html-attributes)) ; -> (alistof symbol (U string symbol number boolean (-> any)))
 
 ; Helpers ----------------------------------------
 
@@ -128,7 +127,7 @@
                (get-on-event/fold seed))
              
              ...
-                          
+             
              ; (seed -> (U js #f))
              (define/public (get-on-event/fold seed)
                ; (U js #f)
@@ -186,8 +185,9 @@
     
     (syntax-case stx ()
       [(_ (src-interface ...) (des-interface ...) clause ...)
-       #`(mixin/cells (src-interface ...) (des-interface ...)
-           #,@(map expand-clause (syntax->list #'(clause ...))))])))
+       (quasisyntax/loc stx
+         (mixin/cells (src-interface ...) (des-interface ...)
+           #,@(map expand-clause (syntax->list #'(clause ...)))))])))
 
 ; Provide statements -----------------------------
 

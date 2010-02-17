@@ -11,11 +11,13 @@
 
 (define object/cells<%>
   (interface ()
-    dirty?))
+    dirty?
+    invoke-callback
+    callback-registered?))
 
 ; Classes ----------------------------------------
 
-(define-serializable-class object/cells% object%
+(define-serializable-class* object/cells% object% (object/cells<%>)
   
   (inspect #f)
   
@@ -46,7 +48,15 @@
   
   ; cell -> void
   (define/public (register-web-cell-field! cell)
-    (set! web-cell-fields (cons cell web-cell-fields))))
+    (set! web-cell-fields (cons cell web-cell-fields)))
+  
+  ; symbol any ... -> any
+  (define/public (invoke-callback method-id . args)
+    (error (format "~a: callback not registered" (class-name (object-class this))) method-id))
+  
+  ; symbol any ... -> any
+  (define/public (callback-registered? method-id . args)
+    #f))
 
 ; Procedures -----------------------------------
 

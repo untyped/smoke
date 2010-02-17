@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require web-server/http
+         web-server/http/bindings
          (planet untyped/mirrors:2)
          "base.ss"
          "class/class.ss"
@@ -9,6 +10,7 @@
          "core/interfaces.ss"
          "core/notification.ss"
          "core/serve-smoke.ss"
+         "core/session.ss"
          "core/session-cell.ss"
          "core/web-cell.ss"
          "lib/define-page.ss"
@@ -55,6 +57,7 @@
 ; Provide statements -----------------------------
 
 (provide (all-from-out web-server/http
+                       web-server/http/bindings
                        (planet untyped/mirrors:2)
                        "class/class.ss"
                        "core/embed.ss"
@@ -62,6 +65,7 @@
                        "core/interfaces.ss"
                        "core/notification.ss"
                        "core/serve-smoke.ss"
+                       "core/session.ss"
                        "core/session-cell.ss"
                        "core/web-cell.ss"
                        "lib/define-page.ss"

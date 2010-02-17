@@ -11,8 +11,8 @@
 (define/provide-test-suite syntax-tests
   
   (test-case "class name inferred correctly"
-    (check-equal? (format "~a" (let ([test% (class/cells object% ())]) test%)) "#<class:test%>" "let")
-    (check-not-false (regexp-match #rx"#<class:.*>" (format "~a" (class/cells object% ()))) "anonymous"))
+    (check-equal? (format "~a" (let ([test% (class/cells object/cells% ())]) test%)) "#<class:test%>" "let")
+    (check-not-false (regexp-match #rx"#<class:.*>" (format "~a" (class/cells object/cells% ()))) "anonymous"))
   
   (test-case "IDs inferred correctly"
     (let ([test/element% (class/cells html-element% ())])
@@ -170,15 +170,15 @@
                     (define/public (method1) 'b1)
                     (define/public #:callback* (method2) 'b2))])
         ; Correct callback registered:
-        (check-true  (callback-registered? a% 'method1))
-        (check-false (callback-registered? a% 'method2))
-        (check-false (callback-registered? b% 'method1))
-        (check-true  (callback-registered? b% 'method2))
+        (check-true  (send (new a%) callback-registered? 'method1))
+        (check-false (send (new a%) callback-registered? 'method2))
+        (check-false (send (new b%) callback-registered? 'method1))
+        (check-true  (send (new b%) callback-registered? 'method2))
         ; Correct return values:
-        (check-equal? (send-callback (new a%) 'method1 null) 'respond)
-        (check-exn exn:fail? (cut send-callback (new a%) 'method2 null))
-        (check-exn exn:fail? (cut send-callback (new b%) 'method1 null))
-        (check-equal? (send-callback (new b%) 'method2 null) 'b2)))
+        (check-equal? (send/apply (new a%) invoke-callback 'method1 null) 'respond)
+        (check-exn exn:fail? (cut send/apply (new a%) invoke-callback 'method2 null))
+        (check-exn exn:fail? (cut send/apply (new b%) invoke-callback 'method1 null))
+        (check-equal? (send/apply (new b%) invoke-callback 'method2 null) 'b2)))
     
     (test-case "class/cells : inheritance"
       (let* ([a%   (class/cells object/cells% ()
@@ -188,15 +188,15 @@
                      (define/override (method1) 'b1)
                      (define/override #:callback* (method2) 'b2))])
         ; Correct callback registered:
-        (check-true  (callback-registered? a% 'method1))
-        (check-false (callback-registered? a% 'method2))
-        (check-true  (callback-registered? b% 'method1))
-        (check-true  (callback-registered? b% 'method2))
+        (check-true  (send (new a%) callback-registered? 'method1))
+        (check-false (send (new a%) callback-registered? 'method2))
+        (check-true  (send (new b%) callback-registered? 'method1))
+        (check-true  (send (new b%) callback-registered? 'method2))
         ; Correct return values:
-        (check-equal? (send-callback (new a%) 'method1 null) 'respond)
-        (check-exn exn:fail? (cut send-callback (new a%) 'method2 null))
-        (check-equal? (send-callback (new b%) 'method1 null) 'respond)
-        (check-equal? (send-callback (new b%) 'method2 null) 'b2)))
+        (check-equal? (send/apply (new a%) invoke-callback 'method1 null) 'respond)
+        (check-exn exn:fail? (cut send/apply (new a%) invoke-callback 'method2 null))
+        (check-equal? (send/apply (new b%) invoke-callback 'method1 null) 'respond)
+        (check-equal? (send/apply (new b%) invoke-callback 'method2 null) 'b2)))
     
     (test-case "class/cells : inheritance : placeholder for the following message"
       (fail (string-append "TODO : require the user to specify "
@@ -212,21 +212,21 @@
                      (define/public #:callback* (method4) 'm4))]
              [b%   (mix a%)])
         ; Correct callback registered:
-        (check-true  (callback-registered? a% 'method1))
-        (check-true  (callback-registered? a% 'method2))
-        (check-false (callback-registered? a% 'method3))
-        (check-false (callback-registered? a% 'method4))
-        (check-true  (callback-registered? b% 'method1))
-        (check-true  (callback-registered? b% 'method2))
-        (check-true  (callback-registered? b% 'method3))
-        (check-true  (callback-registered? b% 'method4))
+        (check-true  (send (new a%) callback-registered? 'method1))
+        (check-true  (send (new a%) callback-registered? 'method2))
+        (check-false (send (new a%) callback-registered? 'method3))
+        (check-false (send (new a%) callback-registered? 'method4))
+        (check-true  (send (new b%) callback-registered? 'method1))
+        (check-true  (send (new b%) callback-registered? 'method2))
+        (check-true  (send (new b%) callback-registered? 'method3))
+        (check-true  (send (new b%) callback-registered? 'method4))
         ; Correct return values:
-        (check-equal? (send-callback (new a%) 'method1 null) 'respond)
-        (check-equal? (send-callback (new a%) 'method2 null) 'a2)
-        (check-equal? (send-callback (new b%) 'method1 null) 'respond)
-        (check-equal? (send-callback (new b%) 'method2 null) 'a2)
-        (check-equal? (send-callback (new b%) 'method3 null) 'respond)
-        (check-equal? (send-callback (new b%) 'method4 null) 'm4)))
+        (check-equal? (send/apply (new a%) invoke-callback 'method1 null) 'respond)
+        (check-equal? (send/apply (new a%) invoke-callback 'method2 null) 'a2)
+        (check-equal? (send/apply (new b%) invoke-callback 'method1 null) 'respond)
+        (check-equal? (send/apply (new b%) invoke-callback 'method2 null) 'a2)
+        (check-equal? (send/apply (new b%) invoke-callback 'method3 null) 'respond)
+        (check-equal? (send/apply (new b%) invoke-callback 'method4 null) 'm4)))
     
     (test-case "singleton/cells"
       (let* ([a%   (class/cells object/cells% ()
@@ -236,8 +236,8 @@
                      (define/override (method1) 'b1)
                      (define/override #:callback* (method2) 'b2))])
         ; Correct callback registered:
-        (check-true  (callback-registered? b  'method1))
-        (check-true  (callback-registered? b  'method2))
+        (check-true  (send b callback-registered? 'method1))
+        (check-true  (send b callback-registered? 'method2))
         ; Correct return values:
-        (check-equal? (send-callback b 'method1 null) 'respond)
-        (check-equal? (send-callback b 'method2 null) 'b2)))))
+        (check-equal? (send/apply b invoke-callback 'method1 null) 'respond)
+        (check-equal? (send/apply b invoke-callback 'method2 null) 'b2)))))

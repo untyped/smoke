@@ -71,7 +71,7 @@
   ; request -> void
   (define/augride (on-request request)
     (when (get-enabled?)
-      (let/debug ([binding    (request-binding-ref request (get-id))]
+      (let ([binding    (request-binding-ref request (get-id))]
             [max-length (get-max-length)])
         (when binding 
           (set-raw! (if (and max-length (< max-length (string-length binding)))
@@ -80,8 +80,8 @@
   
   ; -> void
   (define/public #:callback* (on-popup)
-    (let*/debug ([prefix  (request-binding-ref (current-request) 'prefix)]
-                 [options (get-options prefix)])
+    (let* ([prefix  (request-binding-ref (current-request) 'prefix)]
+           [options (get-options prefix)])
       (make-js-response 
        (js ((function ()
               ; autocomplete.js is written as if all autocompletes are
@@ -111,7 +111,7 @@
           (lambda (option)
             (option+column-matches? option prefix))))
     ; (listof string)
-    (debug* "options2" filter option-matches? (debug* "options1" web-cell-ref options-cell)))
+    (filter option-matches? (web-cell-ref options-cell)))
   
   ; seed -> js
   (define/augride (get-on-focus seed)

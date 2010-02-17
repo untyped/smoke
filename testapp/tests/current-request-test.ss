@@ -13,7 +13,7 @@
       (check-not-exn
         (lambda ()
           (for ([i (in-range 0 10)])
-            (open/wait (controller-url test-current-request))
+            (open/wait (controller-url current-request-page))
             (for ([j (in-range 0 10)])
               (printf "~a ~a~n" i j)
               (click/wait (node/id 'ajax)))))))))

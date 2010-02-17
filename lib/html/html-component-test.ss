@@ -122,15 +122,15 @@ ENDXML
       (check-pred symbol? (send n1 verify-callback-id 'on-noop/n)))
     
     (test-case "call-callback : correct arity"
-      (check-equal? (send-callback n1 'on-noop/0 null) null)
-      (check-equal? (send-callback n1 'on-noop/1 '(1)) (list 1))
-      (check-equal? (send-callback n1 'on-noop/1-2 '(1)) (list 1 #f))
-      (check-equal? (send-callback n1 'on-noop/1-2 '(1 2)) (list 1 2))
-      (check-equal? (send-callback n1 'on-noop/n '(1 2 3 4 5)) (list 1 2 3 4 5)))
+      (check-equal? (send n1 invoke-callback 'on-noop/0) null)
+      (check-equal? (send n1 invoke-callback 'on-noop/1 1) (list 1))
+      (check-equal? (send n1 invoke-callback 'on-noop/1-2 1) (list 1 #f))
+      (check-equal? (send n1 invoke-callback 'on-noop/1-2 1 2) (list 1 2))
+      (check-equal? (send n1 invoke-callback 'on-noop/n 1 2 3 4 5) (list 1 2 3 4 5)))
     
     (test-case "call-callback : incorrect arity"
-      (check-exn exn:fail:contract:arity? (cut send-callback n1 'on-noop/0 (list 1)))
-      (check-exn exn:fail:contract:arity? (cut send-callback n1 'on-noop/1-2 null)))))
+      (check-exn exn:fail:contract:arity? (cut send n1 invoke-callback 'on-noop/0 1))
+      (check-exn exn:fail:contract:arity? (cut send n1 invoke-callback 'on-noop/1-2)))))
 
 ; Helpers ----------------------------------------
 

@@ -3,15 +3,15 @@
 (require "main.ss"
          "test-base.ss"
          "class/all-class-tests.ss"
-         #;"resource/all-resource-tests.ss"
+         ;"resource/all-resource-tests.ss"
          "testapp/tests/all-testapp-tests.ss"
-         #;"web-server/all-web-server-tests.ss")
+         "core/all-core-tests.ss")
 
 ; Tests ------------------------------------------
 
 (define all-smoke-tests
   (test-suite "smoke"
-    #;all-web-server-tests
+    all-core-tests
     all-class-tests
     ;all-resource-tests
     all-testapp-tests))

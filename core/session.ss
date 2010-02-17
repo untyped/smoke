@@ -14,6 +14,10 @@
 
 ; Accessing sessions -----------------------------
 
+; -> (U session #f)
+(define (current-session)
+  (request-session (current-request)))
+
 ; request -> (U string #f)
 (define (request-session-id request)
   (let ([cookies (ensure-string (assoc-value/default
@@ -120,6 +124,7 @@
          session-remove!)
 
 (provide/contract
+ [current-session    (-> (or/c session? #f))]
  [request-session-id (-> request? (or/c string? #f))]
  [request-session    (-> request? (or/c session? #f))]
  [start-session      (->* ()

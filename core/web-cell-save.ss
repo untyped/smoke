@@ -4,16 +4,18 @@
          net/url
          scheme/serialize
          web-server/http
+         (planet untyped/mirrors:2)
          (planet untyped/unlib:3/debug)
          "callback-url.ss"
          "env.ss"
          "request.ss"
+         "serial.ss"
          "web-cell.ss")
 
 ; Frame paths ------------------------------------
 
-; [string] -> path
-(define (serial->path [serial (web-frame-serial)])
+; string -> path
+(define (serial->path serial)
   (build-path (current-directory)
               (format "~a.webframe" serial)))
 
@@ -28,14 +30,6 @@
 (define serial-seed1
   (current-inexact-milliseconds))
 
-; -> string
-(define (generate-serial)
-  (let ([serial-seed2 (current-inexact-milliseconds)])
-    (bytes->string/utf-8
-     (md5 (string->bytes/utf-8
-           (string-append (number->string serial-seed1)
-                          (number->string serial-seed2)))))))
-
 ; Loading and saving web frames ------------------
 
 ; Loads a web frame using the supplied serial.
@@ -47,38 +41,37 @@
            (deserialize (read))))))
 
 ; Saves the current web frame under the serial stored in the frame.
-; -> void
-(define (save-web-frame!)
-  (with-output-to-file (serial->path (web-frame-serial))
+; string -> void
+(define (save-web-frame! serial)
+  (with-output-to-file (serial->path serial)
     (lambda ()
       (write (serialize (capture-web-frame))))
     #:exists 'replace))
 
 ; (_ expr ...)
 (define-syntax-rule (with-saved-web-frame expr ...)
-  (let* ([request (current-request)]
-         [url     (request-uri request)])
-    (debug (format "===== ~a request-url ====="
-                   (if (ajax-request? request) 'ajax 'full))
-           (url->string url))
-    ; Create or restore web frame:
-    (cond [(and (debug* "callback?" callback-url? url)
-                (debug* "load-frame" load-web-frame (request-serial)))
-           => (lambda (saved)
-                (debug "request-serial" (request-serial))
-                (update-web-frame! saved)
-                (unless (ajax-request? request)
-                  (web-frame-serial-set! (generate-serial))
-                  (debug "reset-serial" (web-frame-serial))))]
-          [else (clear-web-frame!)
-                (web-frame-serial-set! (generate-serial))
-                (debug "init-serial" (web-frame-serial))])
-    (begin0
-      ; Run the body expressions:
-      (begin expr ...)
-      ; Save the web frame:
-      (save-web-frame!)
-      (debug "saved-serial" (web-frame-serial)))))
+  (let* ([request      (current-request)]
+         [url          (request-uri request)]
+         [callback?    (callback-url? url)]
+         [saved-frame  (with-handlers ([exn? (lambda _ #f)])
+                         (and callback? (load-web-frame (generate-web-frame-serial (current-request)))))]
+         [initialized? (cond [(and callback? saved-frame)
+                              (update-web-frame! saved-frame)
+                              #t]
+                             [(not callback?)
+                              (clear-web-frame!)
+                              #t]
+                             [else #f])])
+    (if initialized?
+        (let* ([cb-serial (generate-callback-serial)]
+               [wf-serial (generate-web-frame-serial request cb-serial)])
+          (begin0
+            ; Run the body expressions:
+            (parameterize ([current-callback-serial cb-serial])
+              (begin expr ...))
+            ; Save the web frame:
+            (save-web-frame! wf-serial)))
+        (make-redirect-response (url->initial url)))))
 
 ; Provides ---------------------------------------
 

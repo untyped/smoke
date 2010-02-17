@@ -6,7 +6,7 @@
          (planet untyped/delirium:3)
          "lib-base.ss"
          "main.ss"
-         (except-in "testapp/site.ss" focus))
+         "testapp/site.ss")
 
 ; Provide statements -----------------------------
 

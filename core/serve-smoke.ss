@@ -7,6 +7,7 @@
          net/url
          scheme/contract
          scheme/unit
+         web-server/servlet-dispatch
          web-server/web-server
          (except-in web-server/http redirect-to)
          web-server/configuration/namespace
@@ -37,27 +38,25 @@
 ; ->
 ;  void
 (define (serve/smoke
-         app
+         site
          #:port              [port              8765]
          #:listen-ip         [listen-ip         #f]
-         #:htdocs-paths      [app-htdocs-paths  null]
+         #:htdocs-paths      [site-htdocs-paths null]
          #:mime-types-path   [mime-types-path   smoke-mime-types-path]
          #:launch-browser?   [launch-browser?   #f]
          #:404-handler       [404-handler       smoke-404-handler])
   (serve/dispatcher
    (make-top-dispatcher
-    app
-    #:htdocs-paths      `(,@app-htdocs-paths ,smoke-htdocs-path)
+    site
+    #:htdocs-paths      `(,@site-htdocs-paths ,smoke-htdocs-path)
     #:mime-types-path   mime-types-path
     #:404-handler       404-handler)
    #:port               port
    #:listen-ip          listen-ip
    #:launch-browser-url (and launch-browser? "/")))
 
-#|
 ;  site<%>
 ;  schemeunit-test
-;  [#:run-tests?      boolean]
 ;  [#:run-tests       (-> schemeunit-test any)]
 ;  [#:manager         manager]
 ;  [#:port            integer]
@@ -69,29 +68,25 @@
 ; ->
 ;  void
 (define (serve/smoke/delirium
-         app
+         site
          test
-         #:run-tests?      [run-tests?       #t]
-         #:run-tests       [run-tests        run-tests/pause]
-         #:manager         [manager          (make-smoke-smoke-manager)]
-         #:port            [port             8765]
-         #:listen-ip       [listen-ip        #f]
-         #:htdocs-paths    [app-htdocs-paths null]
-         #:mime-types-path [mime-types-path  smoke-mime-types-path]
-         #:launch-browser? [launch-browser?  #t]
-         #:404-handler     [404-handler      smoke-404-handler])
+         #:run-tests       [run-tests         run-tests/pause]
+         #:port            [port              8765]
+         #:listen-ip       [listen-ip         #f]
+         #:htdocs-paths    [site-htdocs-paths null]
+         #:mime-types-path [mime-types-path   smoke-mime-types-path]
+         #:launch-browser? [launch-browser?   #t]
+         #:404-handler     [404-handler       smoke-404-handler])
   (serve/dispatcher
-   (make-top-dispatcher (if run-tests?
-                              (make-delirium-controller (make-smoke-controller start) test run-tests)
-                              (make-smoke-controller start))
-                          #:manager         manager
-                          #:htdocs-paths    `(,delirium-htdocs-path ,@app-htdocs-paths ,smoke-htdocs-path)
-                          #:mime-types-path mime-types-path                       
-                          #:404-handler     404-handler)
+   (make-top-dispatcher
+    site
+    #:test-suite        test
+    #:htdocs-paths      `(,@site-htdocs-paths ,smoke-htdocs-path)
+    #:mime-types-path   mime-types-path
+    #:404-handler       404-handler)
    #:port               port
    #:listen-ip          listen-ip
-   #:launch-browser-url (and launch-browser? "/test")))
-|#
+   #:launch-browser-url (and launch-browser? "/")))
 
 ; Helpers ----------------------------------------
 
@@ -153,7 +148,8 @@
 ; ->
 ;  (connection request -> response)
 (define (make-top-dispatcher
-         app
+         site
+         #:test-suite        [test-suite                #f]
          #:current-directory [servlet-current-directory (current-directory)]
          #:htdocs-paths      [htdocs-paths              (list smoke-htdocs-path)]
          #:mime-types-path   [mime-types-path           smoke-mime-types-path]
@@ -161,14 +157,20 @@
   
   ; connection request -> void
   (apply sequencer:make
-         `(,(site:make app #:error-handler smoke-500-handler)
-           ,@(for/list ([path (in-list (debug "htdocs-paths" htdocs-paths))])
-               (let ([ans (files:make #:url->path       (fsmap:make-url->path path)
+         `(,@(if test-suite
+                 (list (dispatch/servlet
+                        (lambda (request)
+                          (debug "uri" (url->string (request-uri request)))
+                          (run-delirium request test-suite))
+                        #:regexp            #rx"^/test"
+                        #:current-directory servlet-current-directory
+                        #:namespace         '((file "../main.ss"))))
+                 null)
+           ,(site:make site #:error-handler smoke-500-handler)
+           ,@(for/list ([path (in-list `(,@htdocs-paths ,delirium-htdocs-path))])
+               (files:make #:url->path       (fsmap:make-url->path path)
                            #:path->mime-type (make-path->mime-type mime-types-path)
-                           #:indices         (list "index.html" "index.htm"))])
-                 (lambda (conn req)
-                   (debug "looking for file" (url->string (request-uri req)))
-                   (ans conn req))))
+                           #:indices         (list "index.html" "index.htm")))
            ,(proc:make 404-handler #:error-handler smoke-500-handler))))
 
 ; -> response
@@ -193,24 +195,20 @@
 ; Provides ---------------------------------------
 
 (provide/contract
- [serve/smoke (->* ((is-a?/c site<%>))
-                   (#:port natural-number/c
-                           #:listen-ip       (or/c string? #f)
-                           #:htdocs-paths    (listof path?)
-                           #:mime-types-path path?
-                           #:launch-browser? boolean?
-                           #:404-handler     (-> response/c))
-                   void?)])
-
-#|
-[serve/smoke/delirium  (->* ((-> (or/c response/full? response/incremental?)) any/c)
-                            (#:run-tests? boolean?
-                                          #:run-tests       (-> any/c any)
+ [serve/smoke          (->* ((is-a?/c site<%>))
+                            (#:port natural-number/c
+                                    #:listen-ip       (or/c string? #f)
+                                    #:htdocs-paths    (listof path?)
+                                    #:mime-types-path path?
+                                    #:launch-browser? boolean?
+                                    #:404-handler     (-> response/c))
+                            void?)]
+ [serve/smoke/delirium  (->* ((is-a?/c site<%>) schemeunit-test?)
+                             (#:run-tests (-> any/c any)
                                           #:port            natural-number/c
                                           #:listen-ip       (or/c string? #f)
                                           #:htdocs-paths    (listof path?)
                                           #:mime-types-path path?
                                           #:launch-browser? boolean?
                                           #:404-handler     (-> request? any))
-                            void?)]
-|#
+                             void?)])

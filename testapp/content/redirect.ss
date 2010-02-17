@@ -10,4 +10,4 @@
          (p (a (@ [onclick ,(embed/ajax seed (callback on-redirect))]) "AJAX refresh"))))
   
   (define/public #:callback (on-redirect)
-    (redirect-to (controller-url home-page))))
+    (redirect-to (debug* "home-page-url" controller-url home-page))))

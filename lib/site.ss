@@ -29,9 +29,9 @@
   (define/public (dispatch/top)
     (let* ([request (current-request)]
            [url     (request-uri request)])
-      (if (callback-url? url)
-          (dispatch/callback url)
-          (dispatch          url))))
+      (cond [(initial-url?  url) (dispatch url)]
+            [(callback-url? url) (dispatch/callback url)]
+            [else                (make-redirect-response (url->initial url))])))
   
   ; url -> response
   (define/public (dispatch url)

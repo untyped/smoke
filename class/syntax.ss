@@ -5,8 +5,8 @@
                      (planet untyped/unlib:3/debug)
                      (planet untyped/unlib:3/syntax)
                      "syntax-internal.ss")
-         (for-template "callback-registry.ss")
-         scheme/class)
+         scheme/class
+         "class-internal.ss")
 
 (define inferred-id-prefix
   (make-parameter "smoke"))
@@ -20,42 +20,20 @@
 (define-syntax (class/cells stx)
   (syntax-case stx ()
     [(_ superclass (interface ...) clause ...)
-     (with-syntax ([class-id (or (syntax-local-name) 'class%)])
+     (with-syntax ([class-id (or (syntax-local-name) 'anonymous-class%)])
        (let ([seed (foldl expand-clause (make-seed #'class-id) (syntax->list #'(clause ...)))])
          (quasisyntax/loc stx
-           (let ([class-id (class* superclass (interface ...)
-                             #,@(reverse (seed-body-clause-stxs seed))
-                             #,@(if (seed-has-super-new? seed)
-                                    null
-                                    (list #'(super-new)))
-                             #,@(reverse (seed-foot-clause-stxs seed))
-                             #,@(if (seed-has-inspector? seed)
-                                    null
-                                    (list #'(inspect #f))))])
-             #,@(reverse (seed-post-clause-stxs seed))
-             class-id))))]))
+           (class* superclass (interface ...)
+             #,@(seed-clauses seed)))))]))
 
 (define-syntax (mixin/cells stx)
   (syntax-case stx ()
     [(_ (interface-in ...) (interface-out ...) clause ...)
-     (with-syntax ([class1 (if (syntax-local-name)
-                               (make-id #f (syntax-local-name) '-mixed%)
-                               'mixed%)])
-       (let ([seed (foldl expand-clause (make-seed #'class1) (syntax->list #'(clause ...)))])
+     (with-syntax ([mixin-id (or (syntax-local-name) (make-id #f 'anonymous-mixin))])
+       (let ([seed (foldl expand-clause (make-seed #'mixin-id) (syntax->list #'(clause ...)))])
          (quasisyntax/loc stx
-           (lambda (class0)
-             (let ([class1 ((mixin (interface-in ...) (interface-out ...)
-                              #,@(reverse (seed-body-clause-stxs seed))
-                              #,@(if (seed-has-super-new? seed)
-                                     null
-                                     (list #'(super-new)))
-                              #,@(reverse (seed-foot-clause-stxs seed))
-                              #,@(if (seed-has-inspector? seed)
-                                     null
-                                     (list #'(inspect #f))))
-                            class0)])
-               #,@(reverse (seed-post-clause-stxs seed))
-               class1)))))]))
+           (mixin (object/cells<%> interface-in ...) (interface-out ...)
+             #,@(seed-clauses seed)))))]))
 
 (define-syntax (new/inferred-id stx)
   (syntax-case stx ()
@@ -86,23 +64,16 @@
        (quasisyntax/loc stx
          (begin
            (define-serializable-class* id superclass (interface ...)
-             #,@(reverse (seed-body-clause-stxs seed))
-             #,@(if (seed-has-super-new? seed)
-                    null
-                    (list #'(super-new)))
-             #,@(reverse (seed-foot-clause-stxs seed))
-             #,@(if (seed-has-inspector? seed)
-                    null
-                    (list #'(inspect #f))))
-           #,@(reverse (seed-post-clause-stxs seed)))))]))
+             #,@(seed-clauses seed)))))]))
 
 (define-syntax (define-mixin stx)
   (syntax-case stx ()
     [(_ id (interface-in ...) (interface-out ...) clause ...)
-     (quasisyntax/loc stx
-       (define id
-         (mixin/cells (interface-in ...) (interface-out ...)
-           clause ...)))]))
+     (let ([seed (foldl expand-clause (make-seed #'id) (syntax->list #'(clause ...)))])
+       (quasisyntax/loc stx
+         (define id
+           (mixin (object/cells<%> interface-in ...) (interface-out ...)
+             #,@(seed-clauses seed)))))]))
 
 (define-syntax (define-object stx)
   (syntax-case stx ()
@@ -111,7 +82,7 @@
        (quasisyntax/loc stx
          (begin
            (define-class class-id superclass (interface ...) clause ...)
-           (define id (new class-id)))))]))
+           (define id (new/inferred-id class-id)))))]))
 
 ; Provide statements -----------------------------
 

@@ -9,7 +9,7 @@
   (test-suite "autocomplete"
     
     (test-case "test-page displays"
-      (open/wait "/autocomplete")
+      (open/wait (controller-url autocomplete-page))
       (check-equal? (title-ref) "Autocomplete"))
     
     (test-case "run tests manually"

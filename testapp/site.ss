@@ -5,7 +5,7 @@
 ; Site -------------------------------------------
 
 (define-site test-site site%
-  ([()                                home-page]
+  ([("/")                             home-page]
    [("/autocomplete")                 autocomplete-page]
    [("/counter")                      counter-page]
    [("/refresh-counter")              refresh-counter-page]
@@ -15,16 +15,17 @@
    [("/form")                         form-page]
    [("/form/" (boolean-arg))          form-page]
    [("/form/checked")                 checked-form-page]
+   [("/load")                         load-page]
    [("/notification1")                notification-page1]
    [("/notification2")                notification-page2]
    [("/redirect")                     redirect-page]
    [("/requirements")                 requirements-page]
    [("/scroll")                       scroll-page]
-   ;[("/session")                      session-page]
-   ;[("/session/set/" (symbol-arg) "/" (string-arg)) session-set-page]
-   ;[("/session/remove/" (symbol-arg)) session-remove-page]
-   ;[("/session/start/" (boolean-arg)) session-start-page]
-   ;[("/session/end")                  session-end-page]
+   [("/session")                      session-page]
+   [("/session/set/" (symbol-arg) "/" (string-arg)) session-set-page]
+   [("/session/remove/" (symbol-arg)) session-remove-page]
+   [("/session/start/" (boolean-arg)) session-start-page]
+   [("/session/end")                  session-end-page]
    [("/tab")                          tab-page]
    [("/tooltip")                      tooltip-page]))
 

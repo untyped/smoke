@@ -3,7 +3,8 @@
 (require "../lib-base.ss")
 
 (require (planet untyped/unlib:3/bytes)
-         "component.ss")
+         "component.ss"
+         "dispatch/link.ss")
 
 (define-mixin page-mixin (component<%>) (page<%>)
   
@@ -45,7 +46,7 @@
   ; component<%> symbol any ... -> any
   (define/public (dispatch/callback comp method-id . args)
     (on-request (current-request))
-    (send-callback comp method-id args))
+    (send comp invoke-callback method-id . args))
   
   ; -> response
   (define/public (dispatch . args)
@@ -69,7 +70,9 @@
   (define/public (access-denied . args)
     (send/apply site access-denied this args)))
 
-(define-class undefined-page% (page-mixin component%) ()
+(define-class page% (page-mixin component%) ())
+
+(define-class undefined-page% page% ()
   
   (inherit-field site)
   
@@ -79,21 +82,9 @@
   (define/override (dispatch . args)
     (send site page-undefined this . args)))
 
-; Procedures -------------------------------------
-
-; page any ... -> string
-(define (controller-url page . args)
-  (send (send page get-site) encode-url page args))
-
-; page any ... -> string
-(define (controller-access? page . args)
-  (send/apply (send page get-site) access-allowed? args))
-
 ; Provide statements -----------------------------
 
-(provide page-mixin
+(provide (all-from-out "dispatch/link.ss")
+         page-mixin
+         page%
          undefined-page%)
-
-(provide/contract
- [controller-url     (->* ((is-a?/c page<%>)) () #:rest any/c string?)]
- [controller-access? (->* ((is-a?/c page<%>)) () #:rest any/c boolean?)])

@@ -8,6 +8,7 @@
          "focus-test.ss"
          "form-hidden-test.ss"
          "form-test.ss"
+         "load-test.ss"
          "notification-test.ss"
          "redirect-test.ss"
          "requirements-test.ss"
@@ -20,6 +21,7 @@
 
 (define all-testapp-tests
   (test-suite "testapp"
+    load-tests
     session-tests
     counter-tests
     current-request-tests
@@ -28,7 +30,7 @@
     notification-tests
     focus-tests
     form-tests
-    form-tests/hidden
+    ;form-tests/hidden
     tab-tests
     segfault-tests
     autocomplete-tests

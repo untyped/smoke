@@ -117,25 +117,6 @@
     [(old)  (frame-set? old-frame cell)]
     [(base) #f]))
 
-; Frame serials ----------------------------------
-
-; Web frames are saved to disk using randomly generated filenames.
-; Filenames are of the format <serial>.webframe, where <serial> is
-; an unguessable MD5 hash. <serial>s are embedded in callbacks so
-; the server knows which web frame to restore.
-
-; (cell (U string #f))
-(define web-frame-serial-cell (create-web-cell #f))
-
-; -> string
-(define (web-frame-serial)
-  (or (web-cell-ref web-frame-serial-cell)
-      (error "serial not set")))
-
-; string -> void
-(define (web-frame-serial-set! serial)
-  (web-cell-set! web-frame-serial-cell serial))
-
 ; Helpers --------------------------------------
 
 ; web-cell [any] -> any
@@ -176,6 +157,4 @@
  [web-cell-id                          (-> web-cell? symbol?)]
  [web-cell-ref                         (-> web-cell? any)]
  [web-cell-set!                        (-> web-cell? any/c void?)]
- [web-cell-changed?                    (-> web-cell? boolean?)]
- [web-frame-serial                     (-> string?)]
- [web-frame-serial-set!                (-> string? void?)])
+ [web-cell-changed?                    (-> web-cell? boolean?)])

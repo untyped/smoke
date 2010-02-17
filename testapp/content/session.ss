@@ -3,11 +3,11 @@
 (require net/url
          srfi/19
          "../content-base.ss")
-#|
+
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (test-session-show)
+(define-controller (session-page)
   (define session (request-session (current-request)))
   (make-html-response
    (xml (html (head (title "Current session"))
@@ -15,7 +15,7 @@
                     ,(session-html session))))))
 
 ; request -> response
-(define-controller (test-session-start)
+(define-controller (session-start-page)
   (start-session)
   (make-html-response
    (xml (html (head (title "Session started"))
@@ -23,7 +23,7 @@
                     ,(session-html (request-session (current-request))))))))
 
 ; request -> response
-(define-controller (test-session-end)
+(define-controller (session-end-page)
   (define session (request-session (current-request)))
   (end-session
    #:continue
@@ -34,7 +34,7 @@
                        ,(session-html session))))))))
 
 ; request symbol string -> response
-(define-controller (test-session-set key val)
+(define-controller (session-set-page key val)
   (define session (request-session (current-request)))
   (session-set! session key val)
   (make-html-response
@@ -43,7 +43,7 @@
                     ,(session-html session))))))
 
 ; request symbol -> response
-(define-controller (test-session-remove key)
+(define-controller (session-remove-page key)
   (define session (request-session (current-request)))
   (session-remove! session key)
   (make-html-response
@@ -72,4 +72,3 @@
                                      (xml (tr (th ,key)
                                               (td (@ [id ,key]) (pre ,(format "~s" val)))))))))))
       (xml (p "No session"))))
-|#

@@ -8,7 +8,7 @@
          (planet untyped/delirium:3)
          "all-smoke-tests.ss"
          "main.ss"
-         (except-in "testapp/content-base.ss" focus)
+         "testapp/content-base.ss"
          "testapp/content/content.ss")
 
 ; Main program body ----------------------------
@@ -16,17 +16,24 @@
 (print-struct #t)
 (dev? #t)
 
+(thread
+ (lambda ()
+   (let ([start-time (current-inexact-milliseconds)])
+     (let loop ()
+       (collect-garbage)
+       (collect-garbage)
+       (printf "~s\t~s~n"
+               (floor (- (current-inexact-milliseconds) start-time))
+               (current-memory-use))
+       (sleep 1)
+       (loop)))))
+
 ; We don't need logging output, but we want to check these logging hooks don't exn:
 (response-time-logger (lambda (msg url time) (void)))
 (frame-size-logger (lambda (url time) (void)))
 
 (serve/smoke/delirium
- (lambda ()
-   (site-dispatch test-site (current-request)))
+ test-site
  all-smoke-tests
  #:launch-browser? #t
- #:htdocs-paths    (list testapp-htdocs-path)
- #:manager         (make-default-smoke-manager
-                    #:message-interval 5000
-                    #:message-logger   (lambda (use threshold purge rate span)
-                                         (void))))
+ #:htdocs-paths (list testapp-htdocs-path))

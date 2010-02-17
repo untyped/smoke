@@ -59,6 +59,16 @@
                 (string->symbol (cdr pair))))
          (request-headers request)))
 
+; Headers ----------------------------------------
+
+; request symbol -> (U string #f)
+(define (request-header-ref request key)
+  (let ([key-bytes (string->bytes/utf-8 (symbol->string key))])
+    (ormap (lambda (header)
+             (and (equal? key-bytes (header-field header))
+                  (bytes->string/utf-8 (header-value header))))
+           (request-headers/raw request))))
+
 ; Bindings ---------------------------------------
 
 ; request symbol -> (U string #f)
@@ -106,26 +116,6 @@
                            (error (format "~a is bound to a normal form value." key)))))
                 (request-bindings/raw request)))))
 
-; request (symbol string -> ans) -> (listof ans)
-(define (request-binding-map request fn)
-  ; (listof ans)
-  (define binding-values
-    (foldl (lambda (binding accum)
-             (if (binding:form? binding)
-                 (cons (fn (string->symbol (bytes->string/utf-8 (binding-id binding)))
-                           (bytes->string/utf-8 (binding:form-value binding)))
-                       accum)
-                 accum))
-           null
-           (request-bindings/raw request)))
-  ; (listof ans)
-  (if (post-request? request)
-      (reverse (foldl (lambda (kvp accum)
-                        (cons (fn (car kvp) (cdr kvp)) accum))
-                      binding-values
-                      (url-query (request-uri request))))
-      (reverse binding-values)))
-
 ; Provide statements -----------------------------
 
 (provide/contract
@@ -136,9 +126,9 @@
  [ajax-request?               (-> request? boolean?)]
  [ajax-request-requested-with (-> request? (or/c string? #f))]
  [ajax-request-page-id        (-> request? (or/c symbol? #f))]
+ [request-header-ref          (-> request? symbol? (or/c string? #f))]
  [request-binding-ref         (-> request? symbol? (or/c string? #f))]
  [request-get-binding-ref     (-> request? symbol? (or/c string? #f))]
  [request-post-binding-ref    (-> request? symbol? (or/c string? #f))]
  [request-upload-filename-ref (-> request? symbol? (or/c string? #f))]
- [request-upload-content-ref  (-> request? symbol? (or/c bytes?  #f))]
- [request-binding-map         (-> request? (-> symbol? string? any) list?)])
+ [request-upload-content-ref  (-> request? symbol? (or/c bytes?  #f))])
