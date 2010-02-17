@@ -26,32 +26,33 @@
   ; Requests and responses -----------------------
   
   ; -> response
-  (define/public (dispatch/top)
+  (define/public (dispatch)
     (let* ([request (current-request)]
            [url     (request-uri request)])
-      (cond [(initial-url?  url) (dispatch url)]
-            [(callback-url? url) (dispatch/callback url)]
+      (cond [(initial-url?  url) (init-web-frame)
+                                 (dispatch-initial url)]
+            [(callback-url? url) (init-web-frame)
+                                 (dispatch-callback (url->callback url this))]
             [else                (make-redirect-response (url->initial url))])))
   
   ; url -> response
-  (define/public (dispatch url)
+  (define/public (dispatch-initial url)
     (with-handlers ([exn:fail:dispatch? (lambda _ (not-found))])
       (match (decode-url url)
         [(list-rest page args) 
          (init-web-frame)
          (begin0
-           (send/apply page dispatch/top args)
+           (send/apply page dispatch-initial args)
            (save-web-frame))]
         [#f (next-dispatcher)])))
   
   ; callback -> response
-  (define/public (dispatch/callback url)
-    (let*-values ([(callback)  (url->callback url this)]
-                  [(page comp) (find-page+component (callback-component-id callback))])
+  (define/public (dispatch-callback callback)
+    (let-values ([(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
       (init-web-frame)
       (begin0
-        (send/apply page dispatch/callback
+        (send/apply page dispatch-callback
                     comp
                     (callback-method-id callback)
                     (callback-args callback))

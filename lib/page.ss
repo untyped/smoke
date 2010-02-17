@@ -37,14 +37,14 @@
   ; Requests and responses -----------------------
   
   ; any ... -> response
-  (define/public (dispatch/top . args)
+  (define/public (dispatch-initial . args)
     (if (access-allowed? . args)
         (begin (on-request (current-request))
                (dispatch . args))
         (begin (access-denied . args))))
   
   ; component<%> symbol any ... -> any
-  (define/public (dispatch/callback comp method-id . args)
+  (define/public (dispatch-callback comp method-id . args)
     (on-request (current-request))
     (send comp invoke-callback method-id . args))
   

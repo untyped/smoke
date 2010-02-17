@@ -8,7 +8,7 @@
          web-server/http
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/debug)
-         "callback-url.ss"
+         "callback.ss"
          "env.ss"
          "request.ss"
          "serial.ss"

@@ -23,7 +23,7 @@
 
 (define site<%>
   (interface (component<%>)
-    dispatch/top
+    dispatch
     access-allowed?
     access-denied))
 
@@ -38,8 +38,8 @@
     get-http-status
     get-content-type
     get-http-timestamp
-    dispatch/top
-    dispatch
+    dispatch-initial
+    dispatch-callback
     respond
     access-allowed?
     access-denied))

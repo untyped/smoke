@@ -40,8 +40,8 @@
 (define send/finish
   inner:send/finish)
 
-; (url-string -> response) -> request
-(define (send/suspend response-generator)
+; (url-string -> response) [url] -> request
+(define (send/suspend response-generator [base-url (request-uri (current-request))])
   (let ([frame (save-web-frame)]
         [site  (current-site)]
         [page  (current-page)])
@@ -49,33 +49,31 @@
       (call-with-composable-continuation
        (lambda (k)
          (let* ([instance-id (current-servlet-instance-id)]
-                [ctxt        (current-execution-context)]
                 [k-embedding ((manager-continuation-store! (current-servlet-manager))
                               instance-id
                               (make-custodian-box (current-custodian) k)
                               (current-servlet-continuation-expiration-handler))]
-                [k-url        (embed-ids 
-                               (list* instance-id k-embedding)
-                               (request-uri (execution-context-request ctxt)))])
+                [k-url       (embed-ids (list* instance-id k-embedding) base-url)])
            (send/back (response-generator k-url))))
        servlet-prompt)
       (current-site-set! site)
       (current-page-set! page)
       (restore-web-frame frame))))
 
-; (url -> response) -> request
-(define (send/suspend/url response-generator)
+; (url -> response) [url] -> request
+(define (send/suspend/url response-generator [base-url (request-uri (current-request))])
   (send/suspend
    (lambda (k-url)
-     (response-generator (string->url k-url)))))
+     (response-generator (string->url k-url)))
+   base-url))
 
-; (url-string -> response) -> request
-(define (send/forward response-generator)
+; (url-string -> response) [url] -> request
+(define (send/forward response-generator [base-url (request-uri (current-request))])
   (clear-continuation-table!)
-  (send/suspend response-generator))
+  (send/suspend response-generator base-url))
 
-; (((-> response) -> url-string) -> response) -> request
-(define (send/suspend/dispatch response-generator)
+; (((-> response) -> url-string) -> response) [url] -> request
+(define (send/suspend/dispatch response-generator [base-url (request-uri (current-request))])
   (let* ([site  (current-site)]
          [page  (current-page)]
          ; This restores the tail position:
@@ -92,19 +90,20 @@
                            ; This makes the second continuation captured by send/suspend smaller:
                            (call-with-continuation-prompt
                             (lambda ()
-                              (let ([new-request (send/suspend k1)])
+                              (let ([new-request (send/suspend k1 base-url)])
                                 (k0 wrapper)))
                             servlet-prompt)))))))
                  servlet-prompt)])
     (thunk)))
 
 ; (((-> response) -> url) -> response) -> request
-(define (send/suspend/url/dispatch response-generator)
+(define (send/suspend/url/dispatch response-generator [base-url (request-uri (current-request))])
   (send/suspend/dispatch
    (lambda (embed/url)
      (response-generator
       (lambda (proc)
-        (string->url (embed/url proc)))))))
+        (string->url (embed/url proc)))))
+   base-url))
 
 ; ((url-string -> response) -> request) -> request
 (define ((make-redirect/get send/suspend))
@@ -143,16 +142,17 @@
 (provide continuation-url?
          current-servlet-continuation-expiration-handler
          adjust-timeout!
-         clear-continuation-table!)
+         clear-continuation-table!
+         smoke-embed/url/c)
 
 (provide/contract
  [send/back                 (-> response/c void?)]
  [send/finish               (-> response/c void?)]
- [send/forward              (-> response-generator/c request?)]
- [send/suspend              (-> response-generator/c request?)]
- [send/suspend/dispatch     (-> (-> smoke-embed/url/c response/c) any/c)]
- [send/suspend/url          (-> (-> url? response/c) request?)]
- [send/suspend/url/dispatch (-> (-> (-> (-> any) url?) response/c) any/c)]
+ [send/forward              (->* (response-generator/c) (url?) request?)]
+ [send/suspend              (->* (response-generator/c) (url?) request?)]
+ [send/suspend/dispatch     (->* ((-> smoke-embed/url/c response/c)) (url?) any/c)]
+ [send/suspend/url          (->* ((-> url? response/c)) (url?) request?)]
+ [send/suspend/url/dispatch (->* ((-> (-> (-> any) url?) response/c)) (url?) any/c)]
  [redirect/get              (-> request?)]
  [redirect/get/forget       (-> request?)]
  [with-errors-to-browser    (-> (-> response/c request?) (-> any) any/c)])

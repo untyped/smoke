@@ -106,7 +106,7 @@
                    #'())
             
             #,@(if wrapper-proc-stx
-                   #'((define/override (dispatch/top . args)
+                   #'((define/override (dispatch . args)
                         (apply wrapper-proc
                                (lambda args
                                  (dispatch . args)

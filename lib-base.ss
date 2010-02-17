@@ -6,8 +6,6 @@
          web-server/lang/serial-lambda
          "base.ss"
          "class/class.ss"
-         (except-in "core/callback.ss" callback)
-         "core/callback-url.ss"
          "core/embed.ss"
          "core/env.ss"
          "core/interfaces.ss"
@@ -26,8 +24,6 @@
                        web-server/lang/serial-lambda
                        "base.ss"
                        "class/class.ss"
-                       "core/callback.ss"
-                       "core/callback-url.ss"
                        "core/embed.ss"
                        "core/env.ss"
                        "core/interfaces.ss"

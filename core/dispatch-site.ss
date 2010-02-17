@@ -22,7 +22,7 @@
          #:session-domain  [domain  #f])
   (proc:make (lambda ()
                (current-site-set! site)
-               (send site dispatch/top))
+               (send site dispatch))
              #:directory       directory
              #:error-handler   error-handler
              #:manager         manager

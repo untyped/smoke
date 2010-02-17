@@ -4,7 +4,7 @@
          web-server/managers/manager
          (planet untyped/mirrors:2)
          "../base.ss"
-         "callback-url.ss"
+         "callback.ss"
          "request.ss"
          "lru-internal.ss")
 
