@@ -21,6 +21,7 @@
    [("/redirect")                     redirect-page]
    [("/requirements")                 requirements-page]
    [("/scroll")                       scroll-page]
+   [("/send")                         send-page]
    [("/session")                      session-page]
    [("/session/set/" (symbol-arg) "/" (string-arg)) session-set-page]
    [("/session/remove/" (symbol-arg)) session-remove-page]

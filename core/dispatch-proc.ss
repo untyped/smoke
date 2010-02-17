@@ -1,41 +1,39 @@
 #lang scheme
 
-(require srfi/19
-         web-server/dispatchers/dispatch
+(require web-server/dispatchers/dispatch
          web-server/http
-         web-server/http/response
-         web-server/private/web-server-structs
-         (planet untyped/mirrors:2)
-         (planet untyped/unlib:3/log)
+         web-server/managers/manager
          (planet untyped/unlib:3/time)
-         "env.ss"
-         "session.ss"
-         "web-cell.ss")
+         "dispatch-proc-servlet.ss"
+         "lru.ss"
+         "session.ss")
 
 ; symbol
 (define interface-version 'v1)
 
 ; (-> response) -> (connection request -> response)
-(define (make proc
-              #:error-handler   error-handler 
-              #:session-expires [expires #f]
-              #:session-domain  [domain  #f])
-  (lambda (conn req)
-    (current-connection-set! conn)
-    (current-request-set! req)
-    (parameterize ([current-custodian (make-servlet-custodian)])
-      (with-new-web-frame
-       (with-handlers ([exn? error-handler])
-         (output-response/method
-          conn
-          (or (start-session #:expires expires #:domain domain)
-              (proc))
-          (request-method req)))))))
+(define (proc:make
+         proc
+         #:directory       directory
+         #:error-handler   error-handler 
+         #:manager         [manager (make-default-smoke-manager)]
+         #:session-expires [expires #f]
+         #:session-domain  [domain  #f])
+  (make/smoke-servlet
+   (make-smoke-servlet
+    (lambda ()
+      (or (start-session #:expires expires #:domain domain)
+          (proc)))
+    directory
+    manager)
+   error-handler))
 
 ; Provides ---------------------------------------
 
 (provide/contract
- [interface-version dispatcher-interface-version/c]
- [make              (->* ((-> response/c) #:error-handler (-> exn? response/c))
-                         (#:session-expires (or/c time-utc? #f) #:session-domain  (or/c string? #f))
-                         dispatcher/c)])
+ [interface-version     dispatcher-interface-version/c]
+ [rename proc:make make (->* ((-> response/c)
+                              #:directory     path-string?
+                              #:error-handler (-> exn? response/c))
+                             (#:manager manager? #:session-expires (or/c time-utc? #f) #:session-domain (or/c string? #f))
+                             dispatcher/c)])

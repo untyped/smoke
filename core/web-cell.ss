@@ -1,5 +1,7 @@
 #lang scheme
 
+(require "../base.ss")
+
 (require scheme/serialize
          srfi/26
          (planet untyped/unlib:3/enumeration)
@@ -87,7 +89,9 @@
 
 ; any -> web-cell
 (define (create-web-cell default)
-  (let ([cell (make-web-cell (gensym/interned (web-cell-id-prefix)))])
+  (let ([cell (make-web-cell (gensym/interned (if (dev?)
+                                                  (web-cell-id-prefix)
+                                                  'wc)))])
     (web-cell-set! cell default)
     cell))
 

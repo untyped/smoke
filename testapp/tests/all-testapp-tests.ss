@@ -13,6 +13,7 @@
          "redirect-test.ss"
          "requirements-test.ss"
          "segfault-test.ss"
+         "send-test.ss"
          "session-test.ss"
          "tab-test.ss"
          "tooltip-test.ss")
@@ -33,6 +34,7 @@
     ;form-tests/hidden
     tab-tests
     segfault-tests
+    send-tests
     autocomplete-tests
     tooltip-tests))
 

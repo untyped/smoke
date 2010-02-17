@@ -5,13 +5,12 @@
          (planet untyped/unlib:3/debug)
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/exn)
-         (planet untyped/unlib:3/log)
-         "class/class.ss")
+         (planet untyped/unlib:3/log))
 
 ; Configuration --------------------------------
 
 ; (parameter boolean)
-(define dev? (make-parameter #t))
+(define dev? (make-parameter #f))
 
 ; path
 (define-runtime-path smoke-htdocs-path 
@@ -41,8 +40,7 @@
                        (planet untyped/mirrors:2)
                        (planet untyped/unlib:3/debug)
                        (planet untyped/unlib:3/exn)
-                       (planet untyped/unlib:3/log)
-                       "class/class.ss"))
+                       (planet untyped/unlib:3/log)))
 
 (provide/contract
  [dev?                                           (parameter/c boolean?)]

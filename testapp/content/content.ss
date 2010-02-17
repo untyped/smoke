@@ -11,6 +11,7 @@
          "refresh-counter.ss"
          "requirements.ss"
          "scroll.ss"
+         "send.ss"
          "session.ss"
          "tab.ss"
          "tooltip.ss")
@@ -28,6 +29,7 @@
                        "refresh-counter.ss"
                        "requirements.ss"
                        "scroll.ss"
+                       "send.ss"
                        "session.ss"
                        "tab.ss"
                        "tooltip.ss"))

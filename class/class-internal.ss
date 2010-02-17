@@ -13,7 +13,8 @@
   (interface ()
     dirty?
     invoke-callback
-    callback-registered?))
+    callback-registered?
+    verify-callback))
 
 ; Classes ----------------------------------------
 
@@ -52,11 +53,16 @@
   
   ; symbol any ... -> any
   (define/public (invoke-callback method-id . args)
-    (error (format "~a: callback not registered" (class-name (object-class this))) method-id))
+    (error (format "~a: callback not registered:" (class-name (object-class this))) method-id))
   
   ; symbol any ... -> any
   (define/public (callback-registered? method-id . args)
-    #f))
+    #f)
+  
+  ; symbol -> void
+  (define/public (verify-callback method-id)
+    (unless (callback-registered? method-id)
+      (error (format "~a: callback not registered:" (class-name (object-class this))) method-id))))
 
 ; Procedures -----------------------------------
 
