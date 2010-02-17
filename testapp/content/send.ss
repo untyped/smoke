@@ -23,14 +23,14 @@
   ; Methods --------------------------------------
   
   (define/augment (render seed)
-    (xml (p "Counter " ,(get-counter))
-         ,(if (get-k-url)
-              (xml (p (a (@ [href ,(get-k-url)])
-                         "continue")))
-              (xml (p (a (@ [href ,(embed seed (callback on-send-suspend))])
-                         "send/suspend"))
-                   (p (a (@ [href ,(embed seed (callback on-send-suspend-dispatch))])
-                         "send/suspend/dispatch"))))))
+    (xml (p "site "    ,(format "~a" (current-site)))
+         (p "page "    ,(format "~a" (current-page)))
+         (p "counter " ,(get-counter))
+         (p "k-url "   ,(get-k-url))
+         (p (a (@ [href ,(embed seed (callback on-send-suspend))]) "enter send/suspend"))
+         (p (a (@ [href ,(embed seed (callback on-send-suspend-dispatch))]) "enter send/suspend/dispatch"))
+         ,(opt-xml (get-k-url)
+            (p (a (@ [href ,(get-k-url)]) "continue")))))
   
   (define/public #:callback (on-send-suspend)
     (set-counter! (add1 (get-counter)))
