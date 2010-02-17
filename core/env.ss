@@ -30,31 +30,57 @@
 (define (current-request)
   (thread-cell-ref current-request-cell))
 
-; Current request --------------------------------
+; Current site -----------------------------------
 
-; (thread-cell (U request #f))
+; (thread-cell (U site<%> #f))
 (define current-site-cell (make-thread-cell #f))
 
-; request -> void
+; site<%> -> void
 (define (current-site-set! app)
   (thread-cell-set! current-site-cell app))
 
-; -> (U request #f)
+; -> (U site<%> #f)
 (define (current-site)
   (thread-cell-ref current-site-cell))
 
 ; Current page -----------------------------------
 
-; (thread-cell (U request #f))
+; (thread-cell (U page<%> #f))
 (define current-page-cell (make-thread-cell #f))
 
-; request -> void
+; page<%> -> void
 (define (current-page-set! app)
   (thread-cell-set! current-page-cell app))
 
-; -> (U request #f)
+; -> (U page<%> #f)
 (define (current-page)
   (thread-cell-ref current-page-cell))
+
+; Current callback serial ------------------------
+
+; (thread-cell (U string #f))
+(define current-callback-serial-cell (make-thread-cell #f))
+
+; string -> void
+(define (current-callback-serial-set! app)
+  (thread-cell-set! current-callback-serial-cell app))
+
+; -> (U string #f)
+(define (current-callback-serial)
+  (thread-cell-ref current-callback-serial-cell))
+
+; Current web frame serial -----------------------
+
+; (thread-cell (U string #f))
+(define current-web-frame-serial-cell (make-thread-cell #f))
+
+; string -> void
+(define (current-web-frame-serial-set! app)
+  (thread-cell-set! current-web-frame-serial-cell app))
+
+; -> (U string #f)
+(define (current-web-frame-serial)
+  (thread-cell-ref current-web-frame-serial-cell))
 
 ; History ----------------------------------------
 
@@ -67,12 +93,16 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [adjust-http-timeout!     (-> natural-number/c void?)]
- [current-connection-set!  (-> connection? void?)]
- [current-request          (-> (or/c request? #f))]
- [current-request-set!     (-> request? void?)]
- [current-site             (-> (or/c (is-a?/c site<%>) #f))]
- [current-site-set!        (-> (is-a?/c site<%>) void?)]
- [current-page             (-> (or/c (is-a?/c page<%>) #f))]
- [current-page-set!        (-> (is-a?/c page<%>) void?)]
- [clear-history!           (-> void?)])
+ [adjust-http-timeout!          (-> natural-number/c void?)]
+ [current-connection-set!       (-> connection? void?)]
+ [current-request               (-> (or/c request? #f))]
+ [current-request-set!          (-> request? void?)]
+ [current-site                  (-> (or/c (is-a?/c site<%>) #f))]
+ [current-site-set!             (-> (is-a?/c site<%>) void?)]
+ [current-page                  (-> (or/c (is-a?/c page<%>) #f))]
+ [current-page-set!             (-> (is-a?/c page<%>) void?)]
+ [current-callback-serial       (-> (or/c string? #f))]
+ [current-callback-serial-set!  (-> string? void?)]
+ [current-web-frame-serial      (-> (or/c string? #f))]
+ [current-web-frame-serial-set! (-> string? void?)]
+ [clear-history!                (-> void?)])

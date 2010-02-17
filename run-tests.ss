@@ -16,17 +16,18 @@
 (print-struct #t)
 (dev? #t)
 
-(thread
- (lambda ()
-   (let ([start-time (current-inexact-milliseconds)])
-     (let loop ()
-       (collect-garbage)
-       (collect-garbage)
-       (printf "~s\t~s~n"
-               (floor (- (current-inexact-milliseconds) start-time))
-               (current-memory-use))
-       (sleep 1)
-       (loop)))))
+#;(define _
+    (thread
+     (lambda ()
+       (let ([start-time (current-inexact-milliseconds)])
+         (let loop ()
+           (collect-garbage)
+           (collect-garbage)
+           (printf "~s\t~s~n"
+                   (floor (- (current-inexact-milliseconds) start-time))
+                   (current-memory-use))
+           (sleep 1)
+           (loop))))))
 
 ; We don't need logging output, but we want to check these logging hooks don't exn:
 (response-time-logger (lambda (msg url time) (void)))

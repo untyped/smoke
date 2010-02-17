@@ -73,11 +73,13 @@
                   => (match-lambda
                        [(list instance-id k-id salt)
                         (values instance-id
-                                (custodian-box-value ((manager-continuation-lookup manager) instance-id k-id salt)))])]
+                                (custodian-box-value
+                                 ((manager-continuation-lookup manager) instance-id k-id salt)))])]
                  [else (values ((manager-create-instance manager) (exit-handler))
-                               start)]))
+                               (lambda (request)
+                                 (proc)))]))
          (parameterize ([current-servlet-instance-id instance-id])
-           (proc)))))))
+           (handler req)))))))
 
 ; Helpers ----------------------------------------
 

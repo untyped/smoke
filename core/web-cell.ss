@@ -11,7 +11,7 @@
 ; Frames -----------------------------------------
 
 ; (struct (hasheqof symbol any))
-(define-serializable-struct web-frame (env) #:transparent)
+(define-struct web-frame (env) #:prefab)
 
 ; web-frame
 (define empty (make-web-frame #hasheq()))

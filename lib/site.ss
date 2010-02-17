@@ -38,8 +38,10 @@
     (with-handlers ([exn:fail:dispatch? (lambda _ (not-found))])
       (match (decode-url url)
         [(list-rest page args) 
-         (with-saved-web-frame
-          (send/apply page dispatch/top args))]
+         (init-web-frame)
+         (begin0
+           (send/apply page dispatch/top args)
+           (save-web-frame))]
         [#f (next-dispatcher)])))
   
   ; callback -> response
@@ -47,11 +49,13 @@
     (let*-values ([(callback)  (url->callback url this)]
                   [(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
-      (with-saved-web-frame
-       (send/apply page dispatch/callback
-                   comp
-                   (callback-method-id callback)
-                   (callback-args callback)))))
+      (init-web-frame)
+      (begin0
+        (send/apply page dispatch/callback
+                    comp
+                    (callback-method-id callback)
+                    (callback-args callback))
+        (save-web-frame))))
   
   ; page<%> any ... -> response
   (define/public (access-denied page . args)

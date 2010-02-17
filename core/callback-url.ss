@@ -17,10 +17,6 @@
     (debug msg (map path/param-path p))
     p))
 
-; (parameter (U string #f))
-(define current-callback-serial
-  (make-parameter #f))
-
 ; Procedures -------------------------------------
 
 ; url -> boolean
@@ -124,7 +120,6 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [current-callback-serial (parameter/c string?)]
  [initial-url?            (-> url? boolean?)]
  [callback-url?           (-> url? boolean?)]
  [callback->url           (-> seed? callback? string?)]

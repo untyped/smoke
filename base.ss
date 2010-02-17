@@ -28,11 +28,16 @@
 ; (struct string continuation-marks)
 (define-struct (exn:fail:smoke:session exn:fail:smoke) () #:transparent)
 
+; (struct string continuation-marks string)
+(define-struct (exn:fail:smoke:callback exn:fail:smoke) (serial) #:transparent)
+
 ; (struct string continuation-marks)
 (define-struct (exn:smoke exn) () #:transparent)
 
 ; (struct string continuation-marks form-element<%>)
 (define-struct (exn:smoke:form exn:smoke) (element) #:transparent)
+
+
 
 ; Provide statements --------------------------- 
 
@@ -43,10 +48,11 @@
                        (planet untyped/unlib:3/log)))
 
 (provide/contract
- [dev?                                           (parameter/c boolean?)]
- [smoke-htdocs-path                              path?]
- [smoke-mime-types-path                          path?]
- [struct (exn:fail:smoke exn:fail)               ([message string?] [continuation-marks continuation-mark-set?])]
- [struct (exn:fail:smoke:session exn:fail:smoke) ([message string?] [continuation-marks continuation-mark-set?])]
- [struct (exn:smoke exn)                         ([message string?] [continuation-marks continuation-mark-set?])]
- [struct (exn:smoke:form exn:smoke)              ([message string?] [continuation-marks continuation-mark-set?] [element object?])])
+ [dev?                                            (parameter/c boolean?)]
+ [smoke-htdocs-path                               path?]
+ [smoke-mime-types-path                           path?]
+ [struct (exn:fail:smoke exn:fail)                ([message string?] [continuation-marks continuation-mark-set?])]
+ [struct (exn:fail:smoke:session exn:fail:smoke)  ([message string?] [continuation-marks continuation-mark-set?])]
+ [struct (exn:fail:smoke:callback exn:fail:smoke) ([message string?] [continuation-marks continuation-mark-set?] [serial string?])]
+ [struct (exn:smoke exn)                          ([message string?] [continuation-marks continuation-mark-set?])]
+ [struct (exn:smoke:form exn:smoke)               ([message string?] [continuation-marks continuation-mark-set?] [element object?])])

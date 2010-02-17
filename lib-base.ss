@@ -13,6 +13,7 @@
          "core/interfaces.ss"
          "core/notification.ss"
          "core/request.ss"
+         "core/send.ss"
          "core/session-cell.ss"
          "core/web-cell.ss"
          "core/web-cell-save.ss")
@@ -32,6 +33,7 @@
                        "core/interfaces.ss"
                        "core/notification.ss"
                        "core/request.ss"
+                       "core/send.ss"
                        "core/session-cell.ss"
                        "core/web-cell.ss"
                        "core/web-cell-save.ss"))

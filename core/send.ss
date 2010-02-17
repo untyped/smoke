@@ -10,7 +10,9 @@
          web-server/private/util
          (only-in web-server/servlet/servlet-structs response-generator/c)
          (prefix-in inner: web-server/servlet/web)
-         "env.ss")
+         "env.ss"
+         "web-cell.ss"
+         "web-cell-save.ss")
 
 ; Public -----------------------------------------
 
@@ -40,25 +42,26 @@
 
 ; (url-string -> response) -> request
 (define (send/suspend response-generator)
-  (let ([site (current-site)]
-        [page (current-page)])
-    (call-with-composable-continuation
-     (lambda (k)
-       (let* ([instance-id (current-servlet-instance-id)]
-              [ctxt        (current-execution-context)]
-              [k-embedding ((manager-continuation-store! (current-servlet-manager))
-                            instance-id
-                            (make-custodian-box (current-custodian) k)
-                            (current-servlet-continuation-expiration-handler))]
-              [k-url        (embed-ids 
-                             (list* instance-id k-embedding)
-                             (request-uri (execution-context-request ctxt)))]
-              [wrapper      (lambda (k-url)
-                              (current-site-set! site)
-                              (current-page-set! page)
-                              (response-generator k-url))])
-         (send/back (wrapper k-url))))
-     servlet-prompt)))
+  (let ([frame (save-web-frame)]
+        [site  (current-site)]
+        [page  (current-page)])
+    (begin0
+      (call-with-composable-continuation
+       (lambda (k)
+         (let* ([instance-id (current-servlet-instance-id)]
+                [ctxt        (current-execution-context)]
+                [k-embedding ((manager-continuation-store! (current-servlet-manager))
+                              instance-id
+                              (make-custodian-box (current-custodian) k)
+                              (current-servlet-continuation-expiration-handler))]
+                [k-url        (embed-ids 
+                               (list* instance-id k-embedding)
+                               (request-uri (execution-context-request ctxt)))])
+           (send/back (response-generator k-url))))
+       servlet-prompt)
+      (current-site-set! site)
+      (current-page-set! page)
+      (restore-web-frame frame))))
 
 ; (url -> response) -> request
 (define (send/suspend/url response-generator)

@@ -23,29 +23,43 @@
   ; Methods --------------------------------------
   
   (define/augment (render seed)
-    (xml (p "site "    ,(format "~a" (current-site)))
-         (p "page "    ,(format "~a" (current-page)))
-         (p "counter " ,(get-counter))
-         (p "k-url "   ,(get-k-url))
-         (p (a (@ [href ,(embed seed (callback on-send-suspend))]) "enter send/suspend"))
-         (p (a (@ [href ,(embed seed (callback on-send-suspend-dispatch))]) "enter send/suspend/dispatch"))
+    (xml (p "site "    (span (@ [id "current-site"]) ,(format "~a" (current-site))))
+         (p "page "    (span (@ [id "current-page"]) ,(format "~a" (current-page))))
+         (p "counter " (span (@ [id "counter"]) ,(get-counter)))
+         (p "k-url "   (span (@ [id "k-url"]) ,(get-k-url)))
+         (p (a (@ [id   "increment"]
+                  [href ,(embed seed (callback on-increment))])
+               "increment by callback"))
+         (p (a (@ [id   "send-suspend"]
+                  [href ,(embed seed (callback on-send-suspend))])
+               "enter send/suspend"))
+         (p (a (@ [id   "send-suspend-dispatch"]
+                  [href ,(embed seed (callback on-send-suspend-dispatch))])
+               "enter send/suspend/dispatch"))
          ,(opt-xml (get-k-url)
-            (p (a (@ [href ,(get-k-url)]) "continue")))))
+            (p (a (@ [id   "continue"]
+                     [href ,(get-k-url)])
+                  "continue")))))
+  
+  (define/public #:callback (on-increment)
+    (set-counter! (add1 (get-counter))))
   
   (define/public #:callback (on-send-suspend)
-    (set-counter! (add1 (get-counter)))
-    (send/suspend
-     (lambda (k-url)
-       (set-k-url! k-url)
-       (respond)))
-    (set-k-url! #f))
+    (let loop ()
+      (set-counter! (add1 (get-counter)))
+      (send/suspend
+       (lambda (k-url)
+         (set-k-url! k-url)
+         (respond)))
+      (loop)))
   
   (define/public #:callback (on-send-suspend-dispatch)
-    (set-counter! (add1 (get-counter)))
-    (send/suspend/dispatch
-     (lambda (embed-url)
-       (set-k-url!
-        (embed-url
-         (lambda ()
-           (set-k-url! #f))))
-       (respond)))))
+    (let loop ()
+      (set-counter! (add1 (get-counter)))
+      (send/suspend/dispatch
+       (lambda (embed-url)
+         (set-k-url!
+          (embed-url
+           (lambda ()
+             (loop))))
+         (respond))))))
