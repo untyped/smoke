@@ -18,6 +18,7 @@
     get-doctype        ; -> xml
     get-lang           ; -> string
     get-title          ; -> frame
+    make-response      ; [seed] -> response
     on-full-response   ; -> void
     on-ajax-response)) ; -> void
 
@@ -104,12 +105,6 @@
   ; (cell string)
   (init-cell generator "Smoke by Untyped" #:accessor #:mutator)
   
-  ; (cell (listof (U xml (seed -> xml))))
-  ; (cell current-html-requirements null #:accessor #:mutator)
-  
-  ; (cell (listof (U js (seed -> js))))
-  ; (cell current-js-requirements null #:accessor #:mutator)
-  
   ; string
   (init [content-type "text/html; charset=utf-8"])
   
@@ -156,12 +151,9 @@
   (define/override (respond #:forward? [forward? #f])
     (unless (current-request)
       (error "No current HTTP request to respond to."))
-    
     (current-page-set! this)
-    
     (when forward?
       (clear-history!))
-    
     (make-response))
   
   ; -> void
@@ -178,43 +170,34 @@
   ;     that refresh appropriate parts of the page;
   ;   - AJAX requests originating from event handlers in other pages yield Javascript responses
   ;     that redirect the browser to this page (triggering a full page refresh).
-  ;
-  ; -> response
-  (define/public (make-response)
+  ; [seed] -> response
+  (define/public (make-response [seed (make-seed)])
     (if (ajax-request? (current-request))
         (if (equal? (ajax-request-page-id (current-request))
                     (get-component-id))
-            (make-ajax-response)
-            (make-ajax-redirect-response))
+            (make-ajax-response seed)
+            (make-ajax-redirect-response seed))
         (if (post-request? (current-request))
-            (make-post-redirect-response)
-            (make-full-response))))
+            (make-post-redirect-response seed)
+            (make-full-response seed))))
   
   ; Makes a response-generator that creates a complete XHTML response for this page.
-  ;
-  ; -> response
-  (define/public (make-full-response)
+  ; [seed] -> response
+  (define/public (make-full-response seed)
     (on-full-response)
     (log-frame-size)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
        (smoke-response-types full)
        ; seed
-       (let ([seed          (make-seed)]
-             ; [new-html-reqs (remove-duplicates (get-html-requirements/fold))]
-             ; [new-js-reqs   (remove-duplicates (get-js-requirements/fold))]
-             [html-reqs (remove-duplicates (get-html-requirements/fold))]
-             [js-reqs   (remove-duplicates (get-js-requirements/fold))])
-         ; Store the initial requirements for the page:
-         ; (set-current-html-requirements! new-html-reqs)
-         ; (set-current-js-requirements! new-js-reqs)
-         ; Call render before get-on-attach for consistency with AJAX responses:
-         (let ([code      (get-http-code)]
-               [message   (get-http-status)]
-               [seconds   (get-http-timestamp)]
-               [headers   (get-http-headers)]
-               [mime-type (get-content-type)]
-               [content   (render seed)])
+       (let ([html-reqs (remove-duplicates (get-html-requirements/fold))]
+             [js-reqs   (remove-duplicates (get-js-requirements/fold))]
+             [code      (get-http-code)]
+             [message   (get-http-status)]
+             [seconds   (get-http-timestamp)]
+             [headers   (get-http-headers)]
+             [mime-type (get-content-type)]
+             [content   (render seed)])
            ; response
            (make-xml-response
             #:code      code
@@ -245,73 +228,53 @@
                                                                                             ,(get-on-attach seed))))))))
                                                  jQuery)))
                                      (!raw "\n// ]]>\n")))
-                       (body (@ ,@(core-html-attributes seed)) ,content)))))))))
+                       (body (@ ,@(core-html-attributes seed)) ,content))))))))
   
   ; Makes an AJAX Javascript response that refreshes appropriate parts of this page.
-  ;
-  ; -> response
-  (define/public (make-ajax-response)
+  ; [seed] -> response
+  (define/public (make-ajax-response seed)
     (on-ajax-response)
     (log-frame-size)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
        (smoke-response-types ajax)
-       ; seed
-       (let ([seed (make-seed)])
-         ; response
-         (with-handlers ([exn? (lambda (exn)
+       (with-handlers ([exn? (lambda (exn)
                                  (display-exn exn)
                                  (make-js-response 
                                   #:code 500
                                   #:message "Internal Error"
                                   (js (!dot Smoke (log "An error has occurred. Talk to your system administrator.")))))])
-           ;(let ([new-html-reqs (filter-new-requirements (get-current-html-requirements) (get-html-requirements/fold))]
-           ;      [new-js-reqs   (filter-new-requirements (get-current-js-requirements)   (get-js-requirements/fold))])
-           ;  (unless (null? new-html-reqs)
-           ;    (set-current-html-requirements! (append (get-current-html-requirements) new-html-reqs)))
-           ;  (unless (null? new-js-reqs)
-           ;    (set-current-js-requirements! (append (get-current-js-requirements) new-js-reqs)))
            (make-js-response
             (js ((function ($)
-                   ;,(opt-js (not (null? new-html-reqs))
-                   ;   (!dot ($ (!dot Smoke documentHead))
-                   ;         (append ,(xml->string (xml ,@(render-requirements new-html-reqs seed))))))
-                   ;,@(render-requirements new-js-reqs seed)
                    ,@(map (cut send <> get-on-refresh seed)
                           (get-dirty-components)))
-                 jQuery))))))))
+                 jQuery)))))))
 
   ; Response that converts a post request into a get request after form submission.
   ; This avoids "Would you like to resubmit your form?" messages when clicking the "Back" button.
-  ;
-  ; -> response
-  (define/public (make-post-redirect-response)
+  ; seed -> response
+  (define/public (make-post-redirect-response seed)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
        (smoke-response-types post-redirect)
        ; seed
-       (let ([seed (make-seed)])
-         (make-html-response
-          #:code      301 
-          #:message   "Moved Permanently"
-          #:mime-type #"text/html"
-          #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/full seed (callback on-refresh))))
-                            no-cache-http-headers)
-          (xml))))))
+       (make-html-response
+        #:code      301 
+        #:message   "Moved Permanently"
+        #:mime-type #"text/html"
+        #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/full seed (callback on-refresh))))
+                          no-cache-http-headers)
+        (xml)))))
   
   ; Makes a response that redirects the browser to this page.
-  ;
-  ; -> response
-  (define/public (make-ajax-redirect-response)
+  ; seed -> response
+  (define/public (make-ajax-redirect-response seed)
     (parameterize ([javascript-rendering-mode (choose-rendering-mode dev?)])
       (log-response-time
        (smoke-response-types ajax-redirect)
-       ; seed
-       (let ([seed (make-seed)])
-         ; response
-         (make-js-response 
-          (js (= (!dot window location)
-                 ,(embed/full seed (callback on-refresh)))))))))
+       (make-js-response 
+        (js (= (!dot window location)
+               ,(embed/full seed (callback on-refresh))))))))
   
   ; -> void
   (define/public #:callback (on-refresh)
@@ -362,13 +325,6 @@
 (define-class html-page% (html-page-mixin (page-mixin html-element%)) ())
 
 ; Helpers ----------------------------------------
-
-; (listof requirement) (listof requirement) -> (listof requirement)
-;(define (filter-new-requirements prev-reqs curr-reqs)
-;  (remove-duplicates
-;   (filter-map (lambda (req)
-;                 (and (not (member req prev-reqs)) req))
-;               curr-reqs)))
 
 ; (listof (U any (seed -> any))) seed -> (listof any)
 (define (render-requirements reqs seed)

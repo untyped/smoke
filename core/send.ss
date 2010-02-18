@@ -42,23 +42,9 @@
 
 ; (url-string -> response) [url] -> request
 (define (send/suspend response-generator [base-url (request-uri (current-request))])
-  (let ([frame (save-web-frame)]
-        [site  (current-site)]
-        [page  (current-page)])
-    (begin0
-      (call-with-composable-continuation
-       (lambda (k)
-         (let* ([instance-id (current-servlet-instance-id)]
-                [k-embedding ((manager-continuation-store! (current-servlet-manager))
-                              instance-id
-                              (make-custodian-box (current-custodian) k)
-                              (current-servlet-continuation-expiration-handler))]
-                [k-url       (embed-ids (list* instance-id k-embedding) base-url)])
-           (send/back (response-generator k-url))))
-       servlet-prompt)
-      (current-site-set! site)
-      (current-page-set! page)
-      (restore-web-frame frame))))
+  (printf "v~n")
+  (save-web-frame)
+  (send/suspend/internal response-generator base-url))
 
 ; (url -> response) [url] -> request
 (define (send/suspend/url response-generator [base-url (request-uri (current-request))])
@@ -72,8 +58,10 @@
   (clear-continuation-table!)
   (send/suspend response-generator base-url))
 
-; (((-> response) -> url-string) -> response) [url] -> request
-(define (send/suspend/dispatch response-generator [base-url (request-uri (current-request))])
+; (((-> response) -> url-string) -> response) -> request
+(define (send/suspend/dispatch response-generator)
+  (printf "u~n")
+  (save-web-frame)
   (let* ([site  (current-site)]
          [page  (current-page)]
          ; This restores the tail position:
@@ -81,7 +69,7 @@
                  (lambda (k0)
                    (send/back
                     (response-generator
-                     (lambda (proc)
+                     (lambda (proc [base-url (request-uri (current-request))])
                        (let ([wrapper (lambda ()
                                         (current-site-set! site)
                                         (current-page-set! page)
@@ -90,20 +78,19 @@
                            ; This makes the second continuation captured by send/suspend smaller:
                            (call-with-continuation-prompt
                             (lambda ()
-                              (let ([new-request (send/suspend k1 base-url)])
+                              (let ([new-request (send/suspend/internal k1 base-url)])
                                 (k0 wrapper)))
                             servlet-prompt)))))))
                  servlet-prompt)])
     (thunk)))
 
 ; (((-> response) -> url) -> response) -> request
-(define (send/suspend/url/dispatch response-generator [base-url (request-uri (current-request))])
+(define (send/suspend/url/dispatch response-generator)
   (send/suspend/dispatch
    (lambda (embed/url)
      (response-generator
-      (lambda (proc)
-        (string->url (embed/url proc)))))
-   base-url))
+      (lambda (proc [base-url (request-uri (current-request))])
+        (string->url (embed/url proc base-url)))))))
 
 ; ((url-string -> response) -> request) -> request
 (define ((make-redirect/get send/suspend))
@@ -129,13 +116,33 @@
 
 ; Helpers ----------------------------------------
 
+; (url-string -> response) url -> request
+(define (send/suspend/internal response-generator base-url)
+  (let ([frame (capture-web-frame)]
+        [site  (current-site)]
+        [page  (current-page)])
+    (begin0
+      (call-with-composable-continuation
+       (lambda (k)
+         (let* ([instance-id (current-servlet-instance-id)]
+                [k-embedding ((manager-continuation-store! (current-servlet-manager))
+                              instance-id
+                              (make-custodian-box (current-custodian) k)
+                              (current-servlet-continuation-expiration-handler))]
+                [k-url       (embed-ids (list* instance-id k-embedding) base-url)])
+           (send/back (response-generator k-url))))
+       servlet-prompt)
+      (current-site-set! site)
+      (current-page-set! page)
+      (restore-web-frame frame))))
+
 ; (list number number number) url -> string
 (define (embed-ids v u)
   (url->string (insert-param u "k" (write/string v))))
 
 ; contract
 (define smoke-embed/url/c
-  (-> (-> any/c) string?))
+  (->* ((-> any/c)) (url?) string?))
 
 ; Provides ---------------------------------------
 
@@ -150,9 +157,9 @@
  [send/finish               (-> response/c void?)]
  [send/forward              (->* (response-generator/c) (url?) request?)]
  [send/suspend              (->* (response-generator/c) (url?) request?)]
- [send/suspend/dispatch     (->* ((-> smoke-embed/url/c response/c)) (url?) any/c)]
  [send/suspend/url          (->* ((-> url? response/c)) (url?) request?)]
- [send/suspend/url/dispatch (->* ((-> (-> (-> any) url?) response/c)) (url?) any/c)]
+ [send/suspend/dispatch     (-> (-> smoke-embed/url/c response/c) any/c)]
+ [send/suspend/url/dispatch (-> (-> smoke-embed/url/c response/c) any/c)]
  [redirect/get              (-> request?)]
  [redirect/get/forget       (-> request?)]
  [with-errors-to-browser    (-> (-> response/c request?) (-> any) any/c)])

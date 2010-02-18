@@ -16,6 +16,7 @@
    [("/form/" (boolean-arg))          form-page]
    [("/form/checked")                 checked-form-page]
    [("/load")                         load-page]
+   [("/k-page")                       k-page]
    [("/notification1")                notification-page1]
    [("/notification2")                notification-page2]
    [("/redirect")                     redirect-page]

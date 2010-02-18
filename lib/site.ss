@@ -29,10 +29,11 @@
   (define/public (dispatch)
     (let* ([request (current-request)]
            [url     (request-uri request)])
-      (cond [(initial-url?  url) (init-web-frame)
-                                 (dispatch-initial url)]
+      (cond [(initial-url?  url) (dispatch-initial url)]
             [(callback-url? url) (init-web-frame)
-                                 (dispatch-callback (url->callback url this))]
+                                 (begin0
+                                   (dispatch-callback (url->callback url this))
+                                   (save-web-frame))]
             [else                (make-redirect-response (url->initial url))])))
   
   ; url -> response
@@ -50,13 +51,10 @@
   (define/public (dispatch-callback callback)
     (let-values ([(page comp) (find-page+component (callback-component-id callback))])
       (current-page-set! page)
-      (init-web-frame)
-      (begin0
-        (send/apply page dispatch-callback
-                    comp
-                    (callback-method-id callback)
-                    (callback-args callback))
-        (save-web-frame))))
+      (send/apply page dispatch-callback
+                  comp
+                  (callback-method-id callback)
+                  (callback-args callback))))
   
   ; page<%> any ... -> response
   (define/public (access-denied page . args)
@@ -81,7 +79,7 @@
   ; page<%> any ... -> boolean
   (define/public (access-allowed? page . args)
     #t)
-
+  
   ; Decoding/encoding URLs -----------------------
   
   ; url -> (U (list page<%> any ...) #f)
@@ -94,10 +92,10 @@
   ; page<%> (listof any) -> string
   (define/public (encode-url page args)
     (or (for/or ([rule (in-list rules)])
-        (and (eq? (unbox (rule-page-box rule)) page)
-             (pattern-encode (rule-pattern rule) args)))
+          (and (eq? (unbox (rule-page-box rule)) page)
+               (pattern-encode (rule-pattern rule) args)))
         (error "no url for page + arguments" (cons page args))))
-    
+  
   ; Pages and components -------------------------
   
   ; -> (listof page<%>)
