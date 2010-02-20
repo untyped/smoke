@@ -4,13 +4,16 @@
          "../../lib-base.ss"
          "html-page.ss")
 
+; Interfaces -------------------------------------
+
+(define k-html-page<%>
+  (interface html-page<%> ()))
+
 ; Mixins -----------------------------------------
 
-(define-mixin k-html-page-mixin (html-page<%>) ()
+(define-mixin k-html-page-mixin (html-page<%>) (k-html-page<%>)
   
   (inherit make-response)
-  
-  ; Response generation ------------------------
   
   ;  [#:forward? boolean] -> any
   (define/override (respond #:forward? [forward? #f])
