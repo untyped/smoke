@@ -78,7 +78,7 @@
 (define-syntax (define-object stx)
   (syntax-case stx ()
     [(_ id superclass (interface ...) clause ...)
-     (with-syntax ([class-id (make-id #'id #'id '%)])
+     (with-syntax ([class-id (make-id #f #'id '%)])
        (quasisyntax/loc stx
          (begin
            (define-class class-id superclass (interface ...) clause ...)
