@@ -7,7 +7,7 @@
 ; Interfaces -------------------------------------
 
 (define k-html-page<%>
-  (interface html-page<%> ()))
+  (interface (html-page<%>)))
 
 ; Mixins -----------------------------------------
 

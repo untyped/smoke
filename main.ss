@@ -1,6 +1,8 @@
 #lang scheme/base
 
-(require web-server/http
+(require net/url
+         (only-in web-server/dispatchers/dispatch next-dispatcher)
+         web-server/http
          web-server/http/bindings
          (planet untyped/mirrors:2)
          "base.ss"
@@ -9,6 +11,7 @@
          "core/env.ss"
          "core/interfaces.ss"
          "core/notification.ss"
+         "core/request.ss"
          "core/serve-smoke.ss"
          "core/session.ss"
          "core/session-cell.ss"
@@ -57,7 +60,9 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out web-server/http
+(provide (all-from-out net/url
+                       web-server/dispatchers/dispatch
+                       web-server/http
                        web-server/http/bindings
                        (planet untyped/mirrors:2)
                        "class/class.ss"
@@ -65,6 +70,7 @@
                        "core/env.ss"
                        "core/interfaces.ss"
                        "core/notification.ss"
+                       "core/request.ss"
                        "core/serve-smoke.ss"
                        "core/session.ss"
                        "core/session-cell.ss"

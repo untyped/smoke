@@ -127,19 +127,19 @@
 (define (web-cell-base cell [default (cut error "no value for web cell" cell)])
   (frame-ref base-frame cell default))
 
-; web-cell -> any
+; web-cell [any] -> any
 (define (web-cell-new cell [default (cut error "no value for web cell" cell)])
   (frame-ref new-frame cell (cut web-cell-base cell default)))
 
-; web-cell -> any
-(define (web-cell-old cell)
-  (frame-ref old-frame cell (cut web-cell-new cell)))
+; web-cell [any] -> any
+(define (web-cell-old cell [default (cut error "no value for web cell" cell)])
+  (frame-ref old-frame cell (cut web-cell-new cell default)))
 
 ; web-cell any -> void
 (define (web-cell-backup! cell val)
-  (let ([new (web-cell-new cell)])
+  (let ([new (web-cell-new cell undefined)])
     (unless (equal? val new)
-      (let ([old (web-cell-old cell)])
+      (let ([old (web-cell-old cell undefined)])
         (if (equal? val old)
             (frame-unset! old-frame cell)
             (unless (frame-set? old-frame cell)

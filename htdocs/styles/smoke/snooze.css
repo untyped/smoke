@@ -96,9 +96,9 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 
 /* Controls */
 
-.smoke-snooze-report .controls { position: relative; display: block; margin-bottom: 2ex; }
-.smoke-snooze-report .controls .filter  { text-align: center; }
-.smoke-snooze-report .controls .view  { float: left; }
+.smoke-snooze-report .controls { position: relative; display: block; min-height: 2ex; margin-bottom: 2ex; }
+.smoke-snooze-report .controls .filter { text-align: center; }
+.smoke-snooze-report .controls .view { float: left; }
 .smoke-snooze-report .controls .links { float: right; list-style-type: none; margin: .1em 0px; padding: 0px; }
 
 /* Position */

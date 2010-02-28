@@ -13,7 +13,7 @@
 
 ; page any ... -> string
 (define (controller-access? page . args)
-  (send/apply (send page get-site) access-allowed? args))
+  (send/apply page access-allowed? args))
 
 ;  controller
 ;  [#:body    (U xml sexp #f)]

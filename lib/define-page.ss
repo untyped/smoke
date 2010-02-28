@@ -39,13 +39,31 @@
              (send old-page set-site! #f)
              new-page))))]))
 
+; Legacy controller compatibility ----------------
+
+; Not provided by module:
+(define-struct (exn:fail:no-access exn:fail) ())
+    
+(define (plain-controller-wrapper page . args)
+  (with-handlers ([exn:fail:no-access? (lambda _ (send/apply page access-denied args))])
+    (dynamic-wind
+     (lambda ()
+       (unless (send/apply page access-allowed? args)
+         (raise-exn exn:fail:no-access "Access denied.")))
+     (lambda ()
+       (send/apply page dispatch args))
+     void)))
+
+(define default-controller-wrapper
+  (make-parameter plain-controller-wrapper))
+
 (define-syntax (define-controller complete-stx)
   
   (define procedure-style? #f)
   (define id-stx           #f)
   (define args-stx         #f)
   (define rest-stx         #f)
-  (define wrapper-proc-stx #f)
+  (define wrapper-proc-stx #'(default-controller-wrapper))
   (define access-proc-stx  #f)
   (define denied-proc-stx  #f)
   
@@ -80,41 +98,36 @@
                                       complete-stx #'rest))]))
   
   (define (parse-body body-stx)
-    (with-syntax* ([id               id-stx]
-                   [(arg ...)        args-stx]
-                   [body             (if procedure-style?
-                                         (quasisyntax/loc complete-stx
-                                           (lambda (arg ...) #,@body-stx))
-                                         (car (syntax->list body-stx)))]
-                   [box-id           (page-info-box-id (page-info-ref id-stx))]
-                   [page-id          (make-id #f id-stx)]
-                   [wrapper-proc     wrapper-proc-stx]
-                   [access-proc      access-proc-stx]
-                   [denied-proc      denied-proc-stx])
+    (with-syntax* ([id           id-stx]
+                   [(arg ...)    args-stx]
+                   [body         (if procedure-style?
+                                     (quasisyntax/loc complete-stx
+                                       (lambda (arg ...) #,@body-stx))
+                                     (car (syntax->list body-stx)))]
+                   [box-id       (page-info-box-id (page-info-ref id-stx))]
+                   [page-id      (make-id #f id-stx)]
+                   [wrapper-proc wrapper-proc-stx]
+                   [access-proc  access-proc-stx]
+                   [denied-proc  denied-proc-stx])
       (quasisyntax/loc complete-stx
         (begin
           (define-object page-id page% ()
             
             #,@(if access-proc-stx
-                   #'((define/override access-allowed?
-                        access-proc))
+                   #'((define/override (access-allowed? . args)
+                        (apply access-proc args)))
                    #'())
             
             #,@(if denied-proc-stx
-                   #'((define/override access-denied
-                        denied-proc))
+                   #'((define/override (access-denied . args)
+                        (apply denied-proc args)))
                    #'())
             
-            #,@(if wrapper-proc-stx
-                   #'((define/override (dispatch . args)
-                        (apply wrapper-proc
-                               (lambda args
-                                 (dispatch . args)
-                                 args))))
-                   #'())
+            (define/override (dispatch-initial . args)
+              (apply wrapper-proc this args))
             
-            (define/override dispatch
-              body))
+            (define/override (dispatch . args)
+              (apply body args)))
           (define _
             (let ([old-page (unbox box-id)])
               (set-box! box-id page-id)
@@ -135,5 +148,12 @@
 
 ; Provides ---------------------------------------
 
+(define controller-wrapper/c
+  (->* ((is-a?/c page<%>)) () #:rest any/c any))
+
 (provide define-page
          define-controller)
+
+(provide/contract
+ [plain-controller-wrapper   controller-wrapper/c]
+ [default-controller-wrapper (parameter/c controller-wrapper/c)])

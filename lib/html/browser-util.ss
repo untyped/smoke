@@ -100,7 +100,7 @@
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.slide.js"]))
        (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.transfer.js"]))))
 
-(define jquery-ui-styles
+(define default-jquery-ui-styles
   (xml (link (@ [type "text/css"]
                 [href "/styles/jquery-ui/ui-lightness/jquery-ui-1.7.2.custom.css"]
                 [rel  "stylesheet"]))))
@@ -120,4 +120,4 @@
  [jquery-ui-script/min            xml?]
  [jquery-ui-script/dev            xml?]
  [default-tiny-mce-options-script xml?]
- [jquery-ui-styles                xml?])
+ [default-jquery-ui-styles        xml?])

@@ -18,8 +18,8 @@
 
 ; [natural] -> manager
 (define (make-default-smoke-manager
-         ; We start docking life points at 20% of 128M:
-         #:memory-threshold  [threshold         (* 128 1024 1024)]
+         ; We start docking life points at 20% of 256M:
+         #:memory-threshold  [threshold         (* 256 1024 1024)]
          ; The memory use condition is checked every 5 seconds:
          #:check-interval    [check-interval    5000]
          ; One life point is deducted naturally every minute:
@@ -33,7 +33,11 @@
          #:message-logger    [message-logger    #f]
          #:collection-logger [collection-logger #f])
   (letrec ([next-message (+ (current-inexact-milliseconds) message-interval)]
-           [initial-use  (let ([use (current-memory-use)])
+           [initial-use  (let ([use (begin
+                                      (collect-garbage)
+                                      (collect-garbage)
+                                      (current-memory-use))])
+                           (printf "Base memory use ~a~n" use)
                            (if (<= threshold use)
                                (error "LRU memory threshold <= initial memory use" (list threshold use))
                                use))]

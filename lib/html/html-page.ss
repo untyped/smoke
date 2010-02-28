@@ -15,9 +15,12 @@
 
 (define html-page<%>
   (interface (page<%>)
-    get-doctype        ; -> xml
+    get-doctype        ; -> xml+quotable
+    set-doctype!       ; xml+quotable -> void
     get-lang           ; -> string
-    get-title          ; -> frame
+    set-lang!          ; string -> void
+    get-title          ; -> xml+quotable
+    set-title!         ; xml+quotable -> void
     make-response      ; [seed] -> response
     on-full-response   ; -> void
     on-ajax-response)) ; -> void
@@ -83,7 +86,14 @@
   ;     (U exn null)    ; an exception (if any)
   ;
   ; (cell (U js (seed -> js) #f))
-  (init-field ajax-error-handler #f #:accessor #:mutator)
+  (init-field ajax-error-handler
+    #f
+    #:accessor #:mutator)
+  
+  ; xml
+  (init-field jquery-ui-styles
+    default-jquery-ui-styles
+    #:accessor #:mutator)
   
   ; (cell xml)
   (init-cell doctype
@@ -274,10 +284,10 @@
        (smoke-response-types ajax-redirect)
        (make-js-response 
         (js (= (!dot window location)
-               ,(embed/full seed (callback on-refresh))))))))
+               ,(embed/full seed (callback on-ajax-redirect))))))))
   
   ; -> void
-  (define/public #:callback (on-refresh)
+  (define/public #:callback (on-ajax-redirect)
     (void))
   
   ; seed -> xml

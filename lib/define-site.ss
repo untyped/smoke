@@ -15,20 +15,23 @@
 
 (define-syntax (define-site complete-stx)
   (syntax-parse complete-stx
-    [(_ (~describe "id"
-          (~and site-id:id
-                (~bind [site-private-id (datum->syntax #f (syntax->datum #'id))])))
+    [(_ (~describe "id" site-id:id)
         (~describe "class" class%)
-        ((~describe "dispatch rule" 
-           [(~describe "url pattern" (part ...))
-            (~describe "page id" rule-page-id:id)])
-         ...))
-     (with-syntax* ([([page-id page-private-id page-box-id] ...)
-                     (for/list ([page-id-stx (in-list (remove-duplicates (syntax->list #'(rule-page-id ...))
-                                                                         symbolic-identifier=?))])
-                       (list page-id-stx
-                             (make-id #f page-id-stx '-private)
-                             (make-id #f page-id-stx '-box)))]
+        (~describe "dispatch rules"
+                   ((~describe "dispatch rule"
+                               [(~describe "url pattern" (part ...))
+                                (~describe "page id" rule-page-id:id)]) ...))
+        (~describe "site keywords"
+                   (~seq (~or (~seq #:other-pages (other-page-id:id ...))))))
+     (with-syntax* ([site-private-id
+                     (datum->syntax #f (syntax->datum #'id))]
+                    [([page-id page-private-id page-box-id] ...)
+                     `(,@(for/list ([page-id-stx (in-list (remove-duplicates (append (syntax->list #'(rule-page-id ...))
+                                                                                     (syntax->list #'(other-page-id ...)))
+                                                                             symbolic-identifier=?))])
+                           (list page-id-stx
+                                 (make-id #f page-id-stx '-private)
+                                 (make-id #f page-id-stx '-box))))]
                     [(rule-page-box-id ...)
                      (for/list ([rule-page-id-stx (in-list (syntax->list #'(rule-page-id ...)))])
                        (or (for/or ([page-id-stx      (in-list (syntax->list #'(page-id ...)))]
@@ -39,7 +42,8 @@
        (syntax/loc complete-stx
          (begin
            
-           (define page-private-id (new undefined-page% [component-id 'page-id]))
+           (define page-private-id
+             (new undefined-page% [component-id 'page-id]))
            ...
            
            (define page-box-id

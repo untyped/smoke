@@ -2,7 +2,8 @@
 
 (require "../lib-base.ss")
 
-(require (for-template scheme/base)
+(require (for-template scheme/base
+                       "../class/class.ss")
          syntax/boundmap)
 
 ; Info types -------------------------------------
@@ -24,10 +25,16 @@
   prop:procedure
   (lambda (info stx)
     (syntax-case stx ()
-      [id (identifier? #'id)
-          (with-syntax ([box-id (page-info-box-id info)])
-            (syntax/loc stx
-              (unbox box-id)))])))
+      [id
+       (identifier? #'id)
+       (with-syntax ([box-id (page-info-box-id info)])
+         (syntax/loc stx
+           (unbox box-id)))]
+      [(id arg ...)
+       (identifier? #'id)
+       (with-syntax ([box-id (page-info-box-id info)])
+         (syntax/loc stx
+           (send (unbox box-id) dispatch-initial arg ...)))])))
 
 ; Caches -----------------------------------------
 

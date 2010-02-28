@@ -72,6 +72,10 @@
   (define/public (option->string option)
     (error "option->string must be overridden."))
   
+  ; any -> xml+quotable 
+  (define/public (option->xml option) 
+    (option->string option)) 
+  
   ; any -> (listof string)
   (define/public (option->classes option)
     null)
@@ -93,14 +97,17 @@
                    ,@(for/list ([option (in-list options)])
                        (let* ([raw-option (option->raw option)]
                               [selected   (and (equal? raw-option raw-value) "selected")]
-                              [classes    (option->classes option)]
+                              [disabled   (and (not (option-enabled? option)) "disabled")]
+                              [classes    (if disabled 
+                                              (cons 'ui-state-disabled (option->classes option)) 
+                                              (option->classes option))]
                               [id         (option->id option)]
                               [class      (and classes (string-join (map string+symbol->string classes) " "))])
                          (xml (option (@ [value ,raw-option]
                                          ,(opt-xml-attr id)
                                          ,(opt-xml-attr class)
                                          ,(opt-xml-attr selected)
-                                         ,(opt-xml-attr (not (option-enabled? option)) disabled 'disabled))
+                                         ,(opt-xml-attr disabled))
                                       ,(option->string option)))))))))
   
   ; request -> void
