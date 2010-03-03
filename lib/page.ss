@@ -11,10 +11,7 @@
   (inherit on-request)
   
   ; Fields -------------------------------------
-  
-  ; site<%>
-  (field site #f #:accessor #:mutator)
-  
+    
   ; (cell integer)
   (init-cell http-code 200 #:accessor #:mutator)
   
@@ -63,18 +60,22 @@
   
   ; Access permissions -------------------------
   
-  ; page<%> any ... -> boolean
+  ; any ... -> boolean
   (define/public (access-allowed? . args)
-    (send/apply site access-allowed? this args))
+    #t)
   
+  ; any ... -> response
   (define/public (access-denied . args)
-    (send/apply site access-denied this args)))
+    (make-html-response
+     #:code 403
+     (xml (html (head (title "Access denied"))
+                (body (p "Access denied")))))))
 
 (define-class page% (page-mixin component%) ())
 
 (define-class undefined-page% page% ()
   
-  (inherit-field site)
+  (init-field site)
   
   ; Methods --------------------------------------
   

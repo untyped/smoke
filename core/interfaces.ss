@@ -23,16 +23,17 @@
 
 (define site<%>
   (interface (component<%>)
-    dispatch
-    access-allowed?
-    access-denied))
+    dispatch))
 
 ; The page is the unit of functionality in a web application.
 ; It contains methods for responding to requests, rendering HTML,
 ; checking access privileges and so on.
 
 (define page<%>
-  (interface (component<%>)
+  (interface* (component<%>)
+    ([prop:procedure
+      (lambda (this . args)
+        (send this dispatch-initial . args))])
     get-http-code
     get-http-headers
     get-http-status

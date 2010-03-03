@@ -18,11 +18,6 @@
   ; (listof (box page<%>))
   (init-field page-boxes null)
   
-  ; Constructor ----------------------------------
-  
-  (for ([page (in-list page-boxes)])
-    (send (unbox page) set-site! this))
-  
   ; Requests and responses -----------------------
   
   ; -> response
@@ -49,19 +44,13 @@
   
   ; callback -> response
   (define/public (dispatch-callback callback)
-    (let-values ([(page comp) (find-page+component (callback-component-id callback))])
+    (let-values/debug ([(page comp) (find-page+component (debug* "id" callback-component-id callback))])
       (current-page-set! page)
       (send/apply page dispatch-callback
                   comp
                   (callback-method-id callback)
                   (callback-args callback))))
-  
-  ; page<%> any ... -> response
-  (define/public (access-denied page . args)
-    (make-html-response
-     #:code 403
-     (xml (html (body "Access denied")))))
-  
+    
   ; -> response
   (define/public (not-found)
     (make-html-response
@@ -73,13 +62,7 @@
     (make-html-response
      #:code 404
      (xml (html (body "Page undefined")))))
-  
-  ; Access permissions ---------------------------
-  
-  ; page<%> any ... -> boolean
-  (define/public (access-allowed? page . args)
-    #t)
-  
+    
   ; Decoding/encoding URLs -----------------------
   
   ; url -> (U (list page<%> any ...) #f)
@@ -101,14 +84,23 @@
   ; -> (listof page<%>)
   (define/public (get-pages)
     (map unbox page-boxes))
+
+  ; This method is only necessary for legacy code where pages aren't being defined with define-page.
+  ; page<%> -> void
+  (define/public (add-page! page)
+    ; Prevent duplicates:
+    (unless (ormap (cut eq? <> page) (get-pages))
+      (set! page-boxes (cons (box page) page-boxes))))
   
   ; symbol -> (U page<%> #f) (U component<%> #f)
   (define/public (find-page+component id)
     (let loop ([pages (get-pages)])
       (match pages
         [(list) (values #f #f)]
+        [(list-rest #f rest)
+         (loop rest)]
         [(list-rest page rest)
-         (let ([comp (send page find-component id)])
+         (let/debug ([comp (send page find-component id)])
            (if comp
                (values page comp)
                (loop rest)))]))))
