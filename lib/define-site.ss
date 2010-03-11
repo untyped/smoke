@@ -35,7 +35,7 @@
                     [(rule-page-box-id ...)
                      (for/list ([rule-page-id-stx (in-list (syntax->list #'(rule-page-id ...)))])
                        (or (for/or ([page-id-stx      (in-list (syntax->list #'(page-id ...)))]
-                                [page-box-id-stx  (in-list (syntax->list #'(page-box-id ...)))])
+                                    [page-box-id-stx  (in-list (syntax->list #'(page-box-id ...)))])
                              (and (symbolic-identifier=? rule-page-id-stx page-id-stx)
                                   page-box-id-stx))
                            (raise-syntax-error #f "internal badness" complete-stx #'page-id-stx)))])
@@ -59,10 +59,13 @@
            ...
            
            (define site-private-id
-             (new class% 
-                  [component-id 'site-id]
-                  [rules      (list (make-rule (create-pattern part ...) rule-page-box-id) ...)]
-                  [page-boxes (list page-box-id ...)]))
+             (let ([ans (new class% 
+                             [component-id 'site-id]
+                             [rules      (list (make-rule (create-pattern part ...) rule-page-box-id) ...)]
+                             [page-boxes (list page-box-id ...)])])
+               (send page-private-id set-site! ans)
+               ...
+               ans))
            
            (define-syntax site-id
              (let ([certify (syntax-local-certifier #t)])

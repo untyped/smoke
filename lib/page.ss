@@ -11,7 +11,10 @@
   (inherit on-request)
   
   ; Fields -------------------------------------
-    
+  
+  ; (U site<%> #f)
+  (init-field site #f #:accessor #:mutator)
+  
   ; (cell integer)
   (init-cell http-code 200 #:accessor #:mutator)
   
@@ -75,13 +78,13 @@
 
 (define-class undefined-page% page% ()
   
-  (init-field site)
+  (inherit get-site)
   
   ; Methods --------------------------------------
   
   ; -> response
   (define/override (dispatch . args)
-    (send site page-undefined this . args)))
+    (send (get-site) page-undefined this . args)))
 
 ; Provide statements -----------------------------
 

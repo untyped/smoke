@@ -69,7 +69,7 @@
   
   ; symbol -> (U component<%> #f)
   (define/public (find-component id)
-    (if (eq? id (debug* "my-id" get-component-id))
+    (if (eq? id (get-component-id))
         this
         (ormap (cut send <> find-component id)
                (get-child-components))))
