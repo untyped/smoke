@@ -262,7 +262,7 @@ span.wizard-step-title {
 
 /* set-selectors */
 
-div.smoke-set-selector {}
+div.smoke-set-selector { width: auto; }
 
 div.smoke-set-selector ul.active {
   list-style-type: none;

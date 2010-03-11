@@ -33,6 +33,8 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 
 /* views -------------------------------------- */
 
+.smoke-entity-view-page .update-link { float: right; }
+
 .smoke-entity-view th.attribute-label { 
   text-align: right;
   vertical-align: top;
