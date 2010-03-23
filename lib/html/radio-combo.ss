@@ -9,6 +9,7 @@
 
 ; To use this class, override:
 ;   - get-option     : -> (list-of any) ; return a list of Scheme items to show in the list
+;   - option-enabled?: any -> boolean   ; per-option enable/disable controls
 ;   - option->raw    : any -> symbol    ; convert an item into a symbol to use as a form value
 ;   - raw->option    : symbol -> any    ; find an item given a symbol from the request bindings
 ;   - option->string : any -> string    ; convert an item into a user-friendly display string
@@ -65,6 +66,10 @@
     (define/public (get-options)
       (error "get-options must be overridden."))
     
+    ; (U boolean symbol number) -> boolean
+    (define/public (option-enabled? option)
+      #t)
+    
     ; any -> (U string #f)
     (define/public (option->raw option)
       (error "option->raw must be overridden."))
@@ -94,10 +99,17 @@
                   ,@(for/list ([option (get-options)])
                       (let* ([raw       (option->raw option)]
                              [button-id (format "~a-~a" group-id raw)]
-                             [checked   (and (equal? raw raw-value) "checked")])
+                             [checked   (and (equal? raw raw-value) "checked")]
+                             [disabled  (or disabled (and (not (option-enabled? option)) "disabled"))])
                         (xml (div (@ [class "radio-combo-item"])
-                                  (input (@ [type "radio"] [id ,button-id] [name ,group-id] [value ,raw] ,(opt-xml-attr checked) ,(opt-xml-attr disabled)))
-                                  (label (@ [for ,button-id]) ,(option->xml option))))))))))
+                                  (input (@ [type "radio"]
+                                            [id ,button-id]
+                                            [name ,group-id]
+                                            [value ,raw]
+                                            ,(opt-xml-attr checked)
+                                            ,(opt-xml-attr disabled)))
+                                  (label (@ [for ,button-id] ,(opt-xml-attr disabled class "ui-state-disabled"))
+                                         ,(option->xml option))))))))))
     
     ; request -> void
     (define/augment (on-request request)
