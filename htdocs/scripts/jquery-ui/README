@@ -1,0 +1,10 @@
+jQuery UI stylesheets
+---------------------
+
+lib/html/browser-util.ss requires the path to the jQuery UI script files to be:
+
+	scripts/jquery-ui/<VERSION>/jquery-ui.min.js
+	scripts/jquery-ui/<VERSION>/ui.foo.js
+	scripts/jquery-ui/<VERSION>/effect.foo.js
+
+You may have to rename your files to fit this convention.
