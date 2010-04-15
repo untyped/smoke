@@ -1,7 +1,7 @@
 jQuery UI stylesheets
 ---------------------
 
-The Scheme code in lib/html/browser-util.ss requires the path to the jQuery UI stylesheet to be:
+lib/html/browser-util.ss requires the path to the jQuery UI stylesheet to be:
 
 	styles/jquery-ui/<VERSION>/<THEME>/jquery-ui.css
 
