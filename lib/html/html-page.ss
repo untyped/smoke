@@ -125,7 +125,34 @@
     
     ; (listof symbol)
     (init [classes null])
+        
+    ; jquery-version
+    (init [jquery-version (jquery-versions 1.3.2)])
     
+    ; jquery-ui-version
+    (init [jquery-ui-version (jquery-ui-versions 1.7.1)])
+    
+    ; string
+    (init [jquery-ui-theme "ui-lightness"])
+    
+    ; xml
+    (field jquery-script
+      (if dev?
+          (jquery-script/dev jquery-version)
+          (jquery-script/min jquery-version)))
+    
+    ; xml
+    (field jquery-ui-script
+      (if dev?
+          (jquery-ui-script/dev jquery-ui-version)
+          (jquery-ui-script/min jquery-ui-version)))
+    
+    ; xml
+    ; Specify a jquery-ui-theme of #f if you don't want html-page to add a stylesheet for you.
+    (field jquery-ui-stylesheet
+      (opt-xml jquery-ui-theme
+        ,(jquery-ui-styles jquery-ui-version jquery-ui-theme)))
+
     ; boolean
     (init-field custom-notification-position? #f #:accessor)
     
@@ -150,17 +177,12 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
-      (let ([dev? (dev?)])
-        (list* (if dev?
-                   jquery-script/dev
-                   jquery-script/min)
-               (if dev?
-                   jquery-ui-script/dev
-                   jquery-ui-script/min)
-               smoke-script
-               jquery-ui-styles
-               smoke-styles
-               (inner null get-html-requirements))))
+      (list* jquery-script
+             jquery-ui-script
+             smoke-script
+             jquery-ui-stylesheet
+             smoke-styles
+             (inner null get-html-requirements)))
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])

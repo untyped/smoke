@@ -2,15 +2,99 @@
 
 (require "../../lib-base.ss")
 
+(require (planet untyped/unlib:3/enumeration))
+
 ; XML requirements -------------------------------
 
-(define jquery-script/min
-  (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/jquery/jquery-1.3.2.min.js"]))))
+; jQuery -----------------------------------------
 
-(define jquery-script/dev
+(define-enum jquery-versions
+  (1.3.2 1.4.2))
+
+; [jquery-version] -> xml
+(define (jquery-script/min [version (jquery-versions 1.3.2)])
   (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/jquery/jquery-1.3.2.js"]))))
+                  [src  ,(format "/scripts/jquery/~a/jquery.min.js" version)]))))
+
+; [jquery-version] -> xml
+(define (jquery-script/dev [version (jquery-versions 1.3.2)])
+  (xml (script (@ [type "text/javascript"]
+                  [src  ,(format "/scripts/jquery/~a/jquery.js" version)]))))
+
+; jQuery UI --------------------------------------
+
+(define-enum jquery-ui-versions
+  (1.7.1 1.8.0))
+
+; [jquery-ui-version] -> xml
+(define (jquery-ui-script/min [version (jquery-ui-versions 1.7.1)])
+  (xml (script (@ [type "text/javascript"]
+                  [src  ,(format "/scripts/jquery-ui/~a/jquery-ui.min.js" version)]))))
+
+; [jquery-ui-version] -> xml
+(define (jquery-ui-script/dev [version (jquery-ui-versions 1.7.1)])
+  (enum-case jquery-ui-versions version
+    [(1.7.1) (xml (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.accordion.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.datepicker.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.draggable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.droppable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.resizable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.dialog.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.progressbar.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.selectable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.slider.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.sortable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/ui.tabs.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.blind.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.bounce.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.clip.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.drop.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.explode.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.fold.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.highlight.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.pulsate.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.scale.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.shake.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.slide.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.7.1/effects.transfer.js"])))]
+    [(1.8.0) (xml (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.accordion.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.datepicker.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.draggable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.droppable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.resizable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.dialog.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.progressbar.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.selectable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.slider.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.sortable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/ui.tabs.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.blind.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.bounce.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.clip.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.drop.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.explode.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.fold.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.highlight.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.pulsate.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.scale.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.shake.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.slide.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/effects.transfer.js"])))]))
+
+; [jquery-ui-version] [string] -> xml
+(define (jquery-ui-styles [version (jquery-ui-versions 1.7.1)] [theme "ui-lightness"])
+  (xml (link (@ [rel   "stylesheet"] 
+                [href  ,(format "/styles/jquery-ui/~a/~a/jquery-ui.css" version theme)]
+                [type  "text/css"]
+                [media "screen, projection"]))))
+
+; Smoke ------------------------------------------
 
 (define smoke-script
   (xml (script (@ [type "text/javascript"]
@@ -31,6 +115,10 @@
                 [type  "text/css"]
                 [media "screen, projection"]))
        (!raw "<![endif]-->")))
+
+; Smoke "plugins" --------------------------------
+
+; ("Plugin" isn't an official term!)
 
 (define tooltip-script
   (xml (script (@ [type "text/javascript"]
@@ -65,64 +153,22 @@
                                                        [style "simple"])))))
                (!raw "\n// ]]>\n"))))
 
-; jQuery UI --------------------------------------
-
-; (parameter string)
-(define current-jquery-ui-stylesheet
-  (make-parameter "/styles/jquery-ui/ui-lightness/jquery-ui-1.7.2.custom.css"))
-
-(define jquery-ui-script/min
-  (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/jquery-ui/jquery-ui-1.7.1.custom.min.js"]))))
-
-(define jquery-ui-script/dev
-  (xml #;(script (@ [type "text/javascript"] [src "/scripts/jquery-ui/jquery-ui-1.7.2.custom.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.core.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.accordion.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.datepicker.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.draggable.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.droppable.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.resizable.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.dialog.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.progressbar.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.selectable.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.slider.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.sortable.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/ui.tabs.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.core.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.blind.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.bounce.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.clip.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.core.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.drop.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.explode.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.fold.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.highlight.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.pulsate.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.scale.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.shake.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.slide.js"]))
-       (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/dev/effects.transfer.js"]))))
-
-(define (jquery-ui-styles seed)
-  (xml (link (@ [type "text/css"]
-                [href ,(current-jquery-ui-stylesheet)]
-                [rel  "stylesheet"]))))
-
 ; Provide statements -----------------------------
 
+(provide jquery-versions
+         jquery-ui-versions)
+
 (provide/contract
- [jquery-script/dev               xml?]
- [jquery-script/min               xml?]
+ [jquery-script/dev               (->* () ((enum-value/c jquery-versions)) xml?)]
+ [jquery-script/min               (->* () ((enum-value/c jquery-versions)) xml?)]
+ [jquery-ui-script/min            (->* () ((enum-value/c jquery-ui-versions)) xml?)]
+ [jquery-ui-script/dev            (->* () ((enum-value/c jquery-ui-versions)) xml?)]
+ [jquery-ui-styles                (->* () ((enum-value/c jquery-ui-versions) string?) xml?)]
+ [default-tiny-mce-options-script xml?]
  [smoke-script                    xml?]
  [smoke-styles                    xml?]
  [tooltip-script                  xml?]
  [picker-script                   xml?]
  [rollover-script                 xml?]
  [excanvas-script                 xml?]
- [firebug-script                  xml?]
- [current-jquery-ui-stylesheet    (parameter/c string?)]
- [jquery-ui-script/min            xml?]
- [jquery-ui-script/dev            xml?]
- [jquery-ui-styles                (-> any/c xml?)]
- [default-tiny-mce-options-script xml?])
+ [firebug-script                  xml?])
