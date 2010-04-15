@@ -25,19 +25,20 @@
 ; (struct string continuation-marks)
 (define-struct (exn:fail:smoke exn:fail) () #:transparent)
 
-; (struct string continuation-marks)
-(define-struct (exn:fail:smoke:session exn:fail:smoke) () #:transparent)
-
 ; (struct string continuation-marks string)
 (define-struct (exn:fail:smoke:callback exn:fail:smoke) (serial) #:transparent)
+
+; (struct string continuation-marks web-frame (alistof symbol any))
+(define-struct (exn:fail:smoke:frame exn:fail:smoke) (frame cells) #:transparent)
+
+; (struct string continuation-marks)
+(define-struct (exn:fail:smoke:session exn:fail:smoke) () #:transparent)
 
 ; (struct string continuation-marks)
 (define-struct (exn:smoke exn) () #:transparent)
 
 ; (struct string continuation-marks form-element<%>)
 (define-struct (exn:smoke:form exn:smoke) (element) #:transparent)
-
-
 
 ; Provide statements --------------------------- 
 
@@ -52,7 +53,8 @@
  [smoke-htdocs-path                               path?]
  [smoke-mime-types-path                           path?]
  [struct (exn:fail:smoke exn:fail)                ([message string?] [continuation-marks continuation-mark-set?])]
- [struct (exn:fail:smoke:session exn:fail:smoke)  ([message string?] [continuation-marks continuation-mark-set?])]
  [struct (exn:fail:smoke:callback exn:fail:smoke) ([message string?] [continuation-marks continuation-mark-set?] [serial string?])]
+ [struct (exn:fail:smoke:frame    exn:fail:smoke) ([message string?] [continuation-marks continuation-mark-set?] [frame any/c] [cells (listof (cons/c symbol? any/c))])]
+ [struct (exn:fail:smoke:session exn:fail:smoke)  ([message string?] [continuation-marks continuation-mark-set?])]
  [struct (exn:smoke exn)                          ([message string?] [continuation-marks continuation-mark-set?])]
  [struct (exn:smoke:form exn:smoke)               ([message string?] [continuation-marks continuation-mark-set?] [element object?])])

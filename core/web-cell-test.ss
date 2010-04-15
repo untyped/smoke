@@ -5,7 +5,7 @@
          "web-cell.ss")
 
 (require/expose "web-cell.ss"
-  (make-web-frame web-frame-env))
+  (make-web-frame))
 
 ; Tests ----------------------------------------
 

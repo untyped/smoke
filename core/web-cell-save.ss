@@ -53,7 +53,8 @@
   (let ([frame (capture-web-frame)])
     (with-output-to-file (serial->path serial)
       (lambda ()
-        (write (serialize frame)))
+        (with-handlers ([exn:fail:contract? (cut handle-serialize-error <> frame)])
+          (write (serialize frame))))
       #:exists 'replace)
     frame))
 
@@ -74,6 +75,18 @@
                  (deserialize (read)))))
       (begin (printf "no load frame ~a~n" serial)
              #f)))
+
+; exn:fail:contract web-frame -> void
+(define (handle-serialize-error exn frame)
+  (let ([failed (for/fold ([accum null])
+                          ([(key val) (in-dict (web-frame-env frame))])
+                          (with-handlers ([exn:fail:contract? (lambda _ (cons (cons key val) accum))])
+                            (serialize val)
+                            accum))])
+    (raise-exn exn:fail:smoke:frame
+      (format "some web cells could not be serialized: ~a" (map car failed))
+      frame
+      failed)))
 
 ; Provides ---------------------------------------
 

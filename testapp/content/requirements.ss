@@ -35,7 +35,7 @@
          ,@(for/list ([child (in-list (get-children))])
              (send child render seed))))
   
-  (define/override #:callback (on-refresh)
+  (define/public #:callback (on-refresh)
     (when (null? (get-children))
       (set-children! (list requirements-child)))))
 

@@ -25,15 +25,15 @@
       (session-cell-unset! notifications-cell)
       (notifications-set! (filter notification-sticky? (notifications-ref)))))
 
-; xml [boolean] -> notification
-(define (notifications-add! xml [sticky? #f])
-  (let ([notification (create-notification xml sticky?)])
+; xml+quotable [boolean] -> notification
+(define (notifications-add! msg [sticky? #f])
+  (let ([notification (create-notification (xml-quote msg) sticky?)])
     (notifications-set! (append (notifications-ref) (list notification)))
     notification))
 
-; xml -> notification
-(define (notifications-add-sticky! xml)
-  (notifications-add! xml #t))
+; xml+quotable -> notification
+(define (notifications-add-sticky! msg)
+  (notifications-add! (xml-quote msg) #t))
 
 ; (U notification symbol) -> void
 (define (notifications-remove! notification+id)
@@ -54,6 +54,6 @@
  [notifications-ref         (-> (listof notification?))]
  [notifications-set!        (-> (listof notification?) void?)]
  [notifications-reset!      (->* () (boolean?) void?)]
- [notifications-add!        (->* (xml?) (boolean?) notification?)]
- [notifications-add-sticky! (-> xml? notification?)]
+ [notifications-add!        (->* (xml+quotable?) (boolean?) notification?)]
+ [notifications-add-sticky! (-> xml+quotable? notification?)]
  [notifications-remove!     (-> (or/c notification? symbol?) void?)])

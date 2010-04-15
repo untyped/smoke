@@ -6,6 +6,7 @@
                      scheme/provide-transform
                      syntax/parse
                      (planet cce/scheme:6/syntax)
+                     (planet untyped/unlib:3/debug)
                      (planet untyped/unlib:3/syntax)
                      "site-info.ss")
          web-server/dispatchers/dispatch
@@ -21,14 +22,15 @@
                    ((~describe "dispatch rule"
                                [(~describe "url pattern" (part ...))
                                 (~describe "page id" rule-page-id:id)]) ...))
-        (~describe "site keywords"
-                   (~seq (~or (~seq #:other-pages (other-page-id:id ...))))))
-     (with-syntax* ([site-private-id
-                     (datum->syntax #f (syntax->datum #'id))]
+        (~or (~optional (~seq #:other-pages (other-page-id:id ...)) #:name "#:other-pages keyword"))
+        ...)
+     (with-syntax* ([site-private-id     (datum->syntax #f (syntax->datum #'id))]
+                    [all-page-ids        (remove-duplicates
+                                          (append (syntax->list #'(rule-page-id ...))
+                                                  (syntax->list (or (attribute other-page-id) #'())))
+                                          symbolic-identifier=?)]
                     [([page-id page-private-id page-box-id] ...)
-                     `(,@(for/list ([page-id-stx (in-list (remove-duplicates (append (syntax->list #'(rule-page-id ...))
-                                                                                     (syntax->list #'(other-page-id ...)))
-                                                                             symbolic-identifier=?))])
+                     `(,@(for/list ([page-id-stx (in-list (syntax->list #'all-page-ids))])
                            (list page-id-stx
                                  (make-id #f page-id-stx '-private)
                                  (make-id #f page-id-stx '-box))))]

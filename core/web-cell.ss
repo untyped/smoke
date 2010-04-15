@@ -158,6 +158,7 @@
  [update-web-frame!                    (-> web-frame? void?)]
  [clear-web-frame!                     (-> void?)]
  [rename create-web-cell make-web-cell (-> any/c web-cell?)]
+ [web-frame-env                        (-> web-frame? hash?)]
  [web-cell-id                          (-> web-cell? symbol?)]
  [web-cell-ref                         (-> web-cell? any)]
  [web-cell-set!                        (-> web-cell? any/c void?)]

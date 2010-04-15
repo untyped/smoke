@@ -18,7 +18,7 @@
   ; -> void
   (define/public #:callback (on-notify num sticky?)
     (for ([i (in-range 1 (add1 num))])
-      (notifications-add! (xml ,(if sticky? "Sticky notification " "Notification ") ,i) sticky?)))
+      (notifications-add! (format "~a ~a" (if sticky? "Sticky notification " "Notification ") i) sticky?)))
   
   ; seed -> xml
   (define/augment (render seed)

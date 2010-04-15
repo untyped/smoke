@@ -90,11 +90,6 @@
     #f
     #:accessor #:mutator)
   
-  ; xml
-  (init-field jquery-ui-styles
-    default-jquery-ui-styles
-    #:accessor #:mutator)
-  
   ; (cell xml)
   (init-cell doctype
     xhtml-1.0-transitional-doctype
@@ -117,6 +112,33 @@
   
   ; string
   (init [content-type "text/html; charset=utf-8"])
+        
+  ; jquery-version 
+  (init [jquery-version (jquery-versions 1.3.2)]) 
+  
+  ; jquery-ui-version 
+  (init [jquery-ui-version (jquery-ui-versions 1.7.1)]) 
+  
+  ; string 
+  (init [jquery-ui-theme "ui-lightness"]) 
+  
+  ; xml 
+  (field jquery-script 
+    (if dev? 
+        (jquery-script/dev jquery-version) 
+        (jquery-script/min jquery-version))) 
+  
+  ; xml 
+  (field jquery-ui-script 
+    (if dev? 
+        (jquery-ui-script/dev jquery-ui-version) 
+        (jquery-ui-script/min jquery-ui-version))) 
+  
+  ; xml 
+  ; Specify a jquery-ui-theme of #f if you don't want html-page to add a stylesheet for you. 
+  (field jquery-ui-stylesheet 
+    (opt-xml jquery-ui-theme 
+      ,(jquery-ui-styles jquery-ui-version jquery-ui-theme)))
   
   ; (listof symbol)
   (init [classes null])
@@ -145,17 +167,12 @@
   
   ; -> (listof (U xml (seed -> xml)))
   (define/augment (get-html-requirements)
-    (let ([dev? (dev?)])
-      (list* (if dev?
-                 jquery-script/dev
-                 jquery-script/min)
-             (if dev?
-                 jquery-ui-script/dev
-                 jquery-ui-script/min)
-             smoke-script
-             jquery-ui-styles
-             smoke-styles
-             (inner null get-html-requirements))))
+    (list* jquery-script 
+           jquery-ui-script 
+           smoke-script 
+           jquery-ui-stylesheet 
+           smoke-styles 
+           (inner null get-html-requirements)))
   
   ;  [#:forward? boolean] -> response
   (define/override (respond #:forward? [forward? #f])
@@ -238,7 +255,10 @@
                                                                                             ,(get-on-attach seed))))))))
                                                  jQuery)))
                                      (!raw "\n// ]]>\n")))
-                       (body (@ ,@(core-html-attributes seed)) ,content))))))))
+                       (body (@ ,@(core-html-attributes seed))
+                             ,content
+                             (span (@ [id "smoke-ajax-spinner"] [class "ui-corner-all"]) 
+                                   "Loading...")))))))))
   
   ; Makes an AJAX Javascript response that refreshes appropriate parts of this page.
   ; [seed] -> response
@@ -272,7 +292,7 @@
         #:code      301 
         #:message   "Moved Permanently"
         #:mime-type #"text/html"
-        #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/full seed (callback on-refresh))))
+        #:headers   (cons (make-header #"Location" (string->bytes/utf-8 (embed/full seed (callback on-post-redirect))))
                           no-cache-http-headers)
         (xml)))))
   
@@ -288,6 +308,10 @@
   
   ; -> void
   (define/public #:callback (on-ajax-redirect)
+    (void))
+  
+  ; -> void
+  (define/public #:callback (on-post-redirect)
     (void))
   
   ; seed -> xml
@@ -321,8 +345,8 @@
   
   ; seed -> js
   (define/override (get-on-render seed)
-    (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
-                                "children"
+    (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-form-id)))
+                                "replace"
                                 ,(xml->string (render seed))))))
   
   ; seed -> js
