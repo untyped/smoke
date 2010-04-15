@@ -306,7 +306,10 @@
                                                                                               ,(get-on-attach seed))))))))
                                                    jQuery)))
                                        (!raw "\n// ]]>\n")))
-                         (body (@ ,@(core-html-attributes seed)) ,content)))))))))
+                         (body (@ ,@(core-html-attributes seed))
+                               ,content
+                               (span (@ [id "smoke-ajax-spinner"] [class "ui-corner-all"])
+                                     "Loading..."))))))))))
     
     ; -> (embed-url -> response)
     ;
@@ -415,8 +418,8 @@
     
     ; seed -> js
     (define/override (get-on-render seed)
-      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-id)))
-                                  "children"
+      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-form-id)))
+                                  "replace"
                                   ,(xml->string (render seed))))))
     
     ; seed -> js

@@ -53,10 +53,6 @@ if (!window.console.log) {
     Smoke.currentPage = currentPage;
     Smoke.documentHead = $("head").get(0);
     Smoke.documentBody = $("body").get(0);
-    if($("#smoke-ajax-spinner").length == 0) {
-      $(Smoke.documentBody).append(
-        "<span id=\"smoke-ajax-spinner\" class=\"ui-corner-all\">Loading...</span>");
-    }
     initComponents();
     Smoke.triggerUpdateEvent(true);
   };
