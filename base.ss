@@ -16,7 +16,7 @@
 ; Configuration --------------------------------
 
 ; (parameter boolean)
-(define dev? (make-parameter #t))
+(define dev? (make-parameter #f))
 
 ; path
 (define-runtime-path smoke-htdocs-path 
