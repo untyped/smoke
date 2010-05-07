@@ -132,10 +132,6 @@
        (script (@ [type "text/javascript"]
                   [src  "/scripts/smoke/tooltip.js"]))))
 
-(define picker-script
-  (xml (script (@ [type "text/javascript"]
-                  [src  "/scripts/smoke/picker.js"]))))
-
 (define rollover-script
   (xml (script (@ [type "text/javascript"]
                   [src  "/scripts/smoke/rollover.js"]))))
@@ -172,7 +168,6 @@
  [smoke-script                    xml?]
  [smoke-styles                    xml?]
  [tooltip-script                  xml?]
- [picker-script                   xml?]
  [rollover-script                 xml?]
  [excanvas-script                 xml?]
  [firebug-script                  xml?])

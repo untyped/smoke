@@ -5,9 +5,9 @@
          web-server/servlet/servlet-structs)
 (provide/contract
  [create-LRU-manager (expiration-handler/c number? number? (-> (or/c procedure? natural-number/c boolean?))
-                                          #:initial-count number?
-                                          #:inform-p (number? . -> . void)
-                                          . -> . manager?)]
+                                           #:initial-count number?
+                                           #:inform-p (number? . -> . void)
+                                           . -> . manager?)]
  [make-threshold-LRU-manager (expiration-handler/c number? . -> . manager?)]
  [LRU-manager-initial-life-points (manager? . -> . natural-number/c)]
  [LRU-manager-instances (manager? . -> . hash?)])
@@ -113,7 +113,7 @@
                   k-id
                   (list salt k expiration-handler initial-count))
        (list k-id salt)]))
-  (define (continuation-lookup instance-id a-k-id a-salt)
+  (define (continuation-lookup* instance-id a-k-id a-salt peek?)
     (match (instance-lookup instance-id)
       [(struct instance ((struct k-table (next-id-fn htable))))
        (match
@@ -124,8 +124,9 @@
                                (current-continuation-marks)
                                instance-expiration-handler))))
          [(list salt k expiration-handler count)
-          (hash-set! htable a-k-id
-                     (list salt k expiration-handler initial-count))
+          (unless peek?
+            (hash-set! htable a-k-id
+                       (list salt k expiration-handler initial-count)))
           (if (or (not (eq? salt a-salt))
                   (not k))
               (raise (make-exn:fail:servlet-manager:no-continuation
@@ -135,23 +136,43 @@
                           expiration-handler
                           instance-expiration-handler)))
               k)])]))
+  (define (continuation-lookup instance-id a-k-id a-salt)
+    (continuation-lookup* instance-id a-k-id a-salt #f))
+  (define (continuation-peek instance-id a-k-id a-salt)
+    (continuation-lookup* instance-id a-k-id a-salt #t))
   
   (define (wrap f)
     (lambda args
       (call-with-semaphore lock (lambda () (apply f args)))))
   
   (define the-manager
-    (make-LRU-manager (wrap create-instance)
-                      adjust-timeout!
-                      (wrap clear-continuations!)
-                      (wrap continuation-store!)
-                      (wrap continuation-lookup)
-                      ; Specific
-                      instance-expiration-handler
-                      initial-count
-                      ; Private
-                      instances
-                      next-instance-id))
+    ; Compatibility with the older LRU interface (no continuation-peek procedure),
+    ; prior to the addition of the manager debugging code in PLT SVN revision 16560:
+    (with-handlers ([exn:fail:contract?
+                     (lambda (exn)
+                       (make-LRU-manager (wrap create-instance)
+                                         adjust-timeout!
+                                         (wrap clear-continuations!)
+                                         (wrap continuation-store!)
+                                         (wrap continuation-lookup)
+                                         ; Specific
+                                         instance-expiration-handler
+                                         initial-count
+                                         ; Private
+                                         instances
+                                         next-instance-id))])
+      (make-LRU-manager (wrap create-instance)
+                        adjust-timeout!
+                        (wrap clear-continuations!)
+                        (wrap continuation-store!)
+                        (wrap continuation-lookup)
+                        (wrap continuation-peek)
+                        ; Specific
+                        instance-expiration-handler
+                        initial-count
+                        ; Private
+                        instances
+                        next-instance-id)))
   
   ; Collector : boolean (natural -> natural) -> void
   (define (collect just-go? deduct-points)
