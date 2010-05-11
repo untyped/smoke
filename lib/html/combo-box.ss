@@ -8,6 +8,10 @@
          "../../lib-base.ss"
          "form-element.ss")
 
+; string ...
+(define combo-box-false "--no--")
+(define combo-box-true  "--yes--")
+
 ; To use this class, override:
 ;   - get-option     : -> (list-of any) ; return a list of Scheme items to show in the list
 ;   - option->raw    : any -> symbol    ; convert an item into a symbol to use as a form value
@@ -164,15 +168,15 @@
     (match option
       [(? number? num)   (number->string num)]
       [(? symbol? sym)   (symbol->string sym)]
-      [(? boolean? bool) (if bool "--yes--" "--no--")]
+      [(? boolean? bool) (if bool combo-box-true combo-box-false)]
       [other (raise-exn exn:fail:contract
                (format "Bad option key: expected (U boolean number symbol), received ~s" other))]))
   
   ; string -> (U boolean symbol number)
   (define/override (raw->option raw)
     (cond [(not raw)              #f]
-          [(equal? raw "--yes--") #t]
-          [(equal? raw "--no--")  #f]
+          [(equal? raw combo-box-true) #t]
+          [(equal? raw combo-box-false)  #f]
           [(string->number raw) => (lambda (num) num)]
           [else (string->symbol raw)]))
   
@@ -191,5 +195,7 @@
 
 ; Provide statements -----------------------------
 
-(provide vanilla-combo-box%
+(provide combo-box-false
+         combo-box-true
+         vanilla-combo-box%
          combo-box%)
