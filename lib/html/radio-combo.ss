@@ -7,6 +7,10 @@
          "../../lib-base.ss"
          "form-element.ss")
 
+; string ...
+(define radio-combo-false "--no--")
+(define radio-combo-true  "--yes--")
+
 ; To use this class, override:
 ;   - get-option     : -> (list-of any) ; return a list of Scheme items to show in the list
 ;   - option-enabled?: any -> boolean   ; per-option enable/disable controls
@@ -172,15 +176,15 @@
       (match option
         [(? number? num)   (number->string num)]
         [(? symbol? sym)   (symbol->string sym)]
-        [(? boolean? bool) (if bool "--yes--" "--no--")]
+        [(? boolean? bool) (if bool radio-combo-true radio-combo-false)]
         [other (raise-exn exn:fail:contract
                           (format "Bad option key: expected (U boolean number symbol), received ~s" other))]))
     
     ; string -> (U boolean symbol number)
     (define/override (raw->option raw)
-      (cond [(not raw)               #f]
-            [(equal? raw "--yes--")  #t]
-            [(equal? raw "--no--")   #f]
+      (cond [(not raw)                      #f]
+            [(equal? raw radio-combo-true)  #t]
+            [(equal? raw radio-combo-false) #f]
             [(string->number raw) => (lambda (num) num)]
             [else                    (string->symbol raw)]))
     
@@ -200,5 +204,7 @@
 
 ; Provide statements -----------------------------
 
-(provide vanilla-radio-combo%
+(provide radio-combo-false
+         radio-combo-true
+         vanilla-radio-combo%
          radio-combo%)
