@@ -160,7 +160,7 @@
     
     ; notification-pane%
     (field notification-pane 
-      (new notification-pane% [id (symbol-append (get-id) '-notifications)])
+      (new notification-pane% [id 'notification-pane])
       #:child #:accessor)
     
     ; Accessors ----------------------------------
