@@ -42,8 +42,8 @@
                                       ; The 2 collect-garbage calls are a hangover from some old code in the LRU.
                                       ; They probably date from the old PLT garbage collector and I have no idea if both are necessary now.
                                       (collect-garbage)
-                                           (collect-garbage)
-                                           (current-memory-use))])
+                                      (collect-garbage)
+                                      (current-memory-use))])
                            (if (<= threshold use)
                                (error "LRU memory threshold <= initial memory use" (list threshold use))
                                use))]
