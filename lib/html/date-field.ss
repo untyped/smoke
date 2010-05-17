@@ -16,8 +16,9 @@
 (define date-field%
   (class/cells text-field% (date-field<%>)    
     
-    (inherit get-enabled?
-             get-id
+    (inherit get-id
+             get-allow-blank?
+             get-enabled?
              get-placeholder)
     
     ; Fields -------------------------------------    
@@ -64,7 +65,9 @@
             [fmt (get-date-format)])
         (with-handlers ([exn:fail? (lambda (exn)
                                      (raise-exn exn:smoke:form 
-                                       (format "Value must be in the format: ~a"
+                                       (format (if (get-allow-blank?)
+                                                   "Value must be blank or in the format: ~a"
+                                                   "Value must be in the format: ~a")
                                                (or (get-placeholder)
                                                    (get-date-format-example)))
                                        this))])
