@@ -65,9 +65,10 @@
             [fmt (get-date-format)])
         (with-handlers ([exn:fail? (lambda (exn)
                                      (raise-exn exn:smoke:form 
-                                       (format (if (get-allow-blank?)
-                                                   "Value must be blank or in the format: ~a."
-                                                   "Value must be in the format: ~a.")
+                                       ; We currently ignore allow-blank? in this message because it causes incompatibilities with Scaffold.
+                                       ; For backwards-compatibility, Scaffold does not use allow-blank?=#f, favouring errors in the validation phase instead of the parse phase.
+                                       ; This means Smoke can create misleading error messages when a field is required in Scaffold but not in Smoke.
+                                       (format "Value must be in the format: ~a."
                                                (or (get-placeholder)
                                                    (get-date-format-example)))
                                        this))])
