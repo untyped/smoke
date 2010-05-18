@@ -47,10 +47,10 @@
   ; We currently ignore the blank? argument because it causes misleading error messages with Scaffold.
   ; For backwards-compatibility, Scaffold does not use allow-blank?=#f, favouring errors in the validation phase instead of the parse phase.
   ; This means Smoke can create misleading error messages when a field is required in Scaffold but not in Smoke.
-  (cond [(and min max) (raise-exn exn:smoke:form (format "This value must be a number between ~a and ~a inclusive." type-string min max) element)]
-        [min           (raise-exn exn:smoke:form (format "This value must be a number greater than or equal to ~a." type-string min) element)]
-        [max           (raise-exn exn:smoke:form (format "This value must be a number less than or equal to ~a." type-string max) element)]
-        [else          (raise-exn exn:smoke:form (format "This value must be a number." type-string) element)]))
+  (cond [(and min max) (raise-exn exn:smoke:form (format "This value must be a number between ~a and ~a inclusive." min max) element)]
+        [min           (raise-exn exn:smoke:form (format "This value must be a number greater than or equal to ~a." min) element)]
+        [max           (raise-exn exn:smoke:form (format "This value must be a number less than or equal to ~a." max) element)]
+        [else          (raise-exn exn:smoke:form (format "This value must be a number.") element)]))
 
 ; Provide statements -----------------------------
 
