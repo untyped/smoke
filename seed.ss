@@ -9,7 +9,6 @@
          (planet untyped/unlib:3/symbol)
          "base.ss"
          (except-in "seed-internal.ss" callback)
-         "json.ss"
          "class/class.ss"
          "web-server/continuation-url.ss")
 
