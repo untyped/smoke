@@ -125,7 +125,7 @@
     
     ; (listof symbol)
     (init [classes null])
-        
+    
     ; jquery-version
     (init [jquery-version (jquery-versions 1.3.2)])
     
@@ -152,7 +152,7 @@
     (field jquery-ui-stylesheet
       (opt-xml jquery-ui-theme
         ,(jquery-ui-styles jquery-ui-version jquery-ui-theme)))
-
+    
     ; boolean
     (init-field custom-notification-position? #f #:accessor)
     
@@ -307,9 +307,7 @@
                                                    jQuery)))
                                        (!raw "\n// ]]>\n")))
                          (body (@ ,@(core-html-attributes seed))
-                               ,content
-                               (span (@ [id "smoke-ajax-spinner"] [class "ui-corner-all"])
-                                     "Loading..."))))))))))
+                               ,content)))))))))
     
     ; -> (embed-url -> response)
     ;
@@ -401,7 +399,9 @@
                     [action         "javascript:void(0)"])
                  ,(opt-xml (not custom-notification-position?)
                     ,(send notification-pane render seed))
-                 ,(inner (xml "Page under construction.") render seed))))
+                 ,(inner (xml "Page under construction.") render seed))
+           (span (@ [id "smoke-ajax-spinner"] [class "ui-corner-all"])
+                 "Loading...")))
     
     ; seed -> js
     (define/augment (get-on-attach seed)
@@ -418,9 +418,8 @@
     
     ; seed -> js
     (define/override (get-on-render seed)
-      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(get-form-id)))
-                                  "replace"
-                                  ,(xml->string (render seed))))))
+      (js (!dot ($ ,(format "#~a" (get-id)))
+                (html ,(xml->string (render seed))))))
     
     ; seed -> js
     (define/augment (get-on-detach seed)
