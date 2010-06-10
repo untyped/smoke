@@ -96,10 +96,7 @@
 
 ; -> (U response #f)
 (define (end-session)
-  (start-session
-   #:expires (subtract-duration
-              (current-time time-utc)
-              one-week)))
+  (start-session #:expires (subtract-duration (current-time time-utc) one-week)))
 
 ; Helpers ----------------------------------------
 
