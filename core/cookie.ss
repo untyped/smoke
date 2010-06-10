@@ -251,6 +251,4 @@
 ;;; Utility
 
 (define (expires->rfc822-string seconds)
-  (date->string (time-utc->date
-                 (make-time time-utc 0 seconds))
-                "~a, ~d-~b-~Y ~H:~M:~S GMT"))
+  (date->string (time-utc->date (make-time time-utc 0 seconds) 0) "~a, ~d-~b-~Y ~H:~M:~S GMT"))
