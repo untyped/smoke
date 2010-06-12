@@ -1,7 +1,7 @@
 #lang scheme/base
 
-(require (planet untyped/smoke:1/lib/html/browser-util)
-         (planet untyped/unlib:3/string)
+(require (planet untyped/unlib:3/string)
+         "../../lib/html/browser-util.ss"
          "../content-base.ss")
 
 ; Controllers ------------------------------------

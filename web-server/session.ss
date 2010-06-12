@@ -1,6 +1,6 @@
 #lang scheme/base
 
-(require mzlib/md5
+(require file/md5
          srfi/19
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)

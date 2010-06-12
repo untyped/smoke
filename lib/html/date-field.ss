@@ -1,7 +1,6 @@
 #lang scheme/base
 
-(require srfi/19
-         (planet untyped/unlib:3/time)
+(require (planet untyped/unlib:3/date)
          "../../lib-base.ss"
          "browser-util.ss"
          "form-element.ss"
@@ -21,16 +20,16 @@
              get-enabled?
              get-placeholder)
     
-    ; Fields -------------------------------------    
+    ; Fields -------------------------------------
     
     ; (cell string)
-    (init-cell date-format
-      "~d/~m/~Y ~H:~M"
-      #:accessor #:mutator)
+    (init-cell tz #f #:accessor #:mutator)
+    
+    ; (cell string)
+    (init-cell date-format "~d/~m/~Y ~H:~M" #:accessor #:mutator)
     
     ; (cell boolean)
-    (init-cell show-date-label? #f
-      #:accessor #:mutator)
+    (init-cell show-date-label? #f #:accessor #:mutator)
     
     ; (cell (U string #f))
     (init-cell date-picker-format
@@ -50,6 +49,11 @@
                [placeholder placeholder])
     
     ; Methods ------------------------------------
+    
+    ; -> string
+    (define/public (get-effective-tz)
+      (or (get-tz)
+          (current-tz)))
     
     ; -> string
     (define/public (get-date-format-example)
@@ -72,7 +76,7 @@
                                                (or (get-placeholder)
                                                    (get-date-format-example)))
                                        this))])
-          (and val (string->date val fmt)))))
+          (and val (string->date val fmt #:tz (get-effective-tz))))))
     
     ; -> (U time-utc #f)
     (define/public (get-time-utc)
@@ -88,10 +92,10 @@
     (define/override (set-value! val)
       (let ([date (cond [(not val)       val]
                         [(date? val)     val]
-                        [(time-tai? val) (time-tai->date val)]
-                        [(time-utc? val) (time-utc->date val)]
+                        [(time-tai? val) (time-tai->date val #:tz (get-effective-tz))]
+                        [(time-utc? val) (time-utc->date val #:tz (get-effective-tz))]
                         [else            (raise-type-error 'set-value! "(U date time-utc time-tai #f)" val)])])
-        (super set-value! (and date (date->string date (get-date-format))))))
+        (super set-value! (and date (date->string date (get-date-format) #:tz (get-effective-tz))))))
     
     ; seed -> xml
     (define/override (render seed)

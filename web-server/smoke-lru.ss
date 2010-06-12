@@ -126,6 +126,8 @@
 
 ; Helpers ----------------------------------------
 
+; Used for testing/debugging.
+;
 ; LRU-manager integer -> (listof integer)
 (define (lru-life-point-distribution manager num-buckets)
   (let ([accum   (make-vector num-buckets 0)]
@@ -137,6 +139,25 @@
            (let ([index (min (floor (* (/ count initial) num-buckets)) (sub1 num-buckets))])
              (vector-set! accum index (add1 (vector-ref accum index))))])))
     (vector->list accum)))
+
+; Used for testing/debugging.
+;
+; LRU-manager integer -> (U integer #f)
+(define (lru-count-continuations manager instance-id)
+  (match (dict-ref (LRU-manager-instances manager) instance-id #f)
+    [#f #f]
+    [instance (dict-count (k-table-htable (instance-k-table instance)))]))
+
+; Used for testing/debugging.
+;
+; LRU-manager integer integer integer -> (U integer #f)
+(define (lru-life-points manager instance-id k-id salt)
+  (match (dict-ref (LRU-manager-instances manager) instance-id #f)
+    [#f #f]
+    [instance (match (dict-ref (k-table-htable (instance-k-table instance)) k-id #f)
+                [#f #f]
+                [(list k-salt k expiration-handler count) 
+                 (and (equal? salt k-salt) count)])]))
 
 ; Provide statements -----------------------------
 
