@@ -1,0 +1,22 @@
+[.]
+scm = svn
+
+[planetdev/unlib]
+path = planetdev/unlib
+repository = http://svn.untyped.com/unlib/trunk/src
+scm = svn
+
+[planetdev/mirrors]
+path = planetdev/mirrors
+repository = http://svn.untyped.com/mirrors/trunk/src
+scm = svn
+
+[planetdev/delirium]
+path = planetdev/delirium
+repository = http://svn.untyped.com/delirium/trunk/src
+scm = svn
+
+[planetdev/dispatch]
+path = planetdev/dispatch
+repository = http://svn.untyped.com/dispatch/trunk/src
+scm = svn
