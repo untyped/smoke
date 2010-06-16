@@ -3,7 +3,7 @@
 (define name "smoke")
 
 (define blurb 
-  '("An object oriented UI framework for AJAX enabled web applications."))
+  '("Object oriented web application UIs for Racket."))
 
 (define release-notes
   '((p "Changes and additions:")
@@ -27,4 +27,3 @@
     "build.ss"
     "planet"
     "planetdev"))
-
