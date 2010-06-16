@@ -3,6 +3,7 @@
 (require net/url
          srfi/26
          web-server/http
+         (planet dherman/json:3)
          (planet untyped/unlib:3/debug)
          (planet untyped/unlib:3/for)
          "env.ss"
@@ -54,17 +55,19 @@
 (define (callback->url callback [bindings null])
   (make-url
    #f #f #f #f #t
-   (append (url-path-base (request-uri (current-request)))
+   (append (url-path-base (url-path (request-uri (current-request))))
            (map (cut make-path/param <> null)
                 (list* "_"
-                       (symbol->string (callback-component-id callback))
-                       (symbol->string (callback-method-id    callback))
+                       (symbol->string (send (callback-component callback) get-component-id))
+                       (symbol->string (send (callback-component callback)
+                                             verify-callback-id
+                                             (callback-callback-id callback)))
                        (map (lambda (arg)
                               (if (symbol? arg)
                                   (if (memq arg '(true false null))
                                       (error "Cannot serialize the symbols 'true, 'false or 'null in a callback URL.")
                                       (symbol->string arg))
-                                  (scheme->json arg)))
+                                  (jsexpr->json arg)))
                             (callback-args callback)))))
    (cons (cons '__k (current-callback-serial)) bindings)
    #f))
@@ -95,7 +98,7 @@
       method-id
       (for/list ([arg (in-list args)])
         (with-handlers ([exn? (lambda _ (string->symbol arg))])
-          (json->scheme arg))))]
+          (json->jsexpr arg))))]
     [_ (error "malformed callback")]))
 
 ; (listof path/param) -> (listof path/param)
@@ -136,7 +139,7 @@
 (provide/contract
  [struct callback       ([component+id (or/c (is-a?/c component<%>) symbol?)]
                          [method-id    symbol?]
-                         [args         (listof (or/c symbol? json-serializable?))])]
+                         [args         (listof (or/c symbol? jsexpr?))])]
  [callback-component-id (-> callback? symbol?)]
  [initial-url?          (-> url? boolean?)]
  [callback-url?         (-> url? boolean?)]
