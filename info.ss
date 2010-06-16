@@ -3,14 +3,14 @@
 (define name "smoke")
 
 (define blurb 
-  '("An object oriented UI framework for AJAX enabled web applications."))
+  '("Object oriented web application UIs for Racket."))
 
 (define release-notes
   '((p "Changes and additions:")
     (ul (li "Initial release."))))
 
 (define primary-file
-  "main.ss")
+  "smoke.ss")
 
 (define url "http://svn.untyped.com/smoke/")
 
@@ -22,5 +22,8 @@
 
 (define repositories '("4.x"))
 
-(define compile-omit-files '("autoplanetrc.ss"))
-
+(define compile-omit-files
+  '("autoplanet.ss"
+    "build.ss"
+    "planet"
+    "planetdev"))
