@@ -1,0 +1,17 @@
+[.]
+scm = svn
+
+[planetdev/unlib]
+path = planetdev/unlib
+repository = git://github.com/untyped/unlib.git
+scm = git
+
+[planetdev/mirrors]
+path = planetdev/mirrors
+repository = git://github.com/untyped/mirrors.git
+scm = git
+
+[planetdev/delirium]
+path = planetdev/delirium
+repository = git://github.com/untyped/delirium.git
+scm = git
