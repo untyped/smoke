@@ -3,7 +3,7 @@
 (define name "smoke")
 
 (define blurb 
-  '("Object oriented web application UIs for Racket."))
+  '("Object oriented web application UIs."))
 
 (define release-notes
   '((p "Changes and additions:")
