@@ -1,23 +1,12 @@
 #lang scheme/base
 
-(require (planet untyped/unlib:3/require))
+(require "test-base.ss")
 
-(require net/url
-         (except-in web-server/http redirect-to)
-         web-server/servlet-env
-         (planet untyped/delirium:3)
-         "all-smoke-tests.ss"
-         "smoke.ss"
-         "testapp/content-base.ss"
-         (directory-in "testapp/content"))
+(require "all-smoke-tests.ss")
 
 ; Main program body ----------------------------
 
 (print-struct #t)
+(dev? #t)
 
-(serve/smoke/delirium
- (lambda ()
-   (printf "Initial dispatch: ~a~n" (url->string (request-uri (current-request))))
-   (testapp-dispatch (current-request)))
- all-smoke-tests
- #:htdocs-paths (list testapp-htdocs-path))
+(run-tests all-smoke-tests)

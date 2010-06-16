@@ -11,10 +11,10 @@
   (test-suite (symbol->string id)
     
     (test-case "initially hidden"
-      (check-found (node/jquery (format "span#~a.smoke-hidden-component" id))))
+      (check-found (node/jquery (format "span#~a.ui-helper-hidden" id))))
     
     (test-case "click show"
-      (click/wait (node/id (symbol-append id '-show-hide)))
+      (click/wait (node/id (symbol-append id '-disclosure)))
       (check-found (node/jquery (format "~a#~a" tag id))))))
 
 ; Tests ------------------------------------------

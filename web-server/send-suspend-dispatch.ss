@@ -30,8 +30,6 @@
        (lambda (request)
          (current-frame frame)
          
-         (log-debug* "Continuation" (url->string (request-uri (current-request))))
-         
          (cond [resume-k
                 (current-frame frame)
                 (resume-k)]

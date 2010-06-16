@@ -14,18 +14,22 @@
     ; Fields -------------------------------------
     
     ; (cell (listof any))
-    (init-cell [items null]
-      #:accessor #:mutator)
+    (init-cell items null #:accessor #:mutator)
     
     ; form-element<%>
-    (init-field [editor (new text-field%)]
+    (init-field editor
+      (new text-field%)
       #:child #:accessor)
     
     ; (cell boolean)
-    (init-cell [editor-visible? #f]
-      #:accessor #:mutator)
+    (init-cell editor-visible? #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
+    
+    ; (listof (U symbol string))
+    (init [classes null])
+    
+    (super-new [classes (cons 'ui-widget classes)])
     
     ; Methods ------------------------------------
     
@@ -92,7 +96,7 @@
     ; -> void
     (define/public #:callback (on-editor-confirm)
       (with-handlers ([exn:smoke:form? void])
-        (add-item! (debug* "editor-value" send editor get-value))
+        (add-item! (send editor get-value))
         (set-editor-visible?! #f)))
     
     ; -> void

@@ -12,8 +12,7 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [refresh? #f]
-      #:accessor)
+    (init-cell refresh? #f #:accessor)
     
     ; Methods ------------------------------------
     
@@ -26,7 +25,8 @@
       (or (for/fold ([ans #f])
                     ([frame (in-frames)])
                     (or (begin0
-                          (web-cell-set? refresh?-cell frame)
+                          (and (web-cell-set? refresh?-cell frame)
+                               (web-cell-ref refresh?-cell frame))
                           (web-cell-unset! refresh?-cell frame))
                         ans))
           (super dirty?)))))

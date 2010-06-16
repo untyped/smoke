@@ -18,5 +18,5 @@ scm = svn
 
 [planetdev/dispatch]
 path = planetdev/dispatch
-repository = http://svn.untyped.com/dispatch/trunk/src
+repository = http://svn.untyped.com/dispatch/branches/bridge/src
 scm = svn

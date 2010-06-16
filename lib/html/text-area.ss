@@ -1,9 +1,10 @@
 #lang scheme/base
 
 (require "../../lib-base.ss"
+         "placeholder.ss"
          "text-input.ss")
 
-(define text-area%
+(define simple-text-area%
   (class/cells text-input% ()
     
     (inherit get-id
@@ -15,10 +16,10 @@
     ; Fields -----------------------------------
     
     ; (cell (U natural #f))
-    (init-cell [rows #f] #:accessor #:mutator)
+    (init-cell rows #f #:accessor #:mutator)
     
     ; (cell (U natural #f))
-    (init-cell [cols #f] #:accessor #:mutator)
+    (init-cell cols #f #:accessor #:mutator)
 
     ; Constructor ------------------------------
     
@@ -47,6 +48,10 @@
           (when binding 
             (set-raw! binding)))))))
 
+; a text-area with a mixin
+(define text-area%
+  (class/cells (placeholder-mixin simple-text-area%) ()))
+
 ; Provide statements -----------------------------
 
-(provide text-area%)
+(provide simple-text-area% text-area%)

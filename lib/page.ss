@@ -23,13 +23,13 @@
     ; Fields -------------------------------------
 
     ; (cell integer)
-    (init-cell [http-code 200] #:accessor #:mutator)
+    (init-cell http-code 200 #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [http-status "OK"] #:accessor #:mutator)
+    (init-cell http-status "OK" #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [content-type "text/plain"] #:accessor #:mutator)
+    (init-cell content-type "text/plain" #:accessor #:mutator)
     
     ; Methods ------------------------------------
     

@@ -1,0 +1,305 @@
+/* ajax-spinner ------------------------------- */
+
+#smoke-ajax-spinner {
+  display: none;
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  height: 20px;
+  padding: 4px 5px 3px 26px;
+  background: #fff url(/images/smoke/spinner.gif) no-repeat scroll 5px 5px;
+  border: 1px solid #aaa;
+  color: #555;
+  z-index: 9999999;
+}
+
+/* text-field --------------------------------- */
+
+input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
+
+/* vertical tab-pane -------------------------- */
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav { -moz-border-radius: 0px; -webkit-border-radius: 0px; }
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav * { -moz-border-radius: 0px; -webkit-border-radius: 0px; max-width: 16ex; float: left; clear: left; }
+.ui-tabs.ui-tabs-vertical .ui-tabs-panel { }
+
+/* picker ------------------------------------- */
+
+/*
+ * Adapted from the standard jQuery UI Dialog plugin (http://jqueryui.com/demos/dialog/).
+ * See /scripts/smoke/picker.js for the original Copyright info.
+ */
+
+.ui-picker { position: relative; width: 300px; margin-top: 2px; overflow: auto; font-size: .8em; }
+.ui-picker .ui-picker-content { padding: .25em .5em; border: none; background: none; }
+.ui-picker .ui-picker-buttonpane { text-align: left; border: none; background: none; margin: .5em 0 0 0; padding: .3em 1em .5em .4em; }
+.ui-picker .ui-picker-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; padding: .2em .6em .3em .6em; line-height: 1.4em; width: auto; overflow: visible; }
+.ui-picker .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
+
+/* radio-combo -------------------------------- */
+
+.smoke-radio-combo.radio-combo-horizontal { display: inline; }
+.smoke-radio-combo.radio-combo-horizontal .radio-combo-item { display: inline; padding-right: 1em; }
+
+/* tooltip ------------------------------------ */
+
+/*
+ * Adapted from a tutorial by Remy Sharp
+ * (http://jqueryfordesigners.com/coda-popup-bubbles/),
+ * originally inspired by the web page for Coda by Panic
+ * (http://www.panic.com/coda).
+ */
+
+.tooltip-anchor {
+  position: relative;
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+
+  min-width: 200px;
+  max-width: 500px;
+  min-height: 20px;
+
+  border: 1px solid #aaa;
+  background: #fff;
+  padding: 3px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  max-width: 50%;
+
+  z-index: 1;
+}
+
+/* autocomplete-field ------------------------- */
+
+.smoke-autocomplete-field-trigger {
+  background-image: url(/images/smoke/down-arrow.png);
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.smoke-autocomplete-options {
+  display: none;
+  position: absolute;
+}
+
+.smoke-autocomplete-options table {
+  background: #fff;
+  border: 1px solid #aaa;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  border-collapse: collapse;
+  box-shadow: .5em .5em .5em #ccc;
+  -webkit-box-shadow: .5em .5em .5em #ccc;
+  -moz-box-shadow: .5em .5em .5em #ccc;
+}
+
+.smoke-autocomplete-options tr {
+  margin: 0px;
+}
+
+.smoke-autocomplete-options tr:hover,
+.smoke-autocomplete-options tr:hover td {
+  background: #ccf;
+}
+.smoke-autocomplete-options tr.current,
+.smoke-autocomplete-options tr.current:hover,
+.smoke-autocomplete-options tr.current td,
+.smoke-autocomplete-options tr.current:hover td{
+  background: #aaf;
+}
+
+.smoke-autocomplete-options td {
+  padding: .2em .5em;
+  border-left: 1px solid #aaa;
+  white-space: nowrap;
+}
+
+.smoke-autocomplete-options td:first-child {
+  background: none;
+  border-left: none;
+}
+
+/* html-dialog -------------------------------- */
+
+.smoke-dialog-background {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    
+    background: url(/images/smoke/dialog-background.png);
+    z-index: 1000;
+}
+
+.smoke-dialog {
+    display: none;
+    position: absolute;
+    
+    width: 200px;
+    height: 200px;
+
+    border: 1px solid #aaa;
+    background: #fff;
+    padding: .5em;
+    z-index: 1001;
+}
+
+.smoke-error-dialog .ui-dialog-titlebar-close {
+    display: none;
+}
+
+/* notification ------------------------------- */
+
+.smoke-notifications { width: 100%; }
+.smoke-notifications .notification { position: relative; margin: .5em; }
+
+.smoke-notifications .notification-content { margin: .5em 40px .5em .5em; }
+.smoke-notifications .notification-content :first-child { margin-top: 0px; }
+.smoke-notifications .notification-content :last-child  { margin-bottom: 0px; }
+
+.smoke-notifications .notification-sticky { position: absolute; top: .5em; right: 40px; }
+.smoke-notifications .notification-sticky { background: url(/images/smoke/sticky.png); }
+.smoke-notifications .notification-sticky { position: absolute; top: .5em; right: 40px; }
+
+.smoke-notifications .notification-dismiss { position: absolute; top: .5em; right: 16px; cursor: pointer; }
+.smoke-notifications .notification-dismiss { background: url(/images/smoke/dismiss.png) !important; }
+.smoke-notifications .notification-dismiss:hover { background: url(/images/smoke/dismiss-hover.png) !important; }
+.smoke-notifications .notification-dismiss.ui-state-hover { border: none; }
+
+/* wizards ------------------------------------ */
+
+.smoke-wizard table.labels {
+  border: 1px solid #aaa;
+  margin: 0px;
+  font-size: 77%;
+  width: 100%;
+}
+.smoke-wizard table.labels td {
+  vertical-align: middle;
+}
+
+.smoke-wizard table.labels td.start {
+  background: url(/images/smoke/wizard-step-background-start.png) no-repeat center right;
+  font-weight: bold;
+}
+
+.smoke-wizard table.labels td.start-current {
+  background: url(/images/smoke/wizard-step-background-start-current.png) no-repeat center right;
+  font-weight: bold;
+}
+
+.smoke-wizard table.labels td.past-current {
+  background: url(/images/smoke/wizard-step-background-past-current.png) no-repeat center right;
+  color: #777;
+}
+
+.smoke-wizard table.labels td.past {
+  background: url(/images/smoke/wizard-step-background-past.png) no-repeat center right;
+  color: #777;
+}
+
+.smoke-wizard table.labels td.current {
+  background: url(/images/smoke/wizard-step-background-current.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.current-final {
+  background: url(/images/smoke/wizard-step-background-current-final.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.future {
+  background: url(/images/smoke/wizard-step-background-future.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.future-final {
+  background: url(/images/smoke/wizard-step-background-future-final.png) no-repeat center right;
+}
+
+.smoke-wizard table.labels td.final {
+  background: url(/images/smoke/wizard-step-background-final.png) no-repeat center right;
+  font-weight: bold;
+}
+
+span.hidden {
+  display: none;
+}
+
+td.current a, td.future a {
+  color: black;
+}
+
+td.current a:hover, td.future a:hover {
+  text-decoration: none;
+}
+
+div.current-wizard-step {
+  border: 1px solid #aaa;
+  border-bottom: none;
+  margin: 0px auto;
+  padding: 5px;
+}
+
+div.wizard-navigation {
+  border: 1px solid #aaa;
+  border-top: none;
+  text-align: right;
+  padding: 5px;
+}
+
+span.wizard-step-number {
+  vertical-align: middle;
+  padding-right: 0.7ex;
+  font-weight: bold;
+}
+
+span.wizard-step-title {
+  vertical-align: middle;  
+}
+
+/* set-selectors */
+
+div.smoke-set-selector { width: auto; }
+
+div.smoke-set-selector ul.active {
+  list-style-type: none;
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+
+div.smoke-set-selector ul.active li {
+  position: relative;
+  padding: 0 2em 4px 0; /* larger right padding for image*/
+  margin: 0;
+}
+
+div.smoke-set-selector .add-button,
+div.smoke-set-selector .remove-button {
+  position: absolute;
+  top: 5%;
+  right: 1px;
+  cursor: pointer;
+}
+
+div.smoke-set-selector div.item-entry {
+  position: relative;
+  margin: 0;
+  padding: 0 2em 0 0;
+}
+
+div.smoke-set-selector div.item-entry select,
+div.smoke-set-selector div.item-entry input {
+  width: 100%;
+}
+
+#person-review-page #roles {
+  list-style-type: none; padding: 0; margin: 0;
+}
+
+#person-review-page #roles li {
+  margin: 0;
+  padding: 0;
+}

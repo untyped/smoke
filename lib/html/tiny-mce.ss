@@ -52,7 +52,7 @@
 ; Classes ----------------------------------------
 
 (define tiny-mce%
-  (class/cells text-area% ()
+  (class/cells simple-text-area% ()
     
     (inherit get-id)
     
@@ -76,50 +76,35 @@
     ; seed -> javascript
     (define/augment (get-on-attach seed)
       (let ([id (get-id)])
-        (js #;(if (! (!dot Smoke tinyMCECache))
-                (= (!dot Smoke tinyMCECache)
-                   (!object)))
-            
-            (!dot tinyMCE (execCommand "mceAddControl" #f ,id))
-            
-            ; There's no reliable way of getting hold of the tinyMCE instance
-            ; yet to register an onInit event, so we resort to this rather
-            ; clumsy event loop:
-            
-            #;(var [tries       0])
-            #;(var [saveContent (function ()
-                                  (if (> tries 20)
-                                      (!block (alert "Warning: the rich text editor did not initialise correctly."))
-                                      (!block (if (&& (!dot tinyMCE (get ,id))
-                                                      (!dot tinyMCE (get ,id) (getContent)))
-                                                  (= (!dot Smoke (!index tinyMCECache ,id))
-                                                     (!dot tinyMCE (get ,id) (getContent)))
-                                                  (!dot window (setTimeout saveContent 100)))
-                                              (= tries (+ tries 1)))))])
-            
-            #;(saveContent))))
+        (js (!dot tinyMCE (execCommand "mceAddControl" #f ,id)))))
     
     ; seed -> javascript
     (define/augment (get-on-detach seed)
       (let ([id (get-id)])
         (js (!dot tinyMCE (execCommand "mceRemoveControl" #f ,id)))))
     
-    ; seed -> javascript
-    (define/augment (get-on-page-submit seed)
-      (let ([id (get-id)])
-        (js
-         ;(if (!dot Smoke tinyMCECache)
-         ;    (!block (var [oldContent (!dot Smoke (!index tinyMCECache ,id))]
-         ;                 [newContent (!dot tinyMCE (get ,id) (getContent))])
-         ;            (if (!= oldContent newContent)
-         ;                 (!dot Smoke (setSubmitData ,(get-id) (!dot tinyMCE (get ,(get-id)) (getContent)))))))
-         (!dot Smoke (setSubmitData ,(get-id) (!dot tinyMCE (get ,(get-id)) (getContent)))))))
-    
     ; seed -> (U javascript #f)
     ;
     ; Don't use the on-change event from text-area%.
     (define/override (get-on-change seed)
       #f)))
+
+; Helpers ----------------------------------------
+
+; xml
+(define tiny-mce-script
+  (xml (script (@ [type "text/javascript"]
+                  [src  "/scripts/tiny_mce/tiny_mce.js"]))
+       (script (@ [type "text/javascript"])
+               (!raw "\n// <![CDATA[\n")
+               (!raw ,(js (!dot ($ document)
+                                (bind "smoke-page-submit"
+                                      (function (evt fullRefresh)
+                                        (!dot ($ "textarea.smoke-tiny-mce")
+                                              (each (function ()
+                                                      (var [id (!dot this id)])
+                                                      (!dot Smoke (setSubmitData id (!dot tinyMCE (get id) (getContent))))))))))))
+               (!raw "\n// ]]>\n"))))
 
 ; Provide statements -----------------------------
 

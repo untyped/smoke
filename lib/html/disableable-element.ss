@@ -20,7 +20,7 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [enabled? #t] #:accessor #:mutator)
+    (init-cell enabled? #t #:accessor #:mutator)
     
     ; Public methods -----------------------------    
     
@@ -28,15 +28,19 @@
     ; Does NOT output the value.
     (define/override (core-html-attributes seed
                                            #:id      [id      (get-id)]
-                                           #:classes [classes (get-classes)]
+                                           #:classes [classes (if (get-enabled?) 
+                                                                  (get-classes)
+                                                                  (cons 'ui-state-disabled (get-classes)))]
                                            #:style   [style   (get-style)]
                                            #:tooltip [title   (get-tooltip)])
       (append (super core-html-attributes seed
                      #:id      id
-                     #:classes (if (get-enabled?) classes (cons 'smoke-disabled classes))
+                     #:classes classes
                      #:style   style
                      #:tooltip title)
-              (if (get-enabled?) null (xml-attrs [disabled "disabled"]))))))
+              (if (get-enabled?)
+                  null
+                  (xml-attrs [disabled "disabled"]))))))
 
 ; Classes ----------------------------------------
 (define disableable-element%

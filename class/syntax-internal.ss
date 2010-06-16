@@ -1,9 +1,12 @@
 #lang scheme/base
 
 (require (for-template scheme/base
-                       "../base.ss")
-         (planet untyped/unlib:3/syntax)
-         "../base.ss")
+                       scheme/class
+                       "../web-server/web-cell.ss")
+         scheme/contract
+         scheme/match
+         srfi/26
+         (planet untyped/unlib:3/syntax))
 
 ; Seed structure ---------------------------------
 
@@ -94,7 +97,7 @@
      (identifier? #'id)
      (with-syntax ([cell-id (make-cell-id #'id)])
        (expand-keywords #'id #'(kw ...) #t 
-                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix 'id])
+                        (add-foot (add-body seed #'(field [cell-id (parameterize ([web-cell-id-prefix (string->symbol (format "~a.~a" 'id 'cell-id))])
                                                                      (make-web-cell value))]))
                                   #'(send this register-web-cell-field! cell-id))))]
     [(_ id value kw ...) 
@@ -148,33 +151,41 @@
     [(kw other ...)
      (call-with-values
       (cut match (syntax->datum #'kw)
-           ['#:child             (expand-child-keyword          id-stx #'(other ...) cell? seed)]
-           ['#:children          (expand-children-keyword       id-stx #'(other ...) cell? seed)]
-           ['#:optional-child    (expand-optional-child-keyword id-stx #'(other ...) cell? seed)]
-           ['#:accessor          (expand-accessor-keyword       id-stx #'(other ...) cell? #f seed)]
-           ['#:mutator           (expand-mutator-keyword        id-stx #'(other ...) cell? #f seed)]
-           ['#:override-accessor (expand-accessor-keyword       id-stx #'(other ...) cell? #t seed)]
-           ['#:override-mutator  (expand-mutator-keyword        id-stx #'(other ...) cell? #t seed)]
+           ['#:child             (expand-child-keyword           id-stx #'(other ...) cell? seed)]
+           ['#:children          (expand-children-keyword        id-stx #'(other ...) cell? seed)]
+           ['#:child-transform   (expand-child-transform-keyword id-stx #'(other ...) cell? seed)]
+           ['#:optional-child    (expand-optional-child-keyword  id-stx #'(other ...) cell? seed)]
+           ['#:accessor          (expand-accessor-keyword        id-stx #'(other ...) cell? #f seed)]
+           ['#:mutator           (expand-mutator-keyword         id-stx #'(other ...) cell? #f seed)]
+           ['#:override-accessor (expand-accessor-keyword        id-stx #'(other ...) cell? #t seed)]
+           ['#:override-mutator  (expand-mutator-keyword         id-stx #'(other ...) cell? #t seed)]
            [other                (error (format "Expected keyword, received ~s" other))])
       (cut expand-keywords id-stx <> cell? <>))]))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-child-keyword id-stx other-stx cell? seed)
-  (values other-stx 
-          (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
-            (add-foot seed #`(send this register-children-thunk! 'id
-                                   #,(if cell?
-                                         #`(lambda () (list (web-cell-ref cell-id)))
-                                         #`(lambda () (list id))))))))
+  (with-syntax ([transform #'list])
+     (syntax-case other-stx ()
+       [(other ...)
+        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-children-keyword id-stx other-stx cell? seed)
-  (values other-stx 
-          (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
-            (add-foot seed #`(send this register-children-thunk! 'id
-                                   #,(if cell?
-                                         #`(lambda () (web-cell-ref cell-id))
-                                         #`(lambda () id)))))))
+  (with-syntax ([transform #'(lambda (x) x)])
+     (syntax-case other-stx ()
+       [(other ...)
+        (expand-child-transform-keyword id-stx #'(transform other ...) cell? seed)])))
+
+; syntax syntax boolean seed -> syntax seed
+(define (expand-child-transform-keyword id-stx other-stx cell? seed)
+  (syntax-case other-stx ()
+    [(transform other ...)
+     (values #'(other ...)
+             (with-syntax ([id id-stx] [cell-id (make-cell-id id-stx)])
+               (add-foot seed #`(send this register-children-thunk! 'id
+                                      #,(if cell?
+                                            #`(lambda () (transform (web-cell-ref cell-id)))
+                                            #`(lambda () (transform id)))))))]))
 
 ; syntax syntax boolean seed -> syntax seed
 (define (expand-optional-child-keyword id-stx other-stx cell? seed)

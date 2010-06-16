@@ -55,10 +55,10 @@
     ; Fields -------------------------------------
     
     ; (cell boolean)
-    (init-cell [always-dirty? #f] #:accessor #:mutator)
+    (init-cell always-dirty? #f #:accessor #:mutator)
     
     ; (cell (listof component<%>))
-    (init-cell [children null] #:children #:accessor #:mutator)))
+    (init-cell children null #:children #:accessor #:mutator)))
 
 (define n7 (new node% [component-id 'n7]))
 (define n6 (new node% [component-id 'n6]))

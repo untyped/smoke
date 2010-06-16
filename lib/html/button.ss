@@ -15,13 +15,13 @@
     ; Fields -------------------------------------
     
     ; (cell string)
-    (init-cell [label #f] #:accessor #:mutator)
+    (init-cell label #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-button classes)])
+    (super-new [classes (list* 'smoke-button 'ui-widget classes)])
     
     ; Public methods ---------------------------
     

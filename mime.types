@@ -8,7 +8,7 @@
 # please read RFC 2045, 2046, 2047, 2048, and 2077.  The Internet media type
 # registry is at <http://www.iana.org/assignments/media-types/>.
 
-# MIME type			Extensions
+# MIME type                     Extensions
 application/activemessage
 application/andrew-inset	ez
 application/applefile
@@ -25,8 +25,8 @@ application/dca-rft
 application/dec-dx
 application/dvcs
 application/edi-consent
-application/edifact
 application/edi-x12
+application/edifact
 application/eshop
 application/font-tdpfr
 application/http
@@ -248,10 +248,20 @@ application/vnd.mozilla.xul+xml	xul
 application/vnd.ms-artgalry
 application/vnd.ms-asf
 application/vnd.ms-excel	xls
+application/vnd.ms-excel.addin.macroEnabled.12					xlam
+application/vnd.ms-excel.sheet.binary.macroEnabled.12				xlsb
+application/vnd.ms-excel.sheet.macroEnabled.12					xlsm
+application/vnd.ms-excel.template.macroEnabled.12				xltm
 application/vnd.ms-lrm
 application/vnd.ms-powerpoint	ppt
+application/vnd.ms-powerpoint.addin.macroEnabled.12				ppam
+application/vnd.ms-powerpoint.presentation.macroEnabled.12			pptm
+application/vnd.ms-powerpoint.slideshow.macroEnabled.12				ppsm
+application/vnd.ms-powerpoint.template.macroEnabled.12				potm
 application/vnd.ms-project
 application/vnd.ms-tnef
+application/vnd.ms-word.document.macroEnabled.12				docm
+application/vnd.ms-word.template.macroEnabled.12				dotm
 application/vnd.ms-works
 application/vnd.ms-wpl
 application/vnd.mseq
@@ -266,6 +276,13 @@ application/vnd.novadigm.edm
 application/vnd.novadigm.edx
 application/vnd.novadigm.ext
 application/vnd.obn
+application/vnd.openxmlformats-officedocument.presentationml.presentation	pptx
+application/vnd.openxmlformats-officedocument.presentationml.slideshow		ppsx
+application/vnd.openxmlformats-officedocument.presentationml.template		potx
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet		xlsx
+application/vnd.openxmlformats-officedocument.spreadsheetml.template		xltx
+application/vnd.openxmlformats-officedocument.wordprocessingml.document		docx
+application/vnd.openxmlformats-officedocument.wordprocessingml.template		dotx
 application/vnd.osa.netdeploy
 application/vnd.palm
 application/vnd.pg.format
@@ -355,8 +372,8 @@ application/x-futuresplash	spl
 application/x-gtar		gtar
 application/x-gzip
 application/x-hdf		hdf
-application/x-javascript	js
 application/x-java-jnlp-file	jnlp
+application/x-javascript	js
 application/x-koan		skp skd skt skm
 application/x-latex		latex
 application/x-netcdf		nc cdf
@@ -378,10 +395,10 @@ application/x-ustar		ustar
 application/x-wais-source	src
 application/x400-bp
 application/xhtml+xml		xhtml xht
-application/xslt+xml		xslt
 application/xml			xml xsl
 application/xml-dtd		dtd
 application/xml-external-parsed-entity
+application/xslt+xml		xslt
 application/zip			zip
 audio/32kadpcm
 audio/amr
@@ -393,8 +410,8 @@ audio/dsr-es201108
 audio/dvi4
 audio/evrc
 audio/evrc0
-audio/g722
 audio/g.722.1
+audio/g722
 audio/g723
 audio/g726-16
 audio/g726-24
@@ -406,15 +423,15 @@ audio/g729D
 audio/g729E
 audio/gsm
 audio/gsm-efr
-audio/l8
 audio/l16
 audio/l20
 audio/l24
+audio/l8
 audio/lpc
 audio/midi			mid midi kar
+audio/mp4a-latm			m4a m4p
 audio/mpa
 audio/mpa-robust
-audio/mp4a-latm			m4a m4p
 audio/mpeg			mpga mp2 mp3
 audio/parityfec
 audio/pcma
@@ -455,8 +472,8 @@ image/cgm			cgm
 image/g3fax
 image/gif			gif
 image/ief			ief
-image/jpeg			jpeg jpg jpe
 image/jp2			jp2
+image/jpeg			jpeg jpg jpe
 image/naplps
 image/pict			pict pic pct
 image/png			png
@@ -483,8 +500,8 @@ image/vnd.svf
 image/vnd.wap.wbmp		wbmp
 image/vnd.xiff
 image/x-cmu-raster		ras
-image/x-macpaint		pntg pnt mac
 image/x-icon			ico
+image/x-macpaint		pntg pnt mac
 image/x-portable-anymap		pnm
 image/x-portable-bitmap		pbm
 image/x-portable-graymap	pgm
@@ -551,8 +568,8 @@ text/vnd.fly
 text/vnd.fmi.flexstor
 text/vnd.in3d.3dml
 text/vnd.in3d.spot
-text/vnd.iptc.nitf
 text/vnd.iptc.newsml
+text/vnd.iptc.nitf
 text/vnd.latex-z
 text/vnd.motorola.reflex
 text/vnd.ms-mediapackage
@@ -579,8 +596,8 @@ video/mp2p
 video/mp2t
 video/mp4			mp4
 video/mp4v-es
-video/mpv
 video/mpeg			mpeg mpg mpe
+video/mpv
 video/nv
 video/parityfec
 video/pointer

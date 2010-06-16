@@ -8,11 +8,11 @@
 
 ; symbol -> any
 (define (field-value id)
-  (js-ref (js (!dot (!index ,(node/id id) 0) value))))
+  (js-ref (!dot (!index ,(node/id id) 0) value)))
 
 ; symbol symbol -> any
 (define (field-attr id attr-id)
-  (js-ref (js (!index (!index ,(node/id id) 0) ,attr-id))))
+  (js-ref (!index (!index ,(node/id id) 0) ,attr-id)))
 
 ; symbol -> any
 (define (printed-value id)
@@ -33,9 +33,9 @@
 ; symbol any -> void
 (define-check (check-combo-value id expected)
   (check-equal?
-   (js-ref (js ((function ()
-                  (var [elem (!index ,(node/id id) 0)])
-                  (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text))))))
+   (js-ref ((function ()
+              (var [elem (!index ,(node/id id) 0)])
+              (return (!dot (!index (!dot elem options) (!dot elem selectedIndex)) text)))))
    expected))
 
 ; Tests ------------------------------------------
@@ -50,7 +50,7 @@
     ; Have to do password field first as submitting the page clears its value:
     
     (test-suite "password-field"
-    
+      
       (test-case "initial value"
         (check-field-attr 'password-field 'size 20)
         (check-field-attr 'password-field 'maxLength 10)
@@ -86,7 +86,7 @@
         (enter-text (node/id 'password-field) "Done")))
     
     (test-suite "text-field"
-    
+      
       (test-case "initial value"
         (check-field-attr 'text-field 'size 20)
         (check-field-attr 'text-field 'maxLength 10)
@@ -131,10 +131,26 @@
         (enter-text (node/id 'lowercase-text-field) "   ABC   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'lowercase-text-field "abc")
-        (enter-text (node/id 'lowercase-text-field) "Done")))
+        (enter-text (node/id 'lowercase-text-field) "Done"))
+      
+      (test-case "placeholder"
+        (for ([button-id (in-list '(submit-button ajax-submit-button))])
+          (with-check-info (['button-id button-id])
+            (check-field-value 'placeholder-text-field "holder")
+            (check-printed-value 'placeholder-text-field #f)
+            (focus (node/id 'placeholder-text-field))
+            (enter-text (node/id 'placeholder-text-field) "holder")
+            (blur (node/id 'placeholder-text-field))
+            (click/wait (node/id button-id))
+            (check-field-value 'placeholder-text-field "holder")
+            (check-printed-value 'placeholder-text-field "holder")
+            (focus (node/id 'placeholder-text-field))
+            (enter-text (node/id 'placeholder-text-field) "")
+            (blur (node/id 'placeholder-text-field))
+            (click/wait (node/id button-id))))))
     
     (test-suite "text-area"
-    
+      
       (test-case "initial value"
         (check-field-attr 'text-area 'cols 20)
         (check-field-attr 'text-area 'rows 10)
@@ -179,27 +195,43 @@
         (enter-text (node/id 'lowercase-text-area) "   ABC   ")
         (click/wait (node/id 'submit-button))
         (check-printed-value 'lowercase-text-area "abc")
-        (enter-text (node/id 'lowercase-text-area) "Done")))
+        (enter-text (node/id 'lowercase-text-area) "Done"))
+      
+      (test-case "placeholder"
+        (for ([button-id (in-list '(submit-button ajax-submit-button))])
+          (with-check-info (['button-id button-id])
+            (check-field-value 'placeholder-text-area "holder")
+            (check-printed-value 'placeholder-text-area #f)
+            (focus (node/id 'placeholder-text-area))
+            (enter-text (node/id 'placeholder-text-area) "holder")
+            (blur (node/id 'placeholder-text-area))
+            (click/wait (node/id button-id))
+            (check-field-value 'placeholder-text-area "holder")
+            (check-printed-value 'placeholder-text-area "holder")
+            (focus (node/id 'placeholder-text-area))
+            (enter-text (node/id 'placeholder-text-area) "")
+            (blur (node/id 'placeholder-text-area))
+            (click/wait (node/id button-id))))))
     
     (test-suite "tiny-mce"
-    
-      (test-case "initial value"
-        (check-field-attr 'text-area 'cols 20)
-        (check-field-attr 'text-area 'rows 10)
-        (check-field-value 'text-area "<p>Initial</p>")
-        (check-printed-value 'text-area "<p>Initial</p>"))
+      
+      ;(test-case "initial value"
+      ;  (check-field-attr 'text-area 'cols 20)
+      ;  (check-field-attr 'text-area 'rows 10)
+      ;  (check-field-value 'text-area "<p>Initial</p>")
+      ;  (check-printed-value 'text-area "<p>Initial</p>"))
       
       (test-case "full refresh"
         (printf "These tests have not been automated yet (might need an exec-javascript Delirium command).")
-        (printf "Change the value of the tinyMCE field, do a full refresh, and check the repoted value changes:")
+        (printf "Change the value of the tinyMCE field, do a full refresh, and check the reported value changes:")
         (read-line))
       
       (test-case "full refresh"
-        (printf "Change the value of the tinyMCE field, do an AJAX refresh, and check the repoted value changes:")
+        (printf "Change the value of the tinyMCE field, do an AJAX refresh, and check the reported value changes:")
         (read-line)))
     
     (test-suite "check-box"
-    
+      
       (test-case "initial value"
         (check-field-attr 'check-box 'checked #t)
         (check-printed-value 'check-box #t))
@@ -225,7 +257,7 @@
         (check-printed-value 'check-box #t)))
     
     (test-suite "combo-box"
-
+      
       (test-case "initial value"
         (check-field-value 'combo-box "1")
         (check-combo-value 'combo-box "Option 1")
@@ -258,6 +290,56 @@
         (check-field-value 'combo-box "--yes--")
         (check-combo-value 'combo-box "Option 5")
         (check-printed-value 'combo-box #t)))
+    
+    (test-suite "radio-combo"
+      
+      (test-suite "horizontal"
+        
+        (test-case "initial value"
+          (check-field-attr 'radio-combo-h-1 'checked #t)
+          (check-field-attr 'radio-combo-h-a 'checked #f)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-h 1))
+        
+        (test-case "full"
+          (click (node/id 'radio-combo-h-a))
+          (click/wait (node/id 'submit-button))
+          (check-field-attr 'radio-combo-h-1 'checked #f)
+          (check-field-attr 'radio-combo-h-a 'checked #t)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-h 'a))
+        
+        (test-case "ajax"
+          (click (node/id 'radio-combo-h---yes--))
+          (click/wait (node/id 'ajax-submit-button))
+          (check-field-attr 'radio-combo-h-1 'checked #f)
+          (check-field-attr 'radio-combo-h-a 'checked #f)
+          (check-field-attr 'radio-combo-h---yes-- 'checked #t)
+          (check-printed-value 'radio-combo-h #t)))
+      
+      (test-suite "vertical"
+        
+        (test-case "initial value"
+          (check-field-attr 'radio-combo-v-1 'checked #t)
+          (check-field-attr 'radio-combo-v-a 'checked #f)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-v 1))
+        
+        (test-case "full"
+          (click (node/id 'radio-combo-v-a))
+          (click/wait (node/id 'submit-button))
+          (check-field-attr 'radio-combo-v-1 'checked #f)
+          (check-field-attr 'radio-combo-v-a 'checked #t)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #f)
+          (check-printed-value 'radio-combo-v 'a))
+        
+        (test-case "ajax"
+          (click (node/id 'radio-combo-v---yes--))
+          (click/wait (node/id 'ajax-submit-button))
+          (check-field-attr 'radio-combo-v-1 'checked #f)
+          (check-field-attr 'radio-combo-v-a 'checked #f)
+          (check-field-attr 'radio-combo-v---yes-- 'checked #t)
+          (check-printed-value 'radio-combo-v #t))))
     
     (test-suite "radio-button"
       

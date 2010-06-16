@@ -12,24 +12,24 @@
     render                 ; seed -> content
     get-child-components   ; -> (listof component<%>)
     get-all-components     ; -> (listof component<%>)
-    get-dirty-components)) ; -> (listof component<%>)
+    get-dirty-components   ; -> (listof component<%>)
+    custom-print))         ; output-port boolean (U symbol #f) -> void
 
 ; Classses ---------------------------------------
 
 (define component%
-  (class/cells object/cells% (component<%>)
+  (class/cells object/cells% (component<%> printable<%>)
     
     (inherit dirty?)
     
     ; Fields -------------------------------------
     
     ; (cell symbol)
-    (init-field [component-id (gensym/interned 'smoke)]
-      #:accessor)
+    (init-field component-id (gensym/interned (inferred-id-prefix)) #:accessor)
     
     ; (cell (alistof symbol (-> (listof component<%>)))
-    (cell [child-registry null])
-    
+    (cell child-registry null)
+        
     ; Request handling ---------------------------
     
     ; There are two methods involved here:
@@ -49,7 +49,7 @@
       (inner (void) on-request request)
       (for-each (cut send <> on-request request)
                 (get-child-components)))
-      
+    
     ; Rendering ----------------------------------
     
     ; seed -> content
@@ -110,9 +110,36 @@
       (if (dirty?)
           (list this)
           (append-map (cut send <> get-dirty-components)
-                      (get-child-components))))))
+                      (get-child-components))))
+    
+    ; Printing -----------------------------------
+    
+    ; output-port -> void
+    (define/public (custom-write out)
+      (custom-print out write (get-class-name this)))
+    
+    ; output-port -> void
+    (define/public (custom-display out)
+      (custom-print out display (get-class-name this)))
+    
+    ; output-port (any output-post -> void) (U symbol #f) -> void
+    (define/public (custom-print out print class-name)
+      (print (vector (or class-name 'unknown-component)
+                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                       (get-component-id)))
+             out))))
 
 ; Procedures -------------------------------------
+
+; -> (U symbol #f)
+(define (get-class-name obj)
+  (define-values (class object-skipped?)
+    (object-info obj))
+  (define-values (class-name field-count field-name-list field-accessor field-mutator super-class class-skipped?) 
+    (if object-skipped?
+        (list #f #f #f #f #f #f #t)
+        (class-info class)))
+  class-name)
 
 ; any -> boolean
 (define (component? item)

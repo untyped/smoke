@@ -7,13 +7,13 @@
 
 (define-check (check-initial num)
   (open/wait "/requirements")
-  (check-equal? (js-ref (js htmlReqsLoaded)) num)
-  (check-equal? (js-ref (js jsReqsLoaded)) num))
+  (check-equal? (js-ref htmlReqsLoaded) num)
+  (check-equal? (js-ref jsReqsLoaded) num))
 
 (define-check (check-refresh id num)
   (click/wait (node/id id))
-  (check-equal? (js-ref (js htmlReqsLoaded)) num)
-  (check-equal? (js-ref (js jsReqsLoaded)) num))
+  (check-equal? (js-ref htmlReqsLoaded) num)
+  (check-equal? (js-ref jsReqsLoaded) num))
 
 ; Tests ------------------------------------------
 

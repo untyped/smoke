@@ -5,7 +5,7 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (redirect request)
+(define-controller (redirect)
   (send redirect-page respond))
 
 ; Components -------------------------------------

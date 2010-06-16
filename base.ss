@@ -1,7 +1,6 @@
 #lang scheme/base
 
-(require scheme/class
-         scheme/contract
+(require scheme/contract
          scheme/list
          scheme/match
          scheme/pretty
@@ -11,9 +10,13 @@
          (planet untyped/mirrors:2)
          (planet untyped/unlib:3/exn)
          (planet untyped/unlib:3/log)
+         "class/class.ss"
          "web-server/servlet.ss")
 
 ; Configuration --------------------------------
+
+; (parameter boolean)
+(define dev? (make-parameter #f))
 
 ; path
 (define-runtime-path smoke-htdocs-path 
@@ -39,8 +42,7 @@
 
 ; Provide statements --------------------------- 
 
-(provide (all-from-out scheme/class
-                       scheme/contract
+(provide (all-from-out scheme/contract
                        scheme/list
                        scheme/match
                        scheme/pretty
@@ -49,9 +51,11 @@
                        (planet untyped/unlib:3/debug)
                        (planet untyped/unlib:3/exn)
                        (planet untyped/unlib:3/log)
+                       "class/class.ss"
                        "web-server/servlet.ss"))
 
 (provide/contract
+ [dev?                                           (parameter/c boolean?)]
  [smoke-htdocs-path                              path?]
  [smoke-mime-types-path                          path?]
  [struct (exn:fail:smoke exn:fail)               ([message string?] [continuation-marks continuation-mark-set?])]

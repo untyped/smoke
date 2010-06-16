@@ -12,10 +12,6 @@
     
     (init-field page-number)
     
-    (field notification-pane
-      (new notification-pane% [id 'notifications])
-      #:child #:accessor #:mutator)
-    
     ; Constructor --------------------------------
     
     (super-new)
@@ -25,14 +21,13 @@
     ; -> void
     (define/public #:callback (on-notify num sticky?)
       (for ([i (in-range 1 (add1 num))])
-        (notifications-add! (xml ,(if sticky? "Sticky notification " "Notification ") ,i) sticky?)))
+        (notifications-add! (format "~a ~a" (if sticky? "Sticky notification " "Notification ") i) sticky?)))
     
     ; seed -> xml
     (define/augment (render seed)
       (xml (h1 "Notification page " ,page-number)
            (p (a (@ [href ,(controller-url notification1)]) "Visit page 1") " "
               (a (@ [href ,(controller-url notification2)]) "Visit page 2"))
-           ,(send notification-pane render seed)
            (ul ,@(for/list ([i (in-range 1 4)])
                    (xml (li (a (@ [id ,(format "normal-~a-full" i)] [href ,(embed seed (callback on-notify i #f))])
                                "Create " ,i ,(if (= i 1) " notification" " notifications") " (full page refresh)"))))
@@ -55,9 +50,9 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (notification1 request)
+(define-controller (notification1)
   (send notification-page1 respond))
 
 ; request -> response
-(define-controller (notification2 request)
+(define-controller (notification2)
   (send notification-page2 respond))

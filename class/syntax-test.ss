@@ -3,6 +3,7 @@
 (require (planet untyped/unlib:3/hash)
          "../test-base.ss"
          "../lib/component.ss"
+         "../lib/html/html-element.ss"
          "syntax.ss")
 
 ; Tests ------------------------------------------
@@ -13,6 +14,12 @@
     (test-case "class name inferred correctly"
       (check-equal? (format "~a" (let ([test% (class/cells object% ())]) test%)) "#<class:test%>" "let")
       (check-not-false (regexp-match #rx"#<class:.*>" (format "~a" (class/cells object% ()))) "anonymous"))
+    
+    (test-case "IDs inferred correctly"
+      (let ([test/element% (class/cells html-element% ())])
+        (check-not-false (regexp-match #rx"^html-element" (symbol->string (send (new html-element%) get-id))))
+        (check-not-false (regexp-match #rx"^test_element" (symbol->string (send (new test/element%) get-id))))
+        (check-not-false (regexp-match #rx"^foo$" (symbol->string (send (new test/element% [id 'foo]) get-id))))))
     
     (test-case "init-cell and init-field: initial values are required"
       (check-exn exn:fail:object?
@@ -124,7 +131,27 @@
         (check-equal? (get-field e obj) 5)
         (check-equal? (get-field f obj) 6)
         (check-equal? (web-cell-ref (get-field g-cell obj)) 7)
-        (check-equal? (web-cell-ref (get-field h-cell obj)) 8)))))
+        (check-equal? (web-cell-ref (get-field h-cell obj)) 8)))
+    
+    (test-case "#:child, #:children, #:optional-child, #:child-transform"
+      (match-let* ([(list child0 child1 child2 child3 child4 child5 child6 child7 child8 child9)
+                    (for/list ([i (in-range 10)])
+                      (new text-field% [id (string->symbol (format "child~a" i))]))]
+                   [page (singleton/cells html-component% ()
+                           (cell cell0 child0)
+                           (cell cell1 child1 #:child)
+                           (cell cell2 (list child2 child3) #:children)
+                           (cell cell3 #f #:optional-child)
+                           (cell cell4 child4 #:optional-child)
+                           (cell cell5 #f #:child-transform (lambda (x) (or x null)))
+                           (cell cell6 (list child5 child6) #:child-transform (lambda (x) (or x null)))
+                           (cell cell7 (list (cons child7 1) (cons child8 2)) #:child-transform (lambda (x) (map car x)))
+                           (super-new))])
+        (check-equal? (sort (send page get-child-components)
+                            (lambda (a b)
+                              (string<? (symbol->string (send a get-id))
+                                        (symbol->string (send b get-id)))))
+                      (list child1 child2 child3 child4 child5 child6 child7 child8))))))
 
 ; Provide statements -----------------------------
 

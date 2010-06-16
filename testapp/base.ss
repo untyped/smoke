@@ -8,9 +8,9 @@
          srfi/26
          (planet untyped/dispatch:3)
          (planet untyped/mirrors:2)
+         (planet untyped/unlib:3/debug)
          "../dispatch.ss"
-         "../smoke.ss"
-         "../lib/html/snooze/snooze.ss")
+         "../smoke.ss")
 
 ; path
 (define-runtime-path testapp-htdocs-path "htdocs")
@@ -23,9 +23,9 @@
                        srfi/26
                        (planet untyped/dispatch:3)
                        (planet untyped/mirrors:2)
+                       (planet untyped/unlib:3/debug)
                        "../dispatch.ss"
-                       "../smoke.ss"
-                       "../lib/html/snooze/snooze.ss"))
+                       "../smoke.ss"))
 
 (provide/contract
  [testapp-htdocs-path path?])

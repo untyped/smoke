@@ -1,7 +1,10 @@
 #lang scheme/base
 
-(require (only-in srfi/1/list list-index)
-         "../base.ss")
+(require (only-in srfi/1 list-index)
+         scheme/class
+         scheme/contract
+         srfi/26
+         "../web-server/web-cell.ss")
 
 ; Interfaces -------------------------------------
 

@@ -2,7 +2,8 @@
 
 (require (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
-         "form-element.ss")
+         "form-element.ss"
+         "labelled-element.ss")
 
 ; Browsers only submit values for HTML checkboxes to the server when they are checked.
 ; The absence of a value is supposed to be enough to tell that a checkbox was left unchecked.
@@ -14,19 +15,21 @@
 ; for a truth value.
 
 (define check-box%
-  (class/cells form-element% ()
+  (class/cells (labelled-element-mixin form-element%) ()
     
     (inherit get-id
              get-enabled?
-             core-html-attributes)
+             get-label
+             core-html-attributes
+             render-label)
     
     ; Fields -------------------------------------
     
-    ;; (cell boolean)
-    (init-cell [value #f] #:override-accessor #:override-mutator)
+    ; (cell boolean)
+    (init-cell value #f #:override-accessor #:override-mutator)
     
-    ; (cell xml)
-    (init-cell [label #f] #:accessor #:mutator)
+    ; (cell boolean)
+    (init-cell show-label? #t #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -55,21 +58,20 @@
     
     ; seed -> xml
     (define/override (render seed)
-      (define id         (get-id))
-      (define wrapper-id (get-wrapper-id))
-      (define hidden-id  (get-hidden-id))
-      (define value      (get-value))
-      (define label      (get-label))
-      (xml (span (@ [id ,wrapper-id])
-                 (input (@ [id    ,hidden-id]
-                           [name  ,hidden-id]
-                           [type  "hidden"]
-                           [value "yes"]))
-                 (input (@ ,(core-html-attributes seed)
-                           [type "checkbox"]
-                           ,(opt-xml-attr value checked "checked")))
-                 ,(opt-xml label
-                    " " (label (@ [for ,id]) ,label)))))
+      (let ([id         (get-id)]
+            [wrapper-id (get-wrapper-id)]
+            [hidden-id  (get-hidden-id)]
+            [value      (get-value)])
+        (xml (span (@ [id ,wrapper-id])
+                   (input (@ [id    ,hidden-id]
+                             [name  ,hidden-id]
+                             [type  "hidden"]
+                             [value "yes"]))
+                   (input (@ ,(core-html-attributes seed)
+                             [type "checkbox"]
+                             ,(opt-xml-attr value checked "checked")))
+                   ,(opt-xml (get-show-label?)
+                      ,(render-label seed))))))
     
     ; request -> void
     (define/augment (on-request request)

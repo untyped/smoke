@@ -5,8 +5,13 @@
          "../../lib-base.ss"
          "form-element.ss")
 
+(define text-input<%>
+  (interface (form-element<%>)
+    get-raw
+    set-raw!))
+
 (define text-input%
-  (class/cells form-element% ()
+  (class/cells form-element% (text-input<%>)
     
     (inherit get-id
              get-enabled?)
@@ -14,13 +19,13 @@
     ; Fields -------------------------------------
     
     ; (cell string)
-    (cell [raw ""] #:accessor)
+    (cell raw "" #:accessor)
     
     ; (cell boolean)
-    (init-cell [allow-blank? #t] #:accessor #:mutator)
+    (init-cell allow-blank? #t #:accessor #:mutator)
     
     ; (cell (U 'uppercase 'lowercase #f))
-    (cell [case-conversion #f] #:accessor)
+    (cell case-conversion #f #:accessor)
     
     ; Constructor --------------------------------
     
@@ -73,10 +78,20 @@
       (web-cell-changed? raw-cell))
     
     ; seed -> js
+    (define/augment (get-on-focus seed)
+      (js (= (!dot Smoke focusedId) ,(get-id))
+          ,(inner (js) get-on-focus seed)))
+    
+    ; seed -> js
+    (define/augment (get-on-blur seed)
+      (js (= (!dot Smoke focusedId) null)
+          ,(inner (js) get-on-blur seed)))
+    
+    ; seed -> js
     (define/augride (get-on-change seed)
       (define id (get-id))
       (js (!dot Smoke (setSubmitData ,id (!dot Smoke (findById ,id) value)))))))
 
 ; Provide statements -----------------------------
 
-(provide text-input%)
+(provide text-input<%> text-input%)

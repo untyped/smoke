@@ -8,10 +8,9 @@
 
 (define form-element<%>
   (interface (disableable-element<%>)
-    get-value        ; -> any
+    get-value        ; -> any | exn:smoke:form
     set-value!       ; any -> void
     value-valid?     ; -> boolean
-    get-value-error  ; -> (U string #f)
     value-changed?)) ; -> boolean
 
 ; Mixins -----------------------------------------
@@ -19,17 +18,29 @@
 (define form-element-mixin    
   (mixin/cells (disableable-element<%>) (form-element<%>)
     
-    (inherit get-id get-classes get-enabled? get-style get-tooltip)    
+    (inherit get-classes
+             get-component-id
+             get-enabled?
+             get-id
+             get-style
+             get-tooltip)
+    
+    ; Constructor --------------------------------
+    
+    ; (listof (U symbol string))
+    (init [classes null])
+    
+    (super-new [classes (cons 'ui-widget classes)])
     
     ; Public methods -----------------------------
     
     ; -> any
     (define/public (get-value)
-      (error "get-value must be overridden."))
+      (error "form-element.get-value must be overridden."))
     
     ; any -> void
     (define/public (set-value! val)
-      (error "set-value! must be overridden."))
+      (error "form-element.set-value! must be overridden."))
     
     ; -> boolean
     (define/public (value-valid?)
@@ -48,22 +59,37 @@
       (error "value-changed? must be overridden."))
     
     ; seed -> (listof attribute)
-    ; Does NOT output the value.
+    ; Does NOT output the value of the form element.
     (define/override (core-html-attributes 
                       seed
                       #:id      [id      (get-id)]
                       #:classes [classes (get-classes)]
+                      #:name    [name    id]
                       #:style   [style   (get-style)]
                       #:tooltip [title   (get-tooltip)])
-      (define id       (get-id))
       (unless id (error (format "ID not set in form-element: ~a" this)))
       (append (super core-html-attributes seed
                      #:id      id
                      #:classes classes
                      #:style   style
                      #:tooltip title)              
-              (xml-attrs [name ,id])))))
-
+              (opt-xml-attr name)))
+    
+    ; Printing -----------------------------------
+    
+    ; output-port (any output-port -> void) (U symbol #f) -> void
+    (define/override (custom-print out print class-name)
+      (print (vector (or class-name 'unknown-form-element)
+                     (with-handlers ([exn? (lambda (exn) '<no-component-id>)])
+                       (get-component-id))
+                     (with-handlers ([exn? (lambda (exn) '<no-id>)])
+                       (get-id))
+                     (with-handlers ([exn? (lambda (exn) '<no-value>)])
+                       (let ([err (get-value-error)])
+                         (if err
+                             (list 'bad-value err)
+                             (get-value)))))
+             out))))
 
 (define form-element%
   (class/cells (form-element-mixin disableable-element%) ()))

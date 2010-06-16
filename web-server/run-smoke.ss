@@ -19,12 +19,22 @@
          web-server/private/mime-types
          web-server/servlet/setup
          (planet untyped/delirium:3)
-         (planet untyped/mirrors:2)
+         (planet untyped/unlib:3/time)
          "../base.ss"
          "current-request.ss"
          "send-suspend-dispatch.ss"
          "session.ss"
          "smoke-lru.ss")
+
+
+; Smoke needs to be initialised in two places:
+;   - use serve/smoke or serve/smoke/delirium to initialise the dispatcher;
+;   - when a request has been successfully dispatched to Smoke page,
+;     wrap the call in init-smoke to establish a session cookie and create
+;     an AJAX resume prompt.
+; Both of these calls are handled below.
+
+; Called by top-level application ----------------
 
 ;  (-> response)
 ;  [#:manager         manager]
@@ -73,13 +83,13 @@
          start
          test
          #:run-tests?      [run-tests?       #t]
-         #:run-tests       [run-tests        test/text-ui/pause-on-fail]
+         #:run-tests       [run-tests        run-tests/pause]
          #:manager         [manager          (make-default-smoke-manager)]
          #:port            [port             8765]
          #:listen-ip       [listen-ip        #f]
          #:htdocs-paths    [app-htdocs-paths null]
          #:mime-types-path [mime-types-path  smoke-mime-types-path]
-         #:launch-browser? [launch-browser?  #f]
+         #:launch-browser? [launch-browser?  #t]
          #:404-handler     [404-handler      smoke-404-handler])
   (serve/dispatcher
    (make-smoke-dispatcher (if run-tests?
@@ -98,7 +108,8 @@
 ; (-> response) -> (request -> response)
 (define (make-smoke-controller start)
   (lambda (request)
-    (start)))
+    (parameterize ([current-frame (push-frame)])
+      (start))))
 
 ;  (connection request -> void)
 ;   #:port               natural
@@ -188,6 +199,7 @@
   ; connection request -> void
   (apply sequencer:make
          `(,(lambda (conn req)
+              (current-connection-set! conn)
               (current-request-set! req)
               (next-dispatcher))
            ,(servlet:make url->servlet)
@@ -200,7 +212,6 @@
 
 ; request -> response
 (define (smoke-404-handler request)
-  (debug "404 not found" (url->string (request-uri request)))
   (make-html-response
    #:code    404
    #:message "Not found"
@@ -208,17 +219,31 @@
               (body (p "Sorry! We could not find that file or resource on our server:")
                     (blockquote (tt ,(url->string (request-uri request)))))))))
 
+; Called within a servlet ------------------------
+
+; (-> any) -> any
+(define (init-smoke thunk #:session-expires [expires (void)] #:session-domain [domain #f])
+  
+  (define (check-session)
+    (dynamic-wind
+     (lambda ()
+       (assert-request-session-valid (current-request)))
+     thunk
+     void))
+    
+  (start-session #:continue check-session #:expires expires #:domain domain))
+
 ; Provide statements -----------------------------
 
 (provide/contract
- [serve/smoke           (->* ((-> (or/c response/full? response/incremental?)))
+ [serve/smoke           (->* ((-> any/c))
                              (#:manager any/c
                                         #:port              natural-number/c
-                                        #:listen-ip         (or/c string? false/c)
+                                        #:listen-ip         (or/c string? #f)
                                         #:htdocs-paths      (listof path?)
                                         #:mime-types-path   path?
                                         #:launch-browser?   boolean?
-                                        #:404-handler       (-> request? (or/c response/full? response/incremental?))
+                                        #:404-handler       (-> request? any)
                                         #:servlet-namespace list?)
                              void?)]
  [serve/smoke/delirium  (->* ((-> (or/c response/full? response/incremental?)) any/c)
@@ -226,9 +251,12 @@
                                         #:run-tests?      boolean?
                                         #:run-tests       (-> any/c any)
                                         #:port            natural-number/c
-                                        #:listen-ip       (or/c string? false/c)
+                                        #:listen-ip       (or/c string? #f)
                                         #:htdocs-paths    (listof path?)
                                         #:mime-types-path path?
                                         #:launch-browser? boolean?
-                                        #:404-handler     (-> request? (or/c response/full? response/incremental?)))
-                             void?)])
+                                        #:404-handler     (-> request? any))
+                             void?)]
+ [init-smoke            (->* (procedure?)
+                             (#:session-expires (or/c time-utc? void? #f) #:session-domain (or/c string? #f))
+                             any)])

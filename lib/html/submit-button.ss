@@ -2,13 +2,14 @@
 
 (require (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
+         "disableable-element.ss"
          "html-component.ss"
          "html-element.ss")
 
 ; Classes ----------------------------------------
 
 (define submit-button%
-  (class/cells html-element% ()
+  (class/cells (disableable-element-mixin html-element%) ()
     
     (inherit core-html-attributes
              get-id)
@@ -19,13 +20,13 @@
     (init-cell action #:accessor #:mutator)
     
     ; (cell string)
-    (init-cell [label "OK"] #:accessor #:mutator)
+    (init-cell label "OK" #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
     (init [classes null])
     
-    (super-new [classes (cons 'smoke-submit-button classes)])
+    (super-new [classes (list* 'smoke-submit-button 'ui-widget classes)])
     
     ; Public methods ---------------------------
     

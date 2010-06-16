@@ -2,10 +2,15 @@
 
 (require scheme/match
          scheme/pretty
+         (only-in scheme/string string-join)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
          "../../lib-base.ss"
          "form-element.ss")
+
+; string ...
+(define combo-box-false "--no--")
+(define combo-box-true  "--yes--")
 
 ; To use this class, override:
 ;   - get-option     : -> (list-of any) ; return a list of Scheme items to show in the list
@@ -28,7 +33,7 @@
     ; "Raw" version of the selected value that can be embedded in XML output.
     ;
     ; This is converted to/from the "real" selected value using raw->item and item->raw.
-    (cell [raw-value #f] #:accessor #:mutator)
+    (cell raw-value #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -72,23 +77,50 @@
     (define/public (option->string option)
       (error "option->string must be overridden."))
     
+    ; any -> xml+quotable
+    (define/public (option->xml option)
+      (option->string option))
+    
+    ; any -> (listof string)
+    (define/public (option->classes option)
+      null)
+    
+    ; any -> (U string symbol #f)
+    (define/public (option->id option)
+      #f)
+    
+    ; any -> boolean
+    (define/public (option-enabled? option)
+      #t)
+    
     ; seed -> xml
     (define/override (render seed)
-      (define id        (get-id))
-      (define raw-value (get-raw-value))
-      (define options   (get-options))
-      (xml (select (@ ,(core-html-attributes seed))
-                   ,@(for/list ([option (get-options)])
-                       (define raw (option->raw option))
-                       (xml (option (@ [value ,raw]
-                                       ,(opt-xml-attr (equal? raw raw-value) selected "selected"))
-                                    ,(option->string option)))))))
+      (let ([id        (get-id)]
+            [raw-value (get-raw-value)]
+            [options   (get-options)])
+        (xml (select (@ ,(core-html-attributes seed))
+                     ,@(for/list ([option (in-list options)])
+                         (let* ([raw-option (option->raw option)]
+                                [selected   (and (equal? raw-option raw-value) "selected")]
+                                [disabled   (not (option-enabled? option))]
+                                [classes    (if disabled
+                                                (cons 'ui-state-disabled (option->classes option))
+                                                (option->classes option))]
+                                [id         (option->id option)]
+                                [class      (and classes (string-join (map string+symbol->string classes) " "))])
+                           (xml (option (@ [value ,raw-option]
+                                           ,(opt-xml-attr id)
+                                           ,(opt-xml-attr class)
+                                           ,(opt-xml-attr selected)
+                                           ,(opt-xml-attr disabled))
+                                        ,(option->xml option)))))))))
     
     ; request -> void
     (define/augment (on-request request)
       (when (get-enabled?)
         (let ([binding (request-binding-ref request (get-id))])
-          (when binding (set-raw-value! binding)))))
+          (when binding (set-raw-value! binding))
+          (inner (void) on-request request))))
     
     ; seed -> js
     (define/augment (get-on-change seed)
@@ -105,7 +137,7 @@
     ; Fields -------------------------------------
     
     ; (cell (alistof (U boolean symbol number) string))
-    (init-cell [options null])
+    (init-cell options null)
     
     ; Constructor --------------------------------
     
@@ -131,21 +163,21 @@
       (unless (assq (get-value) options)
         (set-value! (and (not (null? options))
                          (caar options)))))
-      
+    
     ; (U bolean symbol number) -> string
     (define/override (option->raw option)
       (match option
         [(? number? num)   (number->string num)]
         [(? symbol? sym)   (symbol->string sym)]
-        [(? boolean? bool) (if bool "--yes--" "--no--")]
+        [(? boolean? bool) (if bool combo-box-true combo-box-false)]
         [other (raise-exn exn:fail:contract
                  (format "Bad option key: expected (U boolean number symbol), received ~s" other))]))
     
     ; string -> (U boolean symbol number)
     (define/override (raw->option raw)
-      (cond [(not raw)              #f]
-            [(equal? raw "--yes--") #t]
-            [(equal? raw "--no--")  #f]
+      (cond [(not raw)                    #f]
+            [(equal? raw combo-box-true)  #t]
+            [(equal? raw combo-box-false) #f]
             [(string->number raw) => (lambda (num) num)]
             [else (string->symbol raw)]))
     
@@ -154,7 +186,17 @@
       (or (assoc-value/default option (web-cell-ref options-cell) #f)
           (error (format "Not a valid option: ~s ~s" (web-cell-ref options-cell) option))))))
 
+; Helpers ----------------------------------------
+
+; (U string symbol) -> string
+(define (string+symbol->string val)
+  (if (string? val)
+      val
+      (symbol->string val)))
+
 ; Provide statements -----------------------------
 
-(provide vanilla-combo-box%
+(provide combo-box-false
+         combo-box-true
+         vanilla-combo-box%
          combo-box%)

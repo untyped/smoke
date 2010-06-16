@@ -45,7 +45,7 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (segfault request)
+(define-controller (segfault)
   (send test-page respond))
 
 ; Components -------------------------------------
@@ -56,10 +56,11 @@
     ; Fields -------------------------------------
     
     ; submit-button%
-    (field [submit (new submit-button%
-                        [id     'submit-button]
-                        [label  "Submit"]
-                        [action (callback on-submit)])]
+    (field submit
+      (new submit-button%
+           [id     'submit-button]
+           [label  "Submit"]
+           [action (callback on-submit)])
       #:child #:accessor #:mutator)
     
     ; Constructor --------------------------------
@@ -91,29 +92,29 @@
 
 ; -> xml
 #;(define generate-data
-  (; make-yieldable/full-continuations
-   ; Swapping the procedure above for the one below prevents the segfault:
-   make-yieldable/composable-continuations
-   (lambda (yield)
-     (lambda ()
-       (yield 1)
-       (yield 2)
-       (yield 3)
-       (yield 4)
-       5))))
-
-; -> xml
-(define generate-data
     (; make-yieldable/full-continuations
      ; Swapping the procedure above for the one below prevents the segfault:
      make-yieldable/composable-continuations
      (lambda (yield)
        (lambda ()
-         (yield (list 1 2))
-         (yield (list 2 3))
-         (yield (list 3 4))
-         (yield (list 4 5))
-         (list 5 6)))))
+         (yield 1)
+         (yield 2)
+         (yield 3)
+         (yield 4)
+         5))))
+
+; -> xml
+(define generate-data
+  (; make-yieldable/full-continuations
+   ; Swapping the procedure above for the one below prevents the segfault:
+   make-yieldable/composable-continuations
+   (lambda (yield)
+     (lambda ()
+       (yield (list 1 2))
+       (yield (list 2 3))
+       (yield (list 3 4))
+       (yield (list 4 5))
+       (list 5 6)))))
 
 ; Dummy database connection ----------------------
 

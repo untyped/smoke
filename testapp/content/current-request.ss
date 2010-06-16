@@ -8,7 +8,7 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (test-current-request request)
+(define-controller (test-current-request)
   (send test-page respond))
 
 ; Components -------------------------------------

@@ -11,12 +11,10 @@
     ; Fields -------------------------------------
     
     ; (cell (U regexp string))
-    (init-cell regexp
-      #:accessor #:mutator)
+    (init-cell regexp #:accessor #:mutator)
     
     ; (cell (U string #f))
-    (init-cell [format-string #f]
-      #:accessor #:mutator)
+    (init-cell format-string #f #:accessor #:mutator)
     
     ; Public methods -----------------------------
     

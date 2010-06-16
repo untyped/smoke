@@ -1,7 +1,7 @@
 #lang scheme/base
 
 (require (for-syntax scheme/base
-                     scheme/class
+                     "../../class/class.ss"
                      srfi/26
                      (planet untyped/unlib:3/syntax))
          "../../lib-base.ss"
@@ -20,6 +20,8 @@
     set-style!             ; string -> void
     get-tooltip            ; -> string
     set-tooltip!           ; string -> void
+    get-visible?           ; -> boolean
+    set-visible?!          ; boolean -> void
     core-html-attributes)) ; -> (alistof symbol (U string symbol number boolean (-> any)))
 
 ; Helpers ----------------------------------------
@@ -46,9 +48,7 @@
                      (select        select)
                      (change        change)
                      (reset         reset)
-                     (submit        submit)
-                     (page-submit   smoke-page-submit)
-                     (page-update   smoke-page-update))])
+                     (submit        submit))])
     (values (map car  all-names)
             (map cadr all-names))))
 
@@ -75,7 +75,8 @@
                 [(event ...)             (map (cut make-id stx <>) event-names)]
                 [(on-event ...)          (map (cut make-id stx 'on- <>) event-names)]
                 [(get-on-event ...)      (map (cut make-id stx 'get-on- <>) event-names)]
-                [(get-on-event/fold ...) (map (cut make-id stx 'get-on- <> '/fold) event-names)])
+                [(get-on-event/fold ...) (map (cut make-id stx 'get-on- <> '/fold) event-names)]
+                [(set-on-event! ...)     (map (cut make-id stx 'set-on- <> '!) event-names)])
     
     ; syntax -> syntax
     (define (expand-clause clause-stx)
@@ -127,7 +128,7 @@
                (get-on-event/fold seed))
              
              ...
-             
+                          
              ; (seed -> (U js #f))
              (define/public (get-on-event/fold seed)
                ; (U js #f)
@@ -147,6 +148,12 @@
                    (if default-handler
                        default-handler
                        #f)))
+             
+             ...
+             
+             ; (U callback js (seed -> js)) -> void
+             (define/public (set-on-event! handler)
+               (set-default-event-handler! 'event handler))
              
              ...
              

@@ -33,7 +33,7 @@
     ; Fields -------------------------------------
     
     ; (hasheqof symbol callback-metadata)
-    (field [callback-metadata-cache (make-hasheq)])
+    (field callback-metadata-cache (make-hasheq))
     
     ; Rendering and scripts ----------------------
     
@@ -54,9 +54,9 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/public (get-html-requirements/fold)
-      (append (append-map (cut send <> get-html-requirements/fold)
-                          (get-child-components))
-              (get-html-requirements)))
+      (append (get-html-requirements)
+              (append-map (cut send <> get-html-requirements/fold)
+                          (get-child-components))))
     
     ; -> (listof (U js (seed -> js)))
     ;
@@ -85,14 +85,11 @@
       (define id (send this get-component-id))
       (js (try ,(call-with-frame (frame-parent (current-frame))
                   (cut get-on-detach seed))
-               (catch exn
-                 (!dot console (log (+ "Failed to detach: " (? (!dot exn description) (!dot exn description) exn))))))
+               (catch exn (!dot Smoke (badDetach exn))))
           (try ,(get-on-render seed)
-               (catch exn
-                 (!dot console (log (+ "Failed to render: " (? (!dot exn description) (!dot exn description) exn))))))
+               (catch exn (!dot Smoke (badRender exn))))
           (try ,(get-on-attach seed)
-               (catch exn
-                 (!dot console (log (+ "Failed to attach: " (? (!dot exn description) (!dot exn description) exn))))))))
+               (catch exn (!dot Smoke (badAttach exn))))))
     
     ; seed -> js
     ;

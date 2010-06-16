@@ -27,7 +27,6 @@ if (!window.console.log) {
         for (var i = 0; i < arguments.length; i++) {
           str += i > 0 ? " " + arguments[i] : "" + arguments[i];
         }
-        window.console.log(str);
       };
     // Other browsers:
     } else {
@@ -54,51 +53,73 @@ if (!window.console.log) {
     Smoke.currentPage = currentPage;
     Smoke.documentHead = $("head").get(0);
     Smoke.documentBody = $("body").get(0);
-    $("#" + formID).bind("submit", function (evt) {
-      Smoke.triggerSubmitEvent(true);
-    });
     initComponents();
     Smoke.triggerUpdateEvent(true);
   };
   
-  // Submit and update events ======================
+  // Submit and update events ====================
   
-  // string object -> event
-  Smoke.makeSmokeEvent = function (evtType, evtBase) {
-    // [DJG] This looks dodgy to me (no prevent method) but it's what jQuery does.
-    // I guess we're no worse off than if we used the jQuery defaults.
-    return $.extend(evtBase, {
-				 	type            : evtType,
-				 	target          : document,
-				 	preventDefault  : function () {},
-				 	stopPropagation : function () {},
-				 	timeStamp       : new Date()
-				});
-  };
-    
   // boolean -> boolean
-  Smoke.triggerSubmitEvent = function () {
-    return $("*").add([document, window]).trigger("smoke-page-submit", arguments);
+  Smoke.triggerSubmitEvent = function (fullRefresh) {
+    return $(document).trigger("smoke-page-submit", arguments);
   };
   
   // boolean -> boolean
   Smoke.triggerUpdateEvent = function (fullRefresh) {
-    return $("*").add([document, window]).trigger("smoke-page-update", arguments);
+    return $(document).trigger("smoke-page-update", arguments);
   };
   
-  // Submit data ===================================
+  // Tracking focus across AJAX refreshes ========
+  
+  // (U string null)
+  Smoke.focusedId = null;
+  
+  // -> (U string null)
+  Smoke.getFocusedId = function () {
+    return Smoke.focusedId;
+  };
+  
+  // (U string null) -> void
+  Smoke.setFocusedId = function (id) {
+    Smoke.focusedId = id;
+  };
+  
+  $(document).bind("smoke-page-update", function () {
+    if(Smoke.focusedId) {
+      $("#" + Smoke.focusedId).focus();
+    }
+  });
+  
+  // Logging messages ============================
+  
+  // exception [string] -> void  
+  Smoke.badAttach = function (exn, id) {
+    Smoke.log("Failed to attach", exn, id || "no id provided");
+  };
+  
+  // exception [string] -> void  
+  Smoke.badRender = function (exn, id) {
+    Smoke.log("Failed to render", exn, id || "no id provided");
+  };
+
+  // exception [string] -> void  
+  Smoke.badDetach = function (exn, id) {
+    Smoke.log("Failed to detach", exn, id || "no id provided");
+  };
+  
+  // Submit data =================================
   
   // hashOf(string string)
   // Hash of form name (or pseudo-name) to value.
   Smoke.submitData = {};
   
   // string -> any
-  Smoke.getSubmitData = function(key) {
+  Smoke.getSubmitData = function (key) {
     return Smoke.submitData[key];
   };
   
   // string any -> void
-  Smoke.setSubmitData = function(key, val) {
+  Smoke.setSubmitData = function (key, val) {
     Smoke.submitData[key] = val;
   };
   
@@ -107,64 +128,139 @@ if (!window.console.log) {
     delete Smoke.submitData[key];
   };
   
-  // AJAX ==========================================
-  
-  // U(string, arrayOf(string)) [object] -> void
+  // AJAX ========================================
+    
+  // (U string (arrayOf string)) [object] -> void
   //
   // url can be a string or an array, with the base callback url at index 0
   // and the arguments at indices 1 and up
-  Smoke.doAjax = function (url) {
+  Smoke.doAjax = function (url, data) {
     var request = null;
     
     try {
       if (!Smoke.triggerSubmitEvent(false)) {
         return false;
-      };
+      }
       
       // Convert array-form URL into a string URL:
       var url = (typeof url == "string")
         ? url
         : url[0] + "/" + $.map(url.slice(1), encodeURIComponent).join("/");
   
-      var data = arguments.length > 1
-        ? $.extend(Smoke.submitData, arguments[1])
+      var data = data
+        ? $.extend(Smoke.submitData, data)
         : Smoke.submitData;
-        
+      
       Smoke.submitData = {};
+      
+      Smoke.showAjaxSpinner();
       
       // The result JS is automatically evaluated by jQuery:
       request = $.ajax({
+        async      : true,
+        global     : false,
         url        : url,
         type       : "post",
         data       : data,
         beforeSend : function (xhr) {
-                       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                       xhr.setRequestHeader("Content-Type",
+                         "application/x-www-form-urlencoded");
                        if (Smoke.currentPage) {
-                         xhr.setRequestHeader("X-Smoke-Page", Smoke.currentPage);
+                         xhr.setRequestHeader("X-Smoke-Page",
+                           Smoke.currentPage);
                        }
                      },
         dataType   : "text",
         success    : function (responseText) {
-                       console.log(responseText);
+                       Smoke.hideAjaxSpinner();
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },
-        error      : Smoke.onAjaxFailure });
+        error      : function (xhr, msg, exn) {
+                       Smoke.hideAjaxSpinner();
+                       Smoke.onAjaxFailure(url, xhr, msg, exn);
+                     }});
     } catch (exn) {
       Smoke.onAjaxFailure (request, "Could not send background request", exn);
     }
   };
   
-  // xhr any ... -> void
-  Smoke.onAjaxFailure = function (xhr) {
-    Smoke.log("AJAX failed", arguments);
+  // (objectOf string integer)
+  //
+  // A map of url => timeoutId for pending AJAX requests.
+  Smoke.delayedAjaxIds = {};
   
-    alert("There was an error communicating with the server. "
-      + "Try reloading the web page and contact your system administrator "
-      + "if the problem persists.");
+  // (objectOf string object)
+  //
+  // A map of url => postdata for pending AJAX requests.
+  Smoke.delayedAjaxData = {};
+      
+  // natural (U string (arrayOf string)) [object] -> void
+  //
+  // Send data to url after time milliseconds. If another call to delayAjax occurs
+  // within time, the data objects are appended and sent in a single request.
+  Smoke.doDelayedAjax = function (time, url, data) {
+    data = data || {};
+  
+    var oldId = Smoke.delayedAjaxIds[url];
+    if(oldId) {
+      window.clearTimeout(oldId);
+      data = $.extend(Smoke.delayedAjaxData[url], data);
+    }
+
+    Smoke.delayedAjaxData[url] = data;
+    Smoke.delayedAjaxIds[url] = window.setTimeout(function () {
+      var data = Smoke.delayedAjaxData[url];
+      delete Smoke.delayedAjaxIds[url];
+      delete Smoke.delayedAjaxData[url];
+      Smoke.doAjax(url, data);
+    }, time);
   };
   
-  // DOM manipulation ==============================
+  // string xhr (U string null) (U exn null) -> void
+  Smoke.onAjaxFailure = function (url, xhr, msg, exn) {
+    Smoke.log("AJAX failure", url, xhr, msg, exn);
+        
+    var title = "Oops! Something went wrong";
+    var html = "<p>Your browser just tried to contact the web server, but an "
+      + "unexpected error occurred. No further information is available.</p>";
+
+    if (msg == "timeout") {
+      title = "Could not contact the server";
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "did not respond. This is probably due to a network error or high a server "
+        + "load.</p>";
+    } else if (msg == "error") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "responded with an unexpected error message. This is probably a bug in the "
+        + "software.</p>";
+    } else if (msg == "notmodified") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "responded with an unexpected error message. This is probably a bug in the "
+        + "software.</p>";
+    } else if (msg == "parseerror") {
+      html = "<p>Your browser just tried to contact the web server, but the server "
+        + "produced a malformed response. This is probably a bug in the software.</p>";
+    }
+
+    html += "<p>Please <a href=\"javascript:void(0);\" onclick=\"window.location.reload()\">reload the page</a> and try again.</p>";
+    
+    $("<div class=\"ui-helper-hidden\">" + html + "</div>")
+      .appendTo("body")
+      .dialog({ dialogClass: "smoke-error-dialog", width: 500, title: title, modal: true });
+  };
+  
+  // -> void
+  Smoke.showAjaxSpinner = function () {
+    $("#smoke-ajax-spinner").show();
+  };
+  
+  // -> void
+  Smoke.hideAjaxSpinner = function () {
+    $("#smoke-ajax-spinner").hide();
+  };
+  
+  // DOM manipulation ============================
   
   //  element
   //  (U "replace" "children" "beforeBegin" "afterBegin" "beforeEnd" "afterEnd")
@@ -261,42 +357,8 @@ if (!window.console.log) {
       }
     }
   };
-  
-  // Dialog boxes ==================================
-  
-  // -> object(width: integer, height: integer)
-  Smoke.getViewportDimensions = function () {
-    // Most browsers:
-    if (typeof(window.innerWidth) == 'number') {
-  
-      return {
-        width:  window.innerWidth,
-        height: window.innerHeight
-      };
-  
-    // IE6 (standards compliant mode):
-    } else if (document.documentElement
-               && (document.documentElement.clientWidth
-               || document.documentElement.clientHeight)) {
-  
-      return {
-        width:  document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight
-      };
-  
-    // Other IEs:
-    } else if (document.body && (document.body.clientWidth
-                             || document.body.clientHeight)) {
-  
-      return {
-        width:  document.body.clientWidth,
-        height: document.body.clientHeight
-      };
-  
-    }
-  };
-  
-  // Delirium support ==============================
+    
+  // Delirium support ============================
   
   // hashOf(function -> function)
   //

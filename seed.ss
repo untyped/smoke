@@ -9,7 +9,6 @@
          (planet untyped/unlib:3/symbol)
          "base.ss"
          (except-in "seed-internal.ss" callback)
-         "json.ss"
          "class/class.ss"
          "web-server/continuation-url.ss")
 
@@ -29,9 +28,11 @@
 
 ; seed (U string (-> void) callback) -> js
 (define (embed/ajax seed handler)
-  (cond [(string? handler)    (js ((!dot Smoke doAjax) ,(embed/full seed handler)))]
-        [(procedure? handler) (js ((!dot Smoke doAjax) ,(embed/full seed handler)))]
-        [(callback? handler)  (js ((!dot Smoke doAjax) ,(callback-url seed handler)))]))
+  (embed/ajax/delay seed handler))
+
+; seed (U string (-> void) callback) natural -> js
+(define (embed/ajax/delay seed handler [delay 100])
+  (js (!dot Smoke (doDelayedAjax ,delay ,(embed/full seed handler)))))
 
 ; seed (-> response) -> string
 (define (embed/thunk seed thunk)
@@ -47,16 +48,16 @@
      seed
      ; -> any
      (lambda ()
-       ; request
-       (define request (current-request))
-       ; html-page<%>
-       (define page (seed-page seed))
-       ; callback
-       (define callback (request->callback request page))
-       (send (callback-component callback)
-             call-callback
-             (callback-callback-id callback)
-             (callback-args callback)))))
+       (let* ([request   (current-request)]
+              [page      (seed-page seed)]
+              [callback  (request->callback request page)]
+              [component (and callback (callback-component callback))])
+         (if (and component callback)
+             (send (callback-component callback)
+                   call-callback
+                   (callback-callback-id callback)
+                   (callback-args callback))
+             (error "no component or callback" (list component callback)))))))
   ; string
   (continuation-url->codes (string->url base-url)))
 
@@ -78,5 +79,6 @@
  [embed               (-> seed? (or/c string? procedure? callback?) (or/c string? url?))]
  [embed/full          (-> seed? (or/c string? procedure? callback?) (or/c string? url?))]
  [embed/ajax          (-> seed? (or/c string? procedure? callback?) javascript?)]
+ [embed/ajax/delay    (->* (seed? (or/c string? procedure? callback?)) (natural-number/c) javascript?)]
  [embed/thunk         (-> seed? procedure? (or/c string? url?))]
  [make-callback-codes (-> seed? (list/c natural? natural? natural?))])

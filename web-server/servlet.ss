@@ -5,8 +5,7 @@
 (require net/url
          scheme/contract
          srfi/26
-         (except-in web-server/http
-                    redirect-to)
+         (except-in web-server/http redirect-to)
          (except-in web-server/servlet
                     clear-continuation-table!
                     ; Web cell stuff:
@@ -29,7 +28,11 @@
                     symbol-arg
                     string-arg
                     integer-arg
-                    real-arg)
+                    number-arg
+                    real-arg
+                    dispatch-rules
+                    dispatch-case
+                    dispatch-url)
          (planet untyped/mirrors:2)
          "current-request.ss"
          "request.ss"
@@ -56,6 +59,7 @@
                        "web-cell.ss"
                        "web.ss")
          ; From current-request.ss:
+         adjust-http-timeout!
          current-request)
 
 (provide/contract

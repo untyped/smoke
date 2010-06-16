@@ -12,7 +12,7 @@
     ; Fields -------------------------------------
     
     ; (U html-page% #f)
-    (cell [page #f] #:accessor #:mutator)
+    (cell page #f #:accessor #:mutator)
     
     ; Constructor --------------------------------
     

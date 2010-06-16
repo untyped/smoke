@@ -5,7 +5,7 @@
 ; Controllers ------------------------------------
 
 ; request -> response
-(define-controller (counter request)
+(define-controller (counter)
   (send counter-page respond))
 
 ; Components -------------------------------------
@@ -15,7 +15,7 @@
     
     ; Fields -------------------------------------
     
-    (cell [counter 0] #:accessor #:mutator)
+    (cell counter 0 #:accessor #:mutator)
     
     (super-new [title "Counter"])
     

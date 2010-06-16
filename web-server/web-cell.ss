@@ -14,7 +14,8 @@
   #:transparent
   #:property prop:custom-write
   (lambda (frame out write?)
-    (fprintf out "#(~a)" (frame-id frame))))
+    (let ([show (if write? write display)])
+      (show (vector 'struct:frame (frame-id frame)) out))))
 
 ; frame -> any
 (define (frame-serialize frame)
@@ -143,41 +144,31 @@
 ; (struct symbol)
 (define-struct web-cell (id)
   #:property prop:custom-write
-  (lambda (cell out write?)
-    (fprintf out "#<~a>" (web-cell-id cell)))
-  ;#:property prop:custom-write 
-  ;(lambda (item port write?)
-  ;  (if (print-web-cell)
-  ;      (debug-write item port write?)
-  ;      (short-write item port write?)))
+  (lambda (id out write?)
+    (short-write id out write?))
   #:transparent)
 
 ; web-cell output-port boolean -> void
-(define (debug-write item port write?)
-  (let ([id (web-cell-id item)]
-        [empty (gensym)]
-        [print (if write? write display)])
-    (display "#<struct:web-cell " port)
-    (print id port)
-    (let loop ([curr (current-frame)])
-      (when curr
-        (display #\space port)
-        (let ([curr-val (namespace-variable-value id #f (lambda () empty) (frame-namespace curr))])
-          (if (eq? curr-val empty)
-              (display #\_ port)
-              (print curr-val port)))
-        (loop (frame-parent curr))))
-    (display #\> port)))
+(define (debug-write item out write?)
+  (let* ([id    (web-cell-id item)]
+         [show  (if write? write display)]
+         [vals  (let loop ([frame (current-frame)] [accum null])
+                  (if frame
+                      (loop (frame-parent frame)
+                            (cons (namespace-variable-value
+                                   id
+                                   #f
+                                   (lambda _ '_)
+                                   (frame-namespace frame))
+                                  accum))
+                      (reverse accum)))])
+    (show (vector 'struct:web-cell id vals) out)))
 
 ; web-cell output-port boolean -> void
-(define (short-write item port write?)
-  (let ([id (web-cell-id item)]
-        [print (if write? write display)])
-    (display "#<struct:web-cell " port)
-    (print id port)
-    (display #\space port)
-    (print (frame-ref (current-frame) id) port)
-    (display #\> port)))
+(define (short-write item out write?)
+  (let ([id   (web-cell-id item)]
+        [show (if write? write display)])
+    (show (vector 'struct:web-cell id) out)))
 
 ; any -> web-cell
 (define (create-web-cell initial)

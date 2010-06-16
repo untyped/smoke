@@ -1,0 +1,169 @@
+/* Check results ------------------------------ */
+
+ul.check-results { margin: 0px; padding: 0px; list-style-type: none; }
+ul.check-results li { padding: 1px 0px 1px 17px; background-repeat: no-repeat; background-position: 0 3px; }
+
+ul.check-results li.check-success { background-image: url(/images/smoke/success.png); }
+
+ul.check-results li.check-warning { background-image: url(/images/smoke/warning.png); }
+ul.check-results li.check-failure { background-image: url(/images/smoke/failure.png); }
+ul.check-results li.check-error   { background-image: url(/images/smoke/error.png);   }
+
+ul.check-results.tooltip { padding: 2px; max-width: 50%; }
+
+.success { border: none; background: transparent; }
+
+/* editors ------------------------------------ */
+
+.smoke-entity-editor th,
+.smoke-entity-editor td { vertical-align: top; padding: .5em; }
+.smoke-entity-editor th { white-space: nowrap; }
+
+.smoke-entity-editor .attribute-label { text-align: left; }
+.smoke-entity-editor .attribute-label label { display: inline; }
+
+.smoke-entity-editor .attribute-value input,
+.smoke-entity-editor .attribute-value select,
+.smoke-entity-editor .attribute-value textarea {
+  margin-top: -.1em;
+}
+
+.smoke-entity-editor .attribute-value ul { margin: 0; }
+.smoke-entity-editor .attribute-value li { list-style-type: none; }
+
+/* views -------------------------------------- */
+
+.smoke-entity-view-page .update-link { float: right; }
+
+.smoke-entity-view th.attribute-label { 
+  text-align: right;
+  vertical-align: top;
+  padding: 0 .5em 1ex 0;
+  width: 20em;
+  white-space: nowrap;
+}
+
+.smoke-entity-view td.attribute-value { 
+  text-align: left;
+  vertical-align: top;
+  padding: 0 0 1ex .5em;
+}
+
+.smoke-entity-view td.attribute-value ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* snooze-report% ----------------------------- */
+
+.snooze-report-table { border-collapse: collapse; margin: 3px 0px; }
+.snooze-report-table tr { background: #fff; border: 1px solid #ccc; }
+.snooze-report-table th { padding: 0px; white-space: nowrap; font-size: .85em; }
+
+.snooze-report-table th a,
+.snooze-report-table th span.not-sortable,
+.snooze-report-table td { padding: 4px 5px; }
+
+.snooze-report-table th .sort-icon { float: right; }
+
+.snooze-report-table th span.not-sortable {
+    display: block;
+    background: transparent;
+}
+
+.snooze-report-table th.sort a {
+    display: block;
+    background: transparent;
+    cursor: pointer;
+}
+
+.snooze-report-table th a.sort.asc {
+    background: transparent url(/images/smoke/up-arrow.png) no-repeat right center;
+}
+
+.snooze-report-table th a.sort.desc {
+    background: transparent url(/images/smoke/down-arrow.png) no-repeat right center;
+}
+
+.snooze-report-table td.empty-row {
+    padding: 1em 0em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.snooze-report-table .controller-icon {
+    padding: 2px;
+    margin: 0 2px;
+    float: left;
+}
+
+.snooze-report-table .controller-cell {
+    white-space: nowrap;
+}
+
+/* Controls */
+
+.smoke-snooze-report .controls { position: relative; display: block; min-height: 2ex; margin-bottom: 2ex; }
+.smoke-snooze-report .controls .filter  { text-align: center; }
+.smoke-snooze-report .controls .view  { position: absolute; left: 0px; }
+.smoke-snooze-report .controls .links { position: absolute; right: 0px; white-space: nowrap; list-style-type: none; margin: .1em 0px; padding: 0px; }
+
+/* Position */
+
+.smoke-snooze-report .position {
+    text-align: center;
+    width: 100%;
+}
+
+.smoke-snooze-report .item-count {
+    width: 100%;
+}
+
+/* Pager tables */
+
+.smoke-snooze-report table.pager {    
+    width: auto;
+    border: 0px;
+    margin: 5px auto;
+    padding: 0px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.smoke-snooze-report table.pager td {
+    width: 2em;
+    padding: 0px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.smoke-snooze-report table.pager td span,
+.smoke-snooze-report table.pager td a {
+    border: 0px solid none;
+    margin: 0px;
+    padding: 4px 5px;
+    text-align: center;
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+table.pager td.spacer span,
+table.pager td.last span {
+    cursor: auto;
+}
+
+.smoke-snooze-report table.pager a:hover {
+    text-decoration: underline;
+}
+
+.smoke-snooze-report .controller-cell {
+    width: 78px;
+}
+
+/* Report data */
+
+.smoke-snooze-report .snooze-report-table {
+    width: 100%;
+}

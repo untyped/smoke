@@ -7,7 +7,8 @@
          (planet untyped/unlib:3/symbol)
          "../../lib-base.ss"
          "form-element.ss"
-         "disableable-element.ss")
+         "disableable-element.ss"
+         "labelled-element.ss")
 
 ; Both radio-group% and all radio-button%s must be added as children of
 ; the component in which they are rendered.
@@ -22,10 +23,10 @@
     ; Fields -------------------------------------
     
     ; (cell (U radio-button% #f))
-    (cell [selected #f] #:accessor)
+    (cell selected #f #:accessor)
     
     ; (cell (list-of radio-button%))
-    (init-cell [buttons null] #:accessor #:mutator)
+    (cell buttons null #:accessor #:mutator)
     
     ; Constructor ------------------------------
     
@@ -77,25 +78,23 @@
           (when binding (set-selected/id! (string->symbol binding))))))))
 
 (define radio-button%
-  (class/cells disableable-element% ()
+  (class/cells (labelled-element-mixin disableable-element%) ()
     
     (inherit get-id
-             core-html-attributes)
+             core-html-attributes
+             render-label)
     
     ; Fields -----------------------------------
     
     ; (cell radio-group%)
-    (cell [group #f] #:accessor)
+    (cell group #f #:accessor)
     
     ; (cell any)
     ; Given a gensym by default, to make explicit the link between 
     ; radio-group:selected and radio-group:value. This link is created
     ; by equality-testing the value of the selected item, hence we need
     ; distinct values by default.
-    (init-cell [value (gensym/interned 'radio-button)] #:accessor #:mutator)
-    
-    ; (cell xml)
-    (init-cell [label #f] #:accessor #:mutator)
+    (init-cell value (gensym/interned 'radio-button) #:accessor #:mutator)
     
     ; Constructor ------------------------------
     
@@ -106,7 +105,7 @@
     (init [classes null])
     
     (when group (set-group! group))
-    (super-new [classes (cons 'smoke-radio-button classes)])
+    (super-new [classes (list* 'smoke-radio-button 'ui-widget classes)])
     
     ; Public methods ---------------------------
     
@@ -129,17 +128,22 @@
       (define group    (get-group))
       (define name     (send group get-id))
       (define value    (get-id))
-      (define label    (get-label))
       (define checked? (equal? (get-value) (send group get-value)))
       (define enabled? (get-enabled?))
-      (xml (input (@ ,@(core-html-attributes seed)
-                     [type  "radio"]
-                     [name  ,name]
-                     [value ,value]
-                     ,@(if checked? (xml-attrs [checked "checked"]) null)
-                     ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
-           ,(opt-xml label
-              " " (label (@ [for ,id]) ,label))))
+      (xml (span (@ ,@(core-html-attributes seed #:id (symbol-append id '-wrapper)))
+                 (input (@ ,@(core-html-attributes seed)
+                           [type  "radio"]
+                           [name  ,name]
+                           [value ,value]
+                           ,@(if checked? (xml-attrs [checked "checked"]) null)
+                           ,@(if enabled? null (xml-attrs [disabled "disabled"]))))
+                 ,(render-label seed))))
+    
+    ; seed -> js
+    (define/override (get-on-render seed)
+      (js (!dot Smoke (insertHTML (!dot Smoke (findById ,(symbol-append (get-id) '-wrapper)))
+                                  "replace"
+                                  ,(xml->string (render seed))))))
     
     ; seed -> js
     (define/augment (get-on-click seed)
