@@ -137,13 +137,13 @@
     
     ; xml
     (field jquery-script
-      (if dev?
+      (if (dev?)
           (jquery-script/dev jquery-version)
           (jquery-script/min jquery-version)))
     
     ; xml
     (field jquery-ui-script
-      (if dev?
+      (if (dev?)
           (jquery-ui-script/dev jquery-ui-version)
           (jquery-ui-script/min jquery-ui-version)))
     
