@@ -129,6 +129,17 @@ if (!window.console.log) {
   };
   
   // AJAX ========================================
+
+  // natural
+  //
+  // Number of successful AJAX requests since page load.
+  Smoke.ajaxCount = 0;
+  
+  // -> void
+  Smoke.incAjaxCount = function () { Smoke.ajaxCount++; };
+  
+  // -> natural
+  Smoke.getAjaxCount = function () { return Smoke.ajaxCount; };
     
   // (U string (arrayOf string)) [object] -> void
   //
@@ -173,6 +184,7 @@ if (!window.console.log) {
         dataType   : "text",
         success    : function (responseText) {
                        Smoke.hideAjaxSpinner();
+                       Smoke.incAjaxCount();
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },
