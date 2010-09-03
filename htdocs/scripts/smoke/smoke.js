@@ -190,10 +190,10 @@ if (!window.console.log) {
                      },
         error      : function (xhr, msg, exn) {
                        Smoke.hideAjaxSpinner();
-                       Smoke.onAjaxFailure(url, xhr, msg, exn);
+                       Smoke.onAjaxFailure(url, data, xhr, msg, exn);
                      }});
     } catch (exn) {
-      Smoke.onAjaxFailure (request, "Could not send background request", exn);
+      Smoke.onAjaxFailure(url, data, request, "Could not send background request", exn);
     }
   };
   
@@ -230,8 +230,8 @@ if (!window.console.log) {
   };
   
   // string xhr (U string null) (U exn null) -> void
-  Smoke.onAjaxFailure = function (url, xhr, msg, exn) {
-    Smoke.log("AJAX failure", url, xhr, msg, exn);
+  Smoke.onAjaxFailure = function (url, data, xhr, msg, exn) {
+    Smoke.log("AJAX failure", url, data, xhr, msg, exn);
         
     var title = "Oops! Something went wrong";
     var html = "<p>Your browser just tried to contact the web server, but an "
