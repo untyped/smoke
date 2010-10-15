@@ -136,20 +136,20 @@
     (init [jquery-ui-theme "ui-lightness"])
     
     ; xml
-    (field jquery-script
+    (init-field jquery-script
       (if (dev?)
           (jquery-script/dev jquery-version)
           (jquery-script/min jquery-version)))
     
     ; xml
-    (field jquery-ui-script
+    (init-field jquery-ui-script
       (if (dev?)
           (jquery-ui-script/dev jquery-ui-version)
           (jquery-ui-script/min jquery-ui-version)))
     
     ; xml
     ; Specify a jquery-ui-theme of #f if you don't want html-page to add a stylesheet for you.
-    (field jquery-ui-stylesheet
+    (init-field jquery-ui-stylesheet
       (opt-xml jquery-ui-theme
         ,(jquery-ui-styles jquery-ui-version jquery-ui-theme)))
     
