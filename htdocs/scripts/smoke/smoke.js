@@ -129,7 +129,7 @@ if (!window.console.log) {
   };
   
   // AJAX ========================================
-
+  
   // natural
   //
   // Number of successful AJAX requests since page load.
@@ -140,7 +140,32 @@ if (!window.console.log) {
   
   // -> natural
   Smoke.getAjaxCount = function () { return Smoke.ajaxCount; };
-    
+  
+  // integer
+  Smoke.ajaxSemaphore = 0;
+  
+  // -> boolean
+  Smoke.canStartAjax = function () {
+    return Smoke.ajaxSemaphore == 0;  
+  };
+
+  // -> void  
+  Smoke.startAjax = function () {
+    console.log("start");
+    Smoke.ajaxSemaphore++;
+    Smoke.showAjaxSpinner();
+  };
+  
+  // boolean -> void
+  Smoke.finishAjax = function (success) {
+    console.log("finish " + success);
+    Smoke.hideAjaxSpinner();
+    Smoke.ajaxSemaphore--;
+    if(success) {
+      Smoke.incAjaxCount();
+    }
+  };
+  
   // (U string (arrayOf string)) [object] -> void
   //
   // url can be a string or an array, with the base callback url at index 0
@@ -149,6 +174,13 @@ if (!window.console.log) {
     var request = null;
     
     try {
+      // Make sure we're not already servicing an AJAX request:
+      if(Smoke.canStartAjax()) {
+        Smoke.startAjax();
+      } else {
+        return;
+      }
+
       if (!Smoke.triggerSubmitEvent(false)) {
         return false;
       }
@@ -164,8 +196,6 @@ if (!window.console.log) {
       
       Smoke.submitData = {};
       
-      Smoke.showAjaxSpinner();
-      
       // The result JS is automatically evaluated by jQuery:
       request = $.ajax({
         async      : true,
@@ -174,25 +204,23 @@ if (!window.console.log) {
         type       : "post",
         data       : data,
         beforeSend : function (xhr) {
-                       xhr.setRequestHeader("Content-Type",
-                         "application/x-www-form-urlencoded");
+                       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                        if (Smoke.currentPage) {
-                         xhr.setRequestHeader("X-Smoke-Page",
-                           Smoke.currentPage);
+                         xhr.setRequestHeader("X-Smoke-Page", Smoke.currentPage);
                        }
                      },
         dataType   : "text",
         success    : function (responseText) {
-                       Smoke.hideAjaxSpinner();
-                       Smoke.incAjaxCount();
+                       Smoke.finishAjax(true);
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
                      },
         error      : function (xhr, msg, exn) {
-                       Smoke.hideAjaxSpinner();
+                       Smoke.finishAjax(false);
                        Smoke.onAjaxFailure(url, data, xhr, msg, exn);
                      }});
     } catch (exn) {
+      Smoke.finishAjax(false);
       Smoke.onAjaxFailure(url, data, request, "Could not send background request", exn);
     }
   };
@@ -263,15 +291,9 @@ if (!window.console.log) {
   };
   
   // -> void
-  Smoke.showAjaxSpinner = function () {
-    $("#smoke-ajax-spinner").show();
-  };
-  
-  // -> void
-  Smoke.hideAjaxSpinner = function () {
-    $("#smoke-ajax-spinner").hide();
-  };
-  
+  Smoke.showAjaxSpinner = function () { $("#smoke-ajax-spinner").show(); };
+  Smoke.hideAjaxSpinner = function () { $("#smoke-ajax-spinner").hide(); };
+
   // DOM manipulation ============================
   
   //  element
