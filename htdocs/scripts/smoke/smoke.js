@@ -151,14 +151,12 @@ if (!window.console.log) {
 
   // -> void  
   Smoke.startAjax = function () {
-    console.log("start");
     Smoke.ajaxSemaphore++;
     Smoke.showAjaxSpinner();
   };
   
   // boolean -> void
   Smoke.finishAjax = function (success) {
-    console.log("finish " + success);
     Smoke.hideAjaxSpinner();
     Smoke.ajaxSemaphore--;
     if(success) {
@@ -211,9 +209,9 @@ if (!window.console.log) {
                      },
         dataType   : "text",
         success    : function (responseText) {
-                       Smoke.finishAjax(true);
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
+                       Smoke.finishAjax(true);
                      },
         error      : function (xhr, msg, exn) {
                        Smoke.finishAjax(false);
