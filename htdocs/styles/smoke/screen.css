@@ -75,9 +75,9 @@ input.smoke-placeholder, textarea.smoke-placeholder { color: #bbb; }
 /* autocomplete-field ------------------------- */
 
 .smoke-autocomplete-field-trigger {
-  background-image: url(/images/smoke/down-arrow.png);
-  background-position: right center;
-  background-repeat: no-repeat;
+  background-image: url(/images/smoke/down-arrow.png) !important;
+  background-position: right center !important;
+  background-repeat: no-repeat !important;
 }
 
 .smoke-autocomplete-options {
