@@ -59,7 +59,7 @@ ul.check-results.tooltip { padding: 2px; max-width: 50%; }
 
 .snooze-report-table { border-collapse: collapse; margin: 3px 0px; }
 .snooze-report-table tr { background: #fff; border: 1px solid #ccc; }
-.snooze-report-table th { padding: 0px; white-space: nowrap; font-size: .85em; }
+.snooze-report-table th { padding: 0px; white-space: nowrap; }
 
 .snooze-report-table th a,
 .snooze-report-table th span.not-sortable,
