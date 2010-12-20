@@ -11,6 +11,7 @@
     get-value        ; -> any | exn:smoke:form
     set-value!       ; any -> void
     value-valid?     ; -> boolean
+    get-value-error  ; -> (U string #f)
     value-changed?)) ; -> boolean
 
 ; Mixins -----------------------------------------
