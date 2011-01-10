@@ -46,7 +46,7 @@
       (request-upload-filename-ref (current-request) (get-id)))
     
     ; -> boolean
-    (define/override (value-changed? value)
+    (define/override (value-changed?)
       #f)
     
     ; seed -> xml
