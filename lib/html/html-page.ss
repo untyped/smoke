@@ -183,7 +183,7 @@
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
       (append (get-scripts)
-              (get-styles)
+              (get-stylesheets)
               (inner null get-html-requirements)))
     
     ; -> (listof (U xml (seed -> xml)))
