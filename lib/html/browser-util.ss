@@ -9,7 +9,7 @@
 ; jQuery -----------------------------------------
 
 (define-enum jquery-versions
-  (1.3.2 1.4.2))
+  (1.3.2 1.4.2 1.4.4))
 
 ; [jquery-version] -> xml
 (define (jquery-script/min [version (jquery-versions 1.3.2)])
@@ -24,7 +24,7 @@
 ; jQuery UI --------------------------------------
 
 (define-enum jquery-ui-versions
-  (1.7.1 1.8.0))
+  (1.7.1 1.8.0 1.8.7))
 
 ; [jquery-ui-version] -> xml
 (define (jquery-ui-script/min [version (jquery-ui-versions 1.7.1)])
@@ -89,7 +89,39 @@
                   (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/jquery.effects.scale.js"]))
                   (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/jquery.effects.shake.js"]))
                   (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/jquery.effects.slide.js"]))
-                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/jquery.effects.transfer.js"])))]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.0/jquery.effects.transfer.js"])))]
+    [(1.8.7) (xml (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.widget.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.mouse.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.position.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.draggable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.droppable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.resizable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.selectable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.sortable.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.accordion.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.autocomplete.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.menu.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.button.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.dialog.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.slider.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.tabs.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.datepicker.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.ui.progressbar.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.core.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.blind.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.bounce.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.clip.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.drop.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.explode.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.fade.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.fold.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.highlight.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.pulsate.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.scale.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.shake.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.slide.js"]))
+                  (script (@ [type "text/javascript"] [src "/scripts/jquery-ui/1.8.7/jquery.effects.transfer.js"])))]))
 
 ; [jquery-ui-version] [string] -> xml
 (define (jquery-ui-styles [version (jquery-ui-versions 1.7.1)] [theme "ui-lightness"])
