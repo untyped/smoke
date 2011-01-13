@@ -33,8 +33,8 @@
     
     ; (cell (U string #f))
     (init-cell date-picker-format
-      (date-format->jquery-ui-date-format date-format)
-      #:accessor #:mutator)
+               (date-format->jquery-ui-date-format date-format)
+               #:accessor #:mutator)
     
     ; Constructor --------------------------------
     
@@ -159,17 +159,19 @@
   (let/ec return
     (regexp-replace*
      #px"~."
-     (regexp-replace*
-      #px"(~.)?([^~]+)(~.)?"
-      (regexp-replace* #px"'" fmt "''")
-      (lambda (a b c d)
-        (if b
-            (if d
-                (format "~a'~a'~a" b c d)
-                (format "~a'~a'" b c))
-            (if d
-                (format "'~a'~a" c d)
-                (format "'~a'" c)))))
+     (if (regexp-match? #px"^~.$" fmt)
+         fmt
+         (regexp-replace*
+          #px"(~.)?([^~]+)(~.)?"
+          (regexp-replace* #px"'" fmt "''")
+          (lambda (a b c d)
+            (if b
+                (if d
+                    (format "~a'~a'~a" b c d)
+                    (format "~a'~a'" b c))
+                (if d
+                    (format "'~a'~a" c d)
+                    (format "'~a'" c))))))
      (match-lambda
        ["~~" "~"]
        ["~a" "D"]

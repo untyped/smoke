@@ -6,6 +6,8 @@
          (planet untyped/unlib:3/date)
          "date-field.ss")
 
+(require/expose "date-field.ss" [date-format->jquery-ui-date-format date-format->placeholder])
+
 ; Tests ------------------------------------------
 
 (define/provide-test-suite date-field-tests
@@ -35,4 +37,24 @@
         (check-equal? (time-utc->date (send field get-time-utc)) (srfi-make-date 0 00 00 02 28 03 2010 3600))
         (check-equal? (time-tai->date (send field get-time-tai)) (srfi-make-date 0 00 00 02 28 03 2010 3600)))))
   
-  )
+  
+  (test-case "date-format->jquery-ui-date-format"
+    (check-equal? (date-format->jquery-ui-date-format "abc") "'abc'")
+    (check-equal? (date-format->jquery-ui-date-format "~dDD") "dd'DD'")
+    (check-equal? (date-format->jquery-ui-date-format "~dMM~m") "dd'MM'mm")
+    (check-equal? (date-format->jquery-ui-date-format "~d/~m/~Y") "dd'/'mm'/'yy")
+    (check-equal? (date-format->jquery-ui-date-format "~Y-~m-~d") "yy'-'mm'-'dd")
+    (check-equal? (date-format->jquery-ui-date-format "abc~d/~m/~Y") "'abc'dd'/'mm'/'yy")
+    (check-equal? (date-format->jquery-ui-date-format "'abc~d/~m/~Y") "'''abc'dd'/'mm'/'yy")
+    (check-equal? (date-format->jquery-ui-date-format "~H:~M") #f)
+    (check-equal? (date-format->jquery-ui-date-format "~d") "dd")) ; FAILS - function needs fixing
+  
+  (test-case "date-format->placeholder"
+    (check-equal? (date-format->placeholder "abc") "abc")
+    (check-equal? (date-format->placeholder "~d") "DD")
+    (check-equal? (date-format->placeholder "~dMM~m") "DDMMMM")
+    (check-equal? (date-format->placeholder "~d/~m/~Y") "DD/MM/YYYY")
+    (check-equal? (date-format->placeholder "~d/~m/~y") "DD/MM/YY")
+    (check-equal? (date-format->placeholder "~Y-~m-~d ~H:~M") "YYYY-MM-DD HH:MM")
+    (check-equal? (date-format->placeholder "'abc~d/~m/~Y") "''abcDD/MM/YYYY")
+    (check-equal? (date-format->placeholder "~a") #f)))
