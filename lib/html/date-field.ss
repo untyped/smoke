@@ -195,17 +195,7 @@
   (let/ec return
     (regexp-replace*
      #px"~."
-     (regexp-replace*
-      #px"(~.)?([^~]+)(~.)?"
-      (regexp-replace* #px"'" fmt "''")
-      (lambda (a b c d)
-        (if b
-            (if d
-                (format "~a~a~a" b c d)
-                (format "~a~a" b c))
-            (if d
-                (format "~a~a" c d)
-                (format "~a" c)))))
+     (regexp-replace* #px"'" fmt "''")
      (match-lambda
        ["~~" "~"]
        ["~a" (return #f)]
