@@ -182,12 +182,20 @@
     
     ; -> (listof (U xml (seed -> xml)))
     (define/augment (get-html-requirements)
-      (list* jquery-script
-             jquery-ui-script
-             smoke-script
-             jquery-ui-stylesheet
-             smoke-styles
-             (inner null get-html-requirements)))
+      (append (get-scripts)
+              (get-styles)
+              (inner null get-html-requirements)))
+    
+    ; -> (listof (U xml (seed -> xml)))
+    (define/public (get-scripts)
+      (list jquery-script
+            jquery-ui-script
+            smoke-script))
+    
+    ; -> (listof (U xml (seed -> xml)))
+    (define/public (get-stylesheets)
+      (list jquery-ui-stylesheet
+            smoke-styles))
     
     ;  [#:forward? boolean] -> any
     (define/override (respond #:forward? [forward? #f])
