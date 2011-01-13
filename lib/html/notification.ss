@@ -20,6 +20,15 @@
     ; (cell (listof symbol))
     (cell visible-notifications null #:accessor #:mutator)
     
+    ; (cell (U natural #f)
+    (init-cell timeout 5000 #:accessor #:mutator)
+    
+    ; (cell js)
+    (init-cell hide-function
+      (js (function (jq callback)
+            (!dot jq (fadeOut callback))))
+      #:accessor #:mutator)
+    
     ; Constructor --------------------------------
     
     (init [classes null])
@@ -27,7 +36,7 @@
     (super-new [classes (list* 'smoke-notifications 'ui-widget classes)])
     
     ; Methods ------------------------------------
-        
+    
     ; seed -> xml
     (define/override (render seed)
       (let* ([id            (get-id)]                 ; (U symbol #f)
@@ -70,22 +79,32 @@
       ; (listof xml)
       (define notifications (notifications-ref))
       (notifications-reset!)
-      (js ,@(for/list ([notification (in-list notifications)])
-              (let* ([id                    (notification-id notification)]
-                     [notification-selector (format "#notification-~a" id)]
-                     [dismiss-selector      (string-append notification-selector "-dismiss")])
-                (js (!dot ($ ,dismiss-selector)
-                          (hover (function () (!dot ($ this) (addClass "ui-state-hover")))
-                                 (function () (!dot ($ this) (removeClass "ui-state-hover"))))
-                          (click (function ()
-                                   (!dot ($ this) (unbind))
-                                   (!dot ($ this) (parent) (unbind)
-                                         (fadeOut "fast"
-                                                  (function ()
-                                                    (!dot ($ ,notification-selector)
-                                                          (remove))
-                                                    ,(opt-js (notification-sticky? notification)
-                                                       ,(embed/ajax seed (callback on-dismiss id))))))))))))))
+      (js ((function ()
+             (var [hide ,(get-hide-function)])
+             (function dismiss (button callback)
+               (var [notification (!dot button (parent))])
+               (!dot button (unbind))
+               (!dot notification (unbind))
+               (hide notification (function ()
+                                    (!dot notification (remove))
+                                    (callback))))
+             ,@(for/list ([notification (in-list notifications)])
+                 (let* ([id                    (notification-id notification)]
+                        [notification-selector (format "#notification-~a" id)]
+                        [dismiss-selector      (string-append notification-selector "-dismiss")])
+                   (js (!dot ($ ,dismiss-selector)
+                             (hover (function () (!dot ($ this) (addClass "ui-state-hover")))
+                                    (function () (!dot ($ this) (removeClass "ui-state-hover"))))
+                             (click (function ()
+                                      (dismiss ($ this)
+                                               (function ()
+                                                 ,(opt-js (notification-sticky? notification)
+                                                          ,(embed/ajax seed (callback on-dismiss id))))))))
+                       ,(opt-js (and (not (notification-sticky? notification))
+                                     (get-timeout))
+                                (!dot window (setTimeout (function ()
+                                                           (dismiss ($ ,dismiss-selector) (function () (return))))
+                                                         ,(get-timeout)))))))))))
     
     ; symbol -> void
     (define/public #:callback (on-dismiss id)

@@ -156,11 +156,16 @@
     ; boolean
     (init-field custom-notification-position? #f #:accessor)
     
-    (super-new [classes (cons 'smoke-html-page classes)] [content-type content-type])
+    (init [notification-timeout 5000])
+    
+    (super-new [classes (cons 'smoke-html-page classes)]
+               [content-type content-type])
     
     ; notification-pane%
     (field notification-pane 
-      (new notification-pane% [id 'notification-pane])
+      (new notification-pane%
+           [id      'notification-pane]
+           [timeout notification-timeout])
       #:child #:accessor)
     
     ; Accessors ----------------------------------
