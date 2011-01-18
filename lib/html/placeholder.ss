@@ -76,4 +76,4 @@
 
 ; Provide statements -----------------------------
 
-(provide placeholder<%> placeholder-mixin)
+(provide placeholder<%> placeholder-mixin placeholder-script)
