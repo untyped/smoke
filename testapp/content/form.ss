@@ -62,6 +62,20 @@
     
     ; Fields -------------------------------------
     
+    ; file-field%
+    (field file-field
+      (new file-field% [id 'file-field] [size 20]))
+    
+    ; Can't get at the contents of a file field during the render procedure.
+    ; Presumably something to do with web cells.
+    ; As a workaround for this page, we get them out and cache them here.
+    
+    ; (U string #f)
+    (define temp-filename #f)
+    
+    ; (U bytes #f)
+    (define temp-content  #f)
+    
     ; (listof form-element%)
     (field controls
       `(,(new password-field% [id 'password-field] [value "Initial"] [size 20] [max-length 10])
@@ -94,7 +108,7 @@
                                                     (#f . "Option 6"))])
         ,(new radio-combo% [id 'radio-combo-h] [vertical? #f] [options '((1 . "Option 1") (a . "Option 2") (#t . "Option 3"))])
         ,(new radio-combo% [id 'radio-combo-v] [vertical? #t] [options '((1 . "Option 1") (a . "Option 2") (#t . "Option 3"))])
-        ,(new file-field% [id 'file-field] [size 20])
+        ,file-field
         ,radio-group
         ,@radio-buttons
         ,(new multi-select% [id 'multi-select] [items '("Apples" "Oranges" "Pears")])
@@ -120,14 +134,19 @@
                                (td ,(send control render seed))
                                (td ,(opt-xml (is-a? control form-element%)
                                       (pre (@ [id ,(symbol-append (send control get-id) '-value)]
-                                              [style "padding: 0px; margin: 0px; font-family: monaco,courier"])
-                                           ,(pretty-format (send control get-value)))))
+                                              [style "padding: 0px; margin: 0px; font-family: menlo,monaco,courier,monospace"])
+                                           ,(if (eq? control file-field)
+                                                (xml "Filename ",temp-filename (br) ,(pretty-format temp-content))
+                                                (pretty-format (send control get-value))))))
                                (td (a (@ [id      ,(symbol-append (send control get-id) '-disclosure)]
+                                         [href    "javascript:"]
                                          [onclick ,(embed/ajax seed (callback on-toggle-visibility (send control get-id)))])
                                       ,(if (send control get-visible?) "Hide" "Show")))))))))
     
     ; -> void
     (define/public #:callback (on-submit)
+      (set! temp-filename (send file-field get-filename))
+      (set! temp-content  (send file-field get-value))
       (refresh!))
     
     ; symbol -> void

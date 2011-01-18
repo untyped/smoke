@@ -1,6 +1,9 @@
 #lang scheme/base
 
-(require "../../lib-base.ss"
+(require "../../lib-base.ss")
+
+(require (only-in srfi/13 string-index-right string-drop)
+         (only-in srfi/14 char-set)
          "form-element.ss")
 
 ; Uploaded files typically take up a lot of memory, so file-field% does not keep a copy of the uploaded data:
@@ -42,8 +45,17 @@
       (error "Cannot set the value of a file-field%."))
     
     ; -> (U string #f)
-    (define/public (get-filename)
+    (define/public (get-full-filename)
       (request-upload-filename-ref (current-request) (get-id)))
+    
+    ; -> (U string #f)
+    (define/public (get-filename)
+      (let ([filename (get-full-filename)])
+        (and filename
+             (let ([slash-pos (string-index-right filename (char-set #\\ #\/))])
+               (if slash-pos
+                   (string-drop filename (add1 slash-pos))
+                   filename)))))
     
     ; -> boolean
     (define/override (value-changed?)
