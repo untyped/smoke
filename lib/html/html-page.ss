@@ -156,7 +156,8 @@
     ; boolean
     (init-field custom-notification-position? #f #:accessor)
     
-    (init [notification-timeout 5000])
+    ; (U natural #f) ; notification timeout in milliseconds
+    (init [notification-timeout #f])
     
     (super-new [classes (cons 'smoke-html-page classes)]
                [content-type content-type])
