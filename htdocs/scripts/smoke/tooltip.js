@@ -114,8 +114,6 @@
         var tooltip = $("." + tooltipClass, this).css("opacity", 0).moveToBody();
       
         $([this, tooltip.get(0)]).mouseover(function () {
-          Smoke.log("over");
-
           if (delayTimer) {
             clearTimeout(delayTimer);
           }
@@ -146,8 +144,6 @@
         
           return this;
         }).mouseout(function () {
-          Smoke.log("out");
-      
           if (delayTimer) {
             clearTimeout(delayTimer);
           }
@@ -162,6 +158,8 @@
         
           return this;
         });
+
+        $(this).mouseover();
       }
     });
   };
@@ -170,7 +168,6 @@
     $(".tooltip-anchor").live("mouseover", function () {
       if(!$(this).data("tooltip-bound")) {
         $(this).tooltip("tooltip");
-        $(this).mouseover();
       }
     });
   });
