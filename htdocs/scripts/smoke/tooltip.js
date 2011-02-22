@@ -91,76 +91,78 @@
     var delay         = settings.delay;
         
     return this.each(function () {
+      if($("." + tooltipClass, this).length > 0) {
     
-      // Prevent repeat bindings:
-      if ($(this).data("tooltip-bound")) {
-        return;
-      } else {
-        $(this).data("tooltip-bound", true);
-      }
-
-      $(this).removeAttr("title");
-
-      // timerID
-      var delayTimer = null;
-  
-      // boolean
-      var appearing = false;
-      var visible = false;
-
-      // element      
-      var anchor = $(this);
-      var tooltip = $("." + tooltipClass, this).css("opacity", 0).moveToBody();
-
-      $([this, tooltip.get(0)]).mouseover(function () {
-        Smoke.log("over");
-
-        if (delayTimer) {
-          clearTimeout(delayTimer);
+        // Prevent repeat bindings:
+        if ($(this).data("tooltip-bound")) {
+          return;
+        } else {
+          $(this).data("tooltip-bound", true);
         }
-  
-        if (!appearing && !visible) {
-          appearing = true;
 
-          // reset position of tooltip box
-          tooltip.css({
-            display: "block",
-            position: "absolute",
-            zIndex: 1000001
-          }).position({
-            my: "left top",
-            at: "left bottom",
-            of: anchor,
-            collision: "flip"
-          }).animate(
-            { opacity: 1 },
-            time,
-            "swing",
-            function () {
-              // once the animation is complete, set the tracker variables
-              appearing = false;
-              visible = true;
-            });
-        }
-        
-        return this;
-      }).mouseout(function () {
-        Smoke.log("out");
+        $(this).removeAttr("title");
+
+        // timerID
+        var delayTimer = null;
+  
+        // boolean
+        var appearing = false;
+        var visible = false;
+
+        // element      
+        var anchor = $(this);
+        var tooltip = $("." + tooltipClass, this).css("opacity", 0).moveToBody();
       
-        if (delayTimer) {
-          clearTimeout(delayTimer);
-        }
+        $([this, tooltip.get(0)]).mouseover(function () {
+          Smoke.log("over");
+
+          if (delayTimer) {
+            clearTimeout(delayTimer);
+          }
+  
+          if (!appearing && !visible) {
+            appearing = true;
+
+            // reset position of tooltip box
+            tooltip.css({
+              display: "block",
+              position: "absolute",
+              zIndex: 1000001
+            }).position({
+              my: "left top",
+              at: "left bottom",
+              of: anchor,
+              collision: "flip"
+            }).animate(
+              { opacity: 1 },
+              time,
+              "swing",
+              function () {
+                // once the animation is complete, set the tracker variables
+                appearing = false;
+                visible = true;
+              });
+          }
         
-        delayTimer = setTimeout(function () {
-          delayTimer = null;
-          tooltip.animate({ opacity: 0 }, time, "swing", function () {
-            visible = false;
-            tooltip.css("display", "none");
-          }).returnFromBody();
-        }, delay);
+          return this;
+        }).mouseout(function () {
+          Smoke.log("out");
+      
+          if (delayTimer) {
+            clearTimeout(delayTimer);
+          }
         
-        return this;
-      });
+          delayTimer = setTimeout(function () {
+            delayTimer = null;
+            tooltip.animate({ opacity: 0 }, time, "swing", function () {
+              visible = false;
+              tooltip.css("display", "none");
+            }).returnFromBody();
+          }, delay);
+        
+          return this;
+        });
+      }
     });
   };
   
