@@ -159,7 +159,8 @@
   (let/ec return
     (regexp-replace*
      #px"~."
-     (if (regexp-match? #px"^~.$" fmt)
+     (regexp-replace* #px"'" fmt "''")
+     #;(if (regexp-match? #px"^~.$" fmt)
          fmt
          (regexp-replace*
           #px"(~.)?([^~]+)(~.)?"

@@ -13,6 +13,53 @@ if (!window.console.log) {
 
 (function ($) {
 
+  // Test if jQuery is at least the version specified.
+  //
+  // int int int -> boolean
+  $.versionAtLeast = function(maj, mid, min) {
+    var parts = $.fn.jquery.split(".");
+    var jqMaj = parseInt(parts[0]);
+    var jqMid = parseInt(parts[1]);
+    var jqMin = parseInt(parts[2]);
+    return (jqMaj  > maj) || 
+           (jqMaj == maj && jqMid  > mid) ||
+           (jqMaj == maj && jqMid == mid && jqMin >= min);
+  }
+  
+  // Unique jQuery selector for the first selected element.
+  // -> string
+  $.fn.uniqueSelector = function() {
+    var accum = "";          // string
+    var curr = this.first(); // jQuery
+    
+    while(true) {
+      var id = curr.attr("id");
+      if(id) {
+        if(curr.is("body")) {
+          return "body#" + id + " " + accum;
+        } else {
+          return "#" + id + " " + accum;
+        }
+      } else {
+        var tag = curr.get(0).tagName.toLowerCase();
+
+        var classAttr = curr.attr("class");
+        var classSel  = classAttr
+                      ? ("." + classAttr.split(" ").join(".")) 
+                      : "";
+
+        var parent   = curr.parent();
+        var siblings = parent.children("*" + classSel);
+        var indexSel = siblings.length > 1 
+                     ? (":eq(" + siblings.index(curr) + ")") 
+                     : "";
+
+        accum = tag + classSel + indexSel + " " + accum;
+        curr = parent;
+      }
+    }
+  };
+  
   // any ... -> void
   Smoke.log = (function () {
     // Firebug:
@@ -48,14 +95,75 @@ if (!window.console.log) {
   Smoke.documentHead = null;
   Smoke.documentBody = null;
   
-  // string string (-> void) -> void
-  Smoke.initialize = function (currentPage, formID, initComponents) {
+  // string string boolean (-> void) -> void
+  Smoke.initialize = function (currentPage, formID, enableActivityLog, initComponents) {
     Smoke.currentPage = currentPage;
     Smoke.documentHead = $("head").get(0);
     Smoke.documentBody = $("body").get(0);
+    if(enableActivityLog) {
+      Smoke.enableActivityLog();
+    }
     initComponents();
     Smoke.triggerUpdateEvent(true);
   };
+  
+  // Activity logging ===========================
+
+  // int
+  Smoke.pageLoadedAt = 0;
+  
+  // boolean
+  Smoke.activityLogEnabled = false;
+  
+  // [ arrayOfLogData, ... ]
+  Smoke.activityLog = [["activity log disabled"]];
+
+  // -> void
+  Smoke.enableActivityLog = function() {
+    Smoke.pageLoadedAt = new Date().getTime();
+    Smoke.activityLog = [[0, "load"]];
+    Smoke.activityLogEnabled = true;
+    
+    if($.fn.delegate) {
+      // jQuery.delegate was introduced in jQuery 1.4+.
+      // We sometimes use a plugin with jQuery 1.3.2 that takes its arguments in a differnt order.
+      // This script detects both situations.
+    
+      // jQuery.Event -> void
+      function onClick(evt) {
+        if(this == evt.srcElement) {
+          Smoke.logActivity($(this).uniqueSelector(), "click", $(this).attr("href") || null);
+        }
+      }
+      
+      // jQuery.Event -> void
+      function onChange(evt) {
+        if(this == evt.srcElement) {
+          Smoke.logActivity($(this).uniqueSelector(), "change", $(this).val() || null);
+        }
+      }
+      
+      if($.versionAtLeast(1, 4, 2)) { // jQuery 1.4.2+:
+        $("body").delegate("*", "click",  onClick);
+        $("body").delegate("*", "change", onChange);
+      } else { // jQuery 1.3.x with the event delegation plugin:
+        $("body").delegate("click",  "*", onClick);
+        $("body").delegate("change", "*", onChange);
+      }
+    }
+  }
+  
+  // any ... -> void
+  Smoke.logActivity = function() {
+    if(Smoke.activityLogEnabled) {
+      var ts = new Date().getTime() - Smoke.pageLoadedAt;
+      var data = [ts];
+      for(var i = 0; i < arguments.length; i++) {
+        data.push(arguments[i]);
+      }
+      Smoke.activityLog.push(data);
+    }
+  }
   
   // Submit and update events ====================
   
@@ -192,6 +300,8 @@ if (!window.console.log) {
         ? $.extend(Smoke.submitData, data)
         : Smoke.submitData;
       
+      Smoke.logActivity("ajax-start", url, data);
+
       Smoke.submitData = {};
       
       // The result JS is automatically evaluated by jQuery:
@@ -211,10 +321,12 @@ if (!window.console.log) {
         success    : function (responseText) {
                        eval(responseText);
                        Smoke.triggerUpdateEvent(false);
+                       Smoke.logActivity("ajax-success", url, data);
                        Smoke.finishAjax(true);
                      },
         error      : function (xhr, msg, exn) {
                        Smoke.finishAjax(false);
+                       Smoke.logActivity("ajax-failure", url, xhr, msg, exn);
                        Smoke.onAjaxFailure(url, data, xhr, msg, exn);
                      }});
     } catch (exn) {
@@ -257,8 +369,6 @@ if (!window.console.log) {
   
   // string xhr (U string null) (U exn null) -> void
   Smoke.onAjaxFailure = function (url, data, xhr, msg, exn) {
-    Smoke.log("AJAX failure", url, data, xhr, msg, exn);
-        
     var title = "Oops! Something went wrong";
     var html = "<p>Your browser just tried to contact the web server, but an "
       + "unexpected error occurred. No further information is available.</p>";

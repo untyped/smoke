@@ -146,4 +146,5 @@
 
 ; Provide statements -----------------------------
 
-(provide autocomplete-field%)
+(provide autocomplete-field%
+         autocomplete-script)

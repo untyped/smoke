@@ -91,6 +91,9 @@
     ; (cell (U js (seed -> js) #f))
     (init-field ajax-error-handler #f #:accessor #:mutator)
     
+    ; boolean
+    (init-field activity-log-enabled? #f #:accessor #:mutator)
+    
     ; (cell xml)
     (init-cell doctype
       xhtml-1.0-transitional-doctype
@@ -311,13 +314,17 @@
                                        (!raw ,(js ((function ($)
                                                      (!dot ($ document)
                                                            (ready (function ()
-                                                                    (!dot Smoke (initialize ,(get-component-id)
-                                                                                            ,(get-form-id)
-                                                                                            (function ()
-                                                                                              ; Init scripts:
-                                                                                              ,@(render-requirements (get-current-js-requirements) seed)
-                                                                                              ; Attach scripts:
-                                                                                              ,(get-on-attach seed))))))))
+                                                                    (!dot Smoke (initialize
+                                                                                 ,(get-component-id)
+                                                                                 ,(get-form-id)
+                                                                                 ,(get-activity-log-enabled?)
+                                                                                 (function ()
+                                                                                   ; Init scripts:
+                                                                                   ,@(render-requirements
+                                                                                      (get-current-js-requirements)
+                                                                                      seed)
+                                                                                   ; Attach scripts:
+                                                                                   ,(get-on-attach seed))))))))
                                                    jQuery)))
                                        (!raw "\n// ]]>\n")))
                          (body (@ ,@(core-html-attributes seed))
