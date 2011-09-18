@@ -3,6 +3,8 @@
 (require scheme/match
          scheme/pretty
          (only-in scheme/string string-join)
+         (planet untyped/unlib:3/debug)
+         (planet untyped/unlib:3/enumeration)
          (planet untyped/unlib:3/list)
          (planet untyped/unlib:3/string)
          "../../lib-base.ss"
@@ -135,9 +137,34 @@
              set-value!)
     
     ; Fields -------------------------------------
+
+    ; The user can specify options in the constructor as:
+    ; 
+    ;   - an alist of values to string
+    ;   - a list of values
+    ;   - an enumeration
+    ; 
+    ; The argument is converted to an alist for storage in the options web cell.
+    ; 
+    ; (U enum 
+    ;    (listof (U boolean symbol number) string))
+    ;    (alistof (U boolean symbol number) string)))
+    (init [(init-options options) null])
     
+    ; Options are always stored as an alist, regardless of the type
+    ; of the constructor argument.
+    ;
     ; (cell (alistof (U boolean symbol number) string))
-    (init-cell options null)
+    (cell options 
+      (cond [(enum? init-options)
+             (map (lambda (val)
+                    (cons val (enum-prettify init-options val)))
+                  (enum-values init-options))]
+            [(and (pair? init-options) (not (pair? (car init-options))))
+             (map (lambda (val)
+                    (cons val (format "~a" val)))
+                  init-options)]
+            [else init-options]))
     
     ; Constructor --------------------------------
     
@@ -147,8 +174,8 @@
     (init [value (void)])
     
     (super-new [value (if (void? value)
-                          (and (not (null? options))
-                               (caar options))
+                          (and (pair? (get-options))
+                               (car (get-options)))
                           value)])
     
     ; Methods ------------------------------------
