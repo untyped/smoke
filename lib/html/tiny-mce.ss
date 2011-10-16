@@ -102,8 +102,12 @@
                                       (function (evt fullRefresh)
                                         (!dot ($ "textarea.smoke-tiny-mce")
                                               (each (function ()
-                                                      (var [id (!dot this id)])
-                                                      (!dot Smoke (setSubmitData id (!dot tinyMCE (get id) (getContent))))))))))))
+                                                      (var [id      (!dot this id)]
+                                                           [content (&& tinyMCE
+                                                                        (!dot tinyMCE (get id))
+                                                                        (!dot tinyMCE (get id) (getContent)))])
+                                                      (if content
+                                                          (!dot Smoke (setSubmitData id (!dot tinyMCE (get id) (getContent)))))))))))))
                (!raw "\n// ]]>\n"))))
 
 ; Provide statements -----------------------------
